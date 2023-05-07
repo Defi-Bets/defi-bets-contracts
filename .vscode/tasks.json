@@ -1,0 +1,32 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "deploy",
+			"script": "deploy",
+			"type": "npm",
+			"problemMatcher": [],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"type": "npm",
+			"script": "chain",
+			"problemMatcher": [],
+			"label": "chain",
+		},
+		{
+			"type": "npm",
+			"script": "start",
+			"problemMatcher": [],
+			"label": "start"
+		},
+		{
+			"problemMatcher": [],
+			"label": "start and chain",
+			"dependsOn": [ "start", "chain" ]
+		  }
+	]
+}
