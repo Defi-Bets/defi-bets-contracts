@@ -3,7 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import '../interface/core/ILiquidityPool.sol';
+import "../interface/core/IDefiBets.sol";
 
 
 
@@ -15,7 +17,13 @@ import '../interface/core/ILiquidityPool.sol';
 contract DefiBetsManager is Pausable,Ownable {
 
     /* ====== State Variaables ====== */
+
+    
+
     address public liquidityPool;
+    address public defiBets;
+
+    address public token;
 
     constructor(){
 
@@ -50,14 +58,24 @@ contract DefiBetsManager is Pausable,Ownable {
 
     }
 
-
-    /* ====== Setup Functions ====== */
-
-    function setAddresses(address _liquidityPool) external onlyOwner {
-        liquidityPool = _liquidityPool;
+    function setBet(uint256 _betSize,uint256 _minPrice,uint256 _maxPrice,uint256 _expTime) external whenNotPaused(){
+        
+        //TODO: Send the tokens to the betting vault
+        
+        IDefiBets(defiBets).setBetForAccount(msg.sender,_betSize,_minPrice,_maxPrice,_expTime);
     }
 
 
-    
+    /* ====== Setup Functions ====== */
+
+    function setAddresses(address _liquidityPool,address _defiBets) external onlyOwner {
+        liquidityPool = _liquidityPool;
+        defiBets = _defiBets;
+    }
+
+
+    /* ====== Internal Functions ====== */
+
+
 
 }
