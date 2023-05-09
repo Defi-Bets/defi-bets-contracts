@@ -8,10 +8,13 @@ const deployDefiBetsContract: DeployFunction = async (hre: HardhatRuntimeEnviron
     const managerContractAddress = (await get("DefiBetsManager")).address;
     const mathContractAddress = (await get("MockMath")).address;
 
+    const dateString = Date.now();
+    const startExpTime = Math.floor(new Date(dateString).getTime() / 1000);
+
     await deploy("DefiBets", {
         from: deployer,
         log: true,
-        args: [managerContractAddress, mathContractAddress],
+        args: [managerContractAddress, mathContractAddress, startExpTime],
         autoMine: true,
     });
 };

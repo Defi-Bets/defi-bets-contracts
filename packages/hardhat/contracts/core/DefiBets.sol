@@ -40,7 +40,8 @@ contract DefiBets {
 
 
     //All mappings can be searched with the expiration date.
-    uint256 private lastExpTime;
+    uint256 private immutable startExpTime;
+    // uint256 private lastExpTime;
     bool private initialized;
     mapping(uint256 => bool) private validExpTime;
     mapping(uint256 => BetInfo) public bets;
@@ -58,23 +59,20 @@ contract DefiBets {
     event BetFinished(uint256 expTime,bool lpWin, uint256 totalAmount);
     event BetParameterUpdated(uint256 maxLossPerDay,uint256 minBetDuration,uint256 maxBetDuration,uint256 slot);
 
-    /* ====== Modifiers ====== */
-    modifier updateExpTimes() {
-        uint256 _next = lastExpTime.add(EXP_TIME_DELTA).sub(maxBetDuration);
-        if(block.timestamp >= _next){
-            lastExpTime = lastExpTime.add(EXP_TIME_DELTA);
-            validExpTime[lastExpTime] = true;
-        }
-        _;
-    }
-
-    constructor(address _defiBetsManager,address _mathContract){
+    /**
+     * @param _defiBetsManager - the manager and owner of the contract. 
+     * @param _mathContract - the math contract, where you can calulate possible winnings for the bet 
+     * @param _startExpTime - the start time when someone is able to place a bet
+     */
+    constructor(address _defiBetsManager,address _mathContract,uint256 _startExpTime){
         defiBetsManager = _defiBetsManager;
         mathContract = _mathContract;
+
+        startExpTime = _startExpTime;
     }
 
     /* ====== Mutation Functions ====== */
-    function setBetForAccount(address _account,uint256 _betSize,uint256 _minPrice,uint256 _maxPrice,uint256 _expTime) external updateExpTimes{
+    function setBetForAccount(address _account,uint256 _betSize,uint256 _minPrice,uint256 _maxPrice,uint256 _expTime) external {
         _isDefiBetManager();
 
 
@@ -95,6 +93,8 @@ contract DefiBets {
 
         _setPlayerBet(_account,_expTime,_betSize,_winning,_minPrice,_maxPrice);
 
+        _distributeWinningsToSlots( _minPrice, _maxPrice, _winning, _expTime);
+
         emit BetPlaced(_account,_betSize,_winning,_expTime,_minPrice,_maxPrice);
     }
 
@@ -109,32 +109,7 @@ contract DefiBets {
         emit BetParameterUpdated( maxLossPerDay, minBetDuration, maxBetDuration, slot);
     }
 
-    function initializeExpTimes() external{
-
-        
-        _isNotIntialized();
-
-        uint256 _now = block.timestamp;
-
-        uint256 _amountExpTimes = (maxBetDuration.sub(minBetDuration)).div(EXP_TIME_DELTA);
-
-        uint256 _firstExpTime = _now.add(minBetDuration);
-
-        for(uint i = 0; i < _amountExpTimes;i++){
-            uint256 _nextExpTime = _firstExpTime.add(EXP_TIME_DELTA.mul(i));
-
-            validExpTime[_nextExpTime] = true;
-
-            emit EpxirationTimeCreated(_nextExpTime);
-        }
-
-        lastExpTime = _firstExpTime.add(_amountExpTimes.mul(EXP_TIME_DELTA));
-        validExpTime[lastExpTime] = true;
-        
-        initialized = true;
-
-    }
-
+    
     /* ====== Internal Functions ====== */
 
     function _setPlayerBet(address _account,uint256 _expTime,uint256 _betSize,uint256 _winning,uint256 _minPrice,uint256 _maxPrice) internal {
@@ -181,7 +156,7 @@ contract DefiBets {
 
     function _validExpirationTime(uint256 _expTime) internal view{
 
-        if(validExpTime[_expTime] != true){
+        if((_expTime.sub(startExpTime)) % EXP_TIME_DELTA != 0){
             revert DefiBets__NoValidExpTime();
         }
     }
@@ -238,8 +213,8 @@ contract DefiBets {
         return validExpTime[_expTime];
     }
 
-    function getMaxExpTime() public view returns(uint256){
-        return lastExpTime;
+    function getStartExpTime() public view returns(uint256){
+        return startExpTime;
     }
     
 }

@@ -8,6 +8,9 @@ const minBetDuration = 60 * 60 * 24 * 4;
 const maxBetDuration = 60 * 60 * 24 * 30;
 const maxLossPerDay = 500;
 
+const dateString = Date.now();
+const startExpTime = Math.floor(new Date(dateString).getTime() / 1000);
+
 describe("DefiBets Unit test", () => {
     async function deployDefiBetsFixture() {
         const [deployer, user, manager, badActor] = await ethers.getSigners();
@@ -16,7 +19,7 @@ describe("DefiBets Unit test", () => {
         const mockMath: MockMath = await MockMath.deploy();
 
         const DefiBets = (await ethers.getContractFactory("DefiBets")) as DefiBets__factory;
-        const defiBets: DefiBets = await DefiBets.deploy(manager.address, mockMath.address);
+        const defiBets: DefiBets = await DefiBets.deploy(manager.address, mockMath.address, startExpTime);
 
         return { defiBets, deployer, user, manager, badActor };
     }
@@ -42,46 +45,20 @@ describe("DefiBets Unit test", () => {
         });
     });
 
-    describe("#initializeExpTimes", () => {
-        it("successfull initialize the expiration times", async () => {
-            const { defiBets, manager } = await loadFixture(deployDefiBetsFixture);
-
-            await defiBets.connect(manager).setBetParamater(maxLossPerDay, minBetDuration, maxBetDuration, slot);
-
-            await defiBets.connect(manager).initializeExpTimes();
-
-            const blockNumber = await ethers.provider.getBlockNumber();
-            const block = await ethers.provider.getBlock(blockNumber);
-
-            const timestamp = block.timestamp;
-
-            const expTime = timestamp + 60 * 60 * 24 * 30;
-
-            expect(await defiBets.getMaxExpTime()).to.be.equal(expTime);
-
-            const firstValidExpTime = expTime - 60 * 60 * 24 * 26;
-
-            expect(await defiBets.isExpTimeValid(firstValidExpTime)).to.be.equal(true);
-        });
-    });
-
     describe("#setBetForAccount", () => {
         it("successfull set a new bet for an account", async () => {
             const { defiBets, manager, user } = await loadFixture(deployDefiBetsFixture);
 
             await defiBets.connect(manager).setBetParamater(maxLossPerDay, minBetDuration, maxBetDuration, slot);
 
-            await defiBets.connect(manager).initializeExpTimes();
-
             const betSize = ethers.utils.parseEther("100");
             const minPrice = ethers.utils.parseEther("20000");
             const maxPrice = ethers.utils.parseEther("25000");
-            const blockNumber = await ethers.provider.getBlockNumber();
-            const block = await ethers.provider.getBlock(blockNumber);
 
-            const timestamp = block.timestamp;
+            const startTime = await defiBets.getStartExpTime();
+            const deltaTime = await defiBets.EXP_TIME_DELTA();
 
-            const expTime = timestamp + 60 * 60 * 24 * 10;
+            const expTime = startTime.add(deltaTime.mul(10));
 
             await defiBets.connect(manager).setBetForAccount(user.address, betSize, minPrice, maxPrice, expTime);
 

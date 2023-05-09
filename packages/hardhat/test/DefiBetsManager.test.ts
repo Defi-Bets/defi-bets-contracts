@@ -7,6 +7,8 @@ const slot = ethers.utils.parseEther("200");
 const minBetDuration = 60 * 60 * 24 * 4;
 const maxBetDuration = 60 * 60 * 24 * 30;
 const maxLossPerDay = 500;
+const dateString = Date.now();
+const startExpTime = Math.floor(new Date(dateString).getTime() / 1000);
 
 describe("DefiBetsManager unit test", () => {
     async function deployDefiBetsManagerFixture() {
@@ -22,10 +24,9 @@ describe("DefiBetsManager unit test", () => {
         const mockMath = await MockMath.deploy();
 
         const DefiBets = (await ethers.getContractFactory("DefiBets")) as DefiBets__factory;
-        const defiBets = await DefiBets.deploy(managerContract.address, mockMath.address);
+        const defiBets = await DefiBets.deploy(managerContract.address, mockMath.address, startExpTime);
 
         await defiBets.setBetParamater(maxLossPerDay, minBetDuration, maxBetDuration, slot);
-        await defiBets.initializeExpTimes();
 
         const LiquidityPool = (await ethers.getContractFactory("LiquidityPool")) as LiquidityPool__factory;
         const liquidityPool = await LiquidityPool.deploy(managerContract.address, mockDUSD.address);
@@ -39,13 +40,18 @@ describe("DefiBetsManager unit test", () => {
         it("successfull set a new bet", async () => {
             const { managerContract, user, defiBets } = await loadFixture(deployDefiBetsManagerFixture);
 
-            const expTime = await defiBets.getMaxExpTime();
+            const startTime = await defiBets.getStartExpTime();
+            const deltaTime = await defiBets.EXP_TIME_DELTA();
+
+            const expTime = startTime.add(deltaTime.mul(10));
 
             const betSize = ethers.utils.parseEther("100");
             const minPrice = ethers.utils.parseEther("20000");
             const maxPrice = ethers.utils.parseEther("25000");
 
             await managerContract.connect(user).setBet(betSize, minPrice, maxPrice, expTime);
+
+            expect((await defiBets.playerBets(expTime, user.address)).betSize).to.be.equal(betSize);
         });
     });
 });
