@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ethers } from "hardhat";
-import { DefiBets, DefiBets__factory, MockMath, MockMath__factory } from "../typechain-types";
+import { DefiBets, DefiBets__factory } from "../typechain-types";
 
 const slot = ethers.utils.parseEther("200");
 const minBetDuration = 60 * 60 * 24 * 4;
@@ -15,11 +15,8 @@ describe("DefiBets Unit test", () => {
     async function deployDefiBetsFixture() {
         const [deployer, user, manager, badActor] = await ethers.getSigners();
 
-        const MockMath = (await ethers.getContractFactory("MockMath")) as MockMath__factory;
-        const mockMath: MockMath = await MockMath.deploy();
-
         const DefiBets = (await ethers.getContractFactory("DefiBets")) as DefiBets__factory;
-        const defiBets: DefiBets = await DefiBets.deploy(manager.address, mockMath.address, startExpTime);
+        const defiBets: DefiBets = await DefiBets.deploy(manager.address, startExpTime);
 
         return { defiBets, deployer, user, manager, badActor };
     }
@@ -60,7 +57,11 @@ describe("DefiBets Unit test", () => {
 
             const expTime = startTime.add(deltaTime.mul(10));
 
-            await defiBets.connect(manager).setBetForAccount(user.address, betSize, minPrice, maxPrice, expTime);
+            const winning = betSize.mul(2);
+
+            await defiBets
+                .connect(manager)
+                .setBetForAccount(user.address, betSize, minPrice, maxPrice, expTime, winning);
 
             const info = await defiBets.bets(expTime);
             expect(info.totalBets).to.be.equal(betSize);

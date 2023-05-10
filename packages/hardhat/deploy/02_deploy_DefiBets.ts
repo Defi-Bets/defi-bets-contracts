@@ -6,7 +6,6 @@ const deployDefiBetsContract: DeployFunction = async (hre: HardhatRuntimeEnviron
     const { deploy, get } = hre.deployments;
 
     const managerContractAddress = (await get("DefiBetsManager")).address;
-    const mathContractAddress = (await get("MockMath")).address;
 
     const dateString = Date.now();
     const startExpTime = Math.floor(new Date(dateString).getTime() / 1000);
@@ -14,7 +13,7 @@ const deployDefiBetsContract: DeployFunction = async (hre: HardhatRuntimeEnviron
     await deploy("DefiBets", {
         from: deployer,
         log: true,
-        args: [managerContractAddress, mathContractAddress, startExpTime],
+        args: [managerContractAddress, startExpTime],
         autoMine: true,
     });
 };

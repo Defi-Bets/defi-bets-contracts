@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "../interface/math/IDefiBetsMath.sol";
+
 
 error DefiBets__Forbidden();
 error DefiBets__NoValidExpTime();
@@ -49,7 +49,7 @@ contract DefiBets {
     mapping(uint256 => mapping(address => PlayerBet)) public playerBets;
 
     address public defiBetsManager;
-    address public mathContract;
+    
 
 
     /* ====== Events ====== */
@@ -61,18 +61,16 @@ contract DefiBets {
 
     /**
      * @param _defiBetsManager - the manager and owner of the contract. 
-     * @param _mathContract - the math contract, where you can calulate possible winnings for the bet 
      * @param _startExpTime - the start time when someone is able to place a bet
      */
-    constructor(address _defiBetsManager,address _mathContract,uint256 _startExpTime){
+    constructor(address _defiBetsManager,uint256 _startExpTime){
         defiBetsManager = _defiBetsManager;
-        mathContract = _mathContract;
 
         startExpTime = _startExpTime;
     }
 
     /* ====== Mutation Functions ====== */
-    function setBetForAccount(address _account,uint256 _betSize,uint256 _minPrice,uint256 _maxPrice,uint256 _expTime) external {
+    function setBetForAccount(address _account,uint256 _betSize,uint256 _minPrice,uint256 _maxPrice,uint256 _expTime,uint256 _winning) external {
         _isDefiBetManager();
 
 
@@ -82,7 +80,7 @@ contract DefiBets {
         _validPrice(_minPrice);
         _validPrice(_maxPrice);
 
-        uint256 _winning = IDefiBetsMath(mathContract).calculateWinning(_minPrice,_maxPrice,_betSize,_expTime);
+        // uint256 _winning = IDefiBetsMath(mathContract).calculateWinning(_minPrice,_maxPrice,_betSize,_expTime);
 
         uint256 _maxUserWinnings = calculateMaxUserWinnings(_expTime,_minPrice,_maxPrice,_winning);
         uint256 _maxLPLoss = calculateMaxLPLoss(_maxUserWinnings,bets[_expTime].totalBets);
@@ -179,7 +177,7 @@ contract DefiBets {
         }
     }
 
-    
+       
 
     /* ====== Pure/View Functions ====== */
 

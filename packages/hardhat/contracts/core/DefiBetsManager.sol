@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import '../interface/core/ILiquidityPool.sol';
 import "../interface/core/IDefiBets.sol";
+import "../interface/math/IDefiBetsMath.sol";
 
 
 
@@ -22,6 +23,7 @@ contract DefiBetsManager is Pausable,Ownable {
 
     address public liquidityPool;
     address public defiBets;
+    address public mathContract;
 
     address public token;
 
@@ -61,16 +63,18 @@ contract DefiBetsManager is Pausable,Ownable {
     function setBet(uint256 _betSize,uint256 _minPrice,uint256 _maxPrice,uint256 _expTime) external whenNotPaused(){
         
         //TODO: Send the tokens to the betting vault
+        uint256 _winning = IDefiBetsMath(mathContract).calculateWinning(_minPrice,_maxPrice,_betSize,_expTime);
         
-        IDefiBets(defiBets).setBetForAccount(msg.sender,_betSize,_minPrice,_maxPrice,_expTime);
+        IDefiBets(defiBets).setBetForAccount(msg.sender,_betSize,_minPrice,_maxPrice,_expTime,_winning);
     }
 
 
     /* ====== Setup Functions ====== */
 
-    function setAddresses(address _liquidityPool,address _defiBets) external onlyOwner {
+    function setAddresses(address _liquidityPool,address _defiBets,address _mathContract) external onlyOwner {
         liquidityPool = _liquidityPool;
         defiBets = _defiBets;
+        mathContract = _mathContract;
     }
 
 

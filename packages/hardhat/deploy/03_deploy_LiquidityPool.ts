@@ -19,8 +19,9 @@ const deployLiquidityPoolContract: DeployFunction = async (hre: HardhatRuntimeEn
     const managerContract: DefiBetsManager = await hre.ethers.getContract("DefiBetsManager");
 
     const defiBetsAddress = (await get("DefiBets")).address;
+    const mathContractAddress = (await get("MockMath")).address;
 
-    await managerContract.setAddresses(lpPoolContract.address, defiBetsAddress);
+    await managerContract.setAddresses(lpPoolContract.address, defiBetsAddress, mathContractAddress);
 };
 
 deployLiquidityPoolContract.tags = ["core"];

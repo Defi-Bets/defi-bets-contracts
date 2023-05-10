@@ -24,14 +24,14 @@ describe("DefiBetsManager unit test", () => {
         const mockMath = await MockMath.deploy();
 
         const DefiBets = (await ethers.getContractFactory("DefiBets")) as DefiBets__factory;
-        const defiBets = await DefiBets.deploy(managerContract.address, mockMath.address, startExpTime);
+        const defiBets = await DefiBets.deploy(managerContract.address, startExpTime);
 
         await defiBets.setBetParamater(maxLossPerDay, minBetDuration, maxBetDuration, slot);
 
         const LiquidityPool = (await ethers.getContractFactory("LiquidityPool")) as LiquidityPool__factory;
         const liquidityPool = await LiquidityPool.deploy(managerContract.address, mockDUSD.address);
 
-        await managerContract.setAddresses(liquidityPool.address, defiBets.address);
+        await managerContract.setAddresses(liquidityPool.address, defiBets.address, mockMath.address);
 
         return { deployer, user, lpStaker, managerContract, defiBets };
     }
