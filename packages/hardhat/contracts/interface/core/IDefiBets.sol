@@ -20,5 +20,9 @@ interface IDefiBets {
 
     function setBetForAccount(address _account,uint256 _betSize,uint256 _minPrice,uint256 _maxPrice,uint256 _expTime,uint256 _winning) external;
 
+    function claimForAccount(address _account,uint256 _tokenId) external returns(uint256,uint256,bool);
+
     function setBetParamater(uint256 _maxLossPerDay,uint256 _minBetDuration,uint256 _maxBetDuration,uint256 _slot) external;
+
+    function performExpiration(uint256 _expTime,uint256 _expPrice) external returns(uint256,bool) ;
 }

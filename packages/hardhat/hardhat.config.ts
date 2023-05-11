@@ -14,7 +14,20 @@ const deployerPrivateKey =
 const etherscanApiKey = process.env.ETHERSCAN_API_KEY || "DNXJA8RX2Q3VZ4URQIWP7Z68CJXQZSC6AW";
 
 const config: HardhatUserConfig = {
-    solidity: "0.8.17",
+    solidity: {
+        compilers: [
+            {
+                version: "0.8.17",
+                settings: {
+                    optimizer: {
+                        enabled: true,
+                        runs: 800,
+                    },
+                },
+            },
+        ],
+    },
+
     defaultNetwork: "localhost",
     namedAccounts: {
         deployer: {
@@ -72,6 +85,12 @@ const config: HardhatUserConfig = {
         etherscan: {
             apiKey: `${etherscanApiKey}`,
         },
+    },
+    gasReporter: {
+        currency: "USD",
+        gasPrice: 1,
+        enabled: process.env.ENABLE_GAS === "true",
+        coinmarketcap: process.env.COINMARKET_CAP_API,
     },
 };
 

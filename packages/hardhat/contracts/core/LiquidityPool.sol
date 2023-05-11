@@ -14,8 +14,11 @@ contract LiquidityPool is ERC20 {
 
     /* ====== State Variables ====== */
 
-    address public liquidityToken;
+    uint256 public totalTokenSupply;
+
+    address public token;
     address public managerContract;
+    address public betVault;
 
     /* ====== Events ====== */
     event Deposit(address indexed account,uint256 amount,uint256 shares,uint256 totalTokens,uint256 totalSupply);
@@ -24,9 +27,9 @@ contract LiquidityPool is ERC20 {
     /* ====== Modifier ====== */
 
 
-    constructor(address _managerContract,address _liquidityToken) ERC20("DefiB","DefiB"){
+    constructor(address _managerContract,address _token) ERC20("DefiB","DefiB"){
         managerContract = _managerContract;
-        liquidityToken = _liquidityToken;
+        token = _token;
     }
 
     /* ====== Main Functions ====== */
@@ -36,7 +39,7 @@ contract LiquidityPool is ERC20 {
 
         uint256 _shares = calcSharesToMint(_amount);
 
-        IERC20(liquidityToken).transferFrom(_account,address(this),_amount);
+        IERC20(token).transferFrom(_account,address(this),_amount);
 
         _mint(_account,_shares);
 
@@ -53,10 +56,25 @@ contract LiquidityPool is ERC20 {
 
         _burn(_account,_shares);
 
-        IERC20(liquidityToken).transfer(_account,_tokens);
+        IERC20(token).transfer(_account,_tokens);
 
 
         emit Redeem(_account,_shares,_tokens,balanceTokens(),totalSupply());
+    }
+
+    function updateTokenSupply(uint256 _amount,bool _profit) external {
+        _isManagerContract();
+
+        if(_profit){
+            totalTokenSupply = totalTokenSupply.add(_amount);
+        }else{
+
+            IERC20(token).transfer(betVault,_amount);
+
+            totalTokenSupply = totalTokenSupply.sub(_amount);
+        }
+
+        
     }
 
 
@@ -114,7 +132,7 @@ contract LiquidityPool is ERC20 {
 
     function balanceTokens() public view returns(uint256){
 
-        return IERC20(liquidityToken).balanceOf(address(this));
+        return IERC20(token).balanceOf(address(this));
     }
 
 }

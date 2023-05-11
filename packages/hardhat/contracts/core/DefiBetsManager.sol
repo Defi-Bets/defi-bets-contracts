@@ -7,11 +7,11 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import '../interface/core/ILiquidityPool.sol';
 import "../interface/core/IDefiBets.sol";
 import "../interface/math/IDefiBetsMath.sol";
+import "../interface/core/IDefiBetsVault.sol";
 
 
 
 /**  @title DefiBets Manager Contract
- *   @author Florian Meiswinkel
  *   @notice This contract controls the main functions of the protocol
  */
 
@@ -24,6 +24,7 @@ contract DefiBetsManager is Pausable,Ownable {
     address public liquidityPool;
     address public defiBets;
     address public mathContract;
+    address public vault;
 
     address public token;
 
@@ -62,19 +63,47 @@ contract DefiBetsManager is Pausable,Ownable {
 
     function setBet(uint256 _betSize,uint256 _minPrice,uint256 _maxPrice,uint256 _expTime) external whenNotPaused(){
         
-        //TODO: Send the tokens to the betting vault
+        
         uint256 _winning = IDefiBetsMath(mathContract).calculateWinning(_minPrice,_maxPrice,_betSize,_expTime);
         
         IDefiBets(defiBets).setBetForAccount(msg.sender,_betSize,_minPrice,_maxPrice,_expTime,_winning);
+
+        IDefiBetsVault(vault).deposit(msg.sender,_betSize,_expTime);
+    }
+
+    function executeExpiration(uint256 _expTime) external {
+
+        //TODO: Code Mock Oracle for testing
+
+        uint256 _price = 1000 ether;
+
+        (uint256 _delta,bool _profit) = IDefiBets(defiBets).performExpiration(_expTime,_price);
+
+        if(_profit == true){
+            IDefiBetsVault(vault).withdraw(liquidityPool,_delta,_expTime);
+        }
+
+
+    }
+
+    function claimWinnings(uint256 _tokenId) external {
+
+        (uint256 _token,uint256 _expTime,bool _profit) = IDefiBets(defiBets).claimForAccount(msg.sender,_tokenId);
+       
+
+        if(_profit == true){
+            IDefiBetsVault(vault).withdraw(msg.sender,_token,_expTime);
+        }
     }
 
 
     /* ====== Setup Functions ====== */
 
-    function setAddresses(address _liquidityPool,address _defiBets,address _mathContract) external onlyOwner {
+    function setAddresses(address _liquidityPool,address _defiBets,address _mathContract,address _vault) external onlyOwner {
         liquidityPool = _liquidityPool;
         defiBets = _defiBets;
         mathContract = _mathContract;
+        vault = _vault;
     }
 
 
