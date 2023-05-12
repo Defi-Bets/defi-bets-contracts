@@ -2,78 +2,94 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "../interface/math/IDefiBetsMath.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+
+
 
 error DefiBets__Forbidden();
 error DefiBets__NoValidExpTime();
 error DefiBets__NoValidPrice();
+error DefiBets__NoValidWinningPrice();
 error DefiBets__OutOfActiveExpTimeRange();
 error DefiBets__AlreadyInitialized();
+error DefiBets__ParameterNotInitialized();
+error DefiBets_NoValidParamters();
+error DefiBets__TokenDontExists();
+error DefiBets__NotExecutableTime();
+error  DefiBets__NotTheTokenOwner();
+error DefiBets__NotEpxired();
 
-contract DefiBets {
+contract DefiBets is ERC721 {
 
     using SafeMath for uint256;
+    using Counters for Counters.Counter;
+    
 
-    struct BetInfo {
+
+    struct ExpTimeInfo {
         uint256 maxUserWinning;
         uint256 totalBets;
-        uint256 maxLPLoss;
-        bool finished;
+        uint256 maxLossLimit;
         uint256 expPrice;
+        uint256 deltaValue;
+        uint256 slotSize;
+        bool finished;
+        bool profit;
+        bool init;
     }
 
-    struct PlayerBet {
+    struct Bet {
+        uint256 expTime;
         uint256 betSize;
         uint256 profit;
         uint256 minPrice;
         uint256 maxPrice;
-        bool claimed;
     }
 
     uint256 public constant EXP_TIME_DELTA = 60*60*24;
 
     /* ====== State Variables ====== */
-    uint256 public maxLossPerDay; //max loss per day in percent with 2 decimals e.g. 1% => 100
+    Counters.Counter private tokenIds;
+    bool private initialized;
     uint256 public minBetDuration;
     uint256 public maxBetDuration;
     uint256 public slot;
 
+    
+
 
     //All mappings can be searched with the expiration date.
-    uint256 private immutable startExpTime;
-    // uint256 private lastExpTime;
-    bool private initialized;
+    uint256 private  startExpTime;
     mapping(uint256 => bool) private validExpTime;
-    mapping(uint256 => BetInfo) public bets;
+    mapping(uint256 => ExpTimeInfo) public expTimeInfos;
+    mapping(uint256 => Bet) private bets;
+
     mapping(uint => mapping(uint256 => uint256)) public betsWinningSlots;
-    mapping(uint256 => mapping(address => PlayerBet)) public playerBets;
 
     address public defiBetsManager;
-    address public mathContract;
+    
 
 
     /* ====== Events ====== */
-    event EpxirationTimeCreated(uint256 expTime);
-    event ExpiryTimeBetInfoUpdated(uint256 expirationDate,uint256 totalBets,uint256 maxUserWinnings,uint256 maxLPLoss);
+    event EpxirationTimeCreated(uint256 expTime,uint256 maxLpLoss);
+    event ExpiryTimeBetInfoUpdated(uint256 expirationDate,uint256 totalBets,uint256 maxUserWinnings);
     event BetPlaced(address indexed account,uint256 betSize,uint256 profit,uint256 expDate,uint256 minPrice,uint256 maxPrice);
-    event BetFinished(uint256 expTime,bool lpWin, uint256 totalAmount);
-    event BetParameterUpdated(uint256 maxLossPerDay,uint256 minBetDuration,uint256 maxBetDuration,uint256 slot);
+    event Expiration(uint256 expTime,bool profit, uint256 delta);
+    event BetParameterUpdated(uint256 minBetDuration,uint256 maxBetDuration,uint256 slot);
 
     /**
      * @param _defiBetsManager - the manager and owner of the contract. 
-     * @param _mathContract - the math contract, where you can calulate possible winnings for the bet 
-     * @param _startExpTime - the start time when someone is able to place a bet
      */
-    constructor(address _defiBetsManager,address _mathContract,uint256 _startExpTime){
+    constructor(address _defiBetsManager) ERC721("DefiBetsToken","DB"){
         defiBetsManager = _defiBetsManager;
-        mathContract = _mathContract;
-
-        startExpTime = _startExpTime;
+        
     }
 
     /* ====== Mutation Functions ====== */
-    function setBetForAccount(address _account,uint256 _betSize,uint256 _minPrice,uint256 _maxPrice,uint256 _expTime) external {
+    function setBetForAccount(address _account,uint256 _betSize,uint256 _minPrice,uint256 _maxPrice,uint256 _expTime,uint256 _winning) external {
         _isDefiBetManager();
+        _isInitialized();
 
 
         // validate input paramaters
@@ -82,63 +98,158 @@ contract DefiBets {
         _validPrice(_minPrice);
         _validPrice(_maxPrice);
 
-        uint256 _winning = IDefiBetsMath(mathContract).calculateWinning(_minPrice,_maxPrice,_betSize,_expTime);
+        
 
         uint256 _maxUserWinnings = calculateMaxUserWinnings(_expTime,_minPrice,_maxPrice,_winning);
-        uint256 _maxLPLoss = calculateMaxLPLoss(_maxUserWinnings,bets[_expTime].totalBets);
+        
+        uint256 _maxLPLoss = calculateMaxLPLoss(_maxUserWinnings,expTimeInfos[_expTime].totalBets);
 
-        //TODO: Check if the loss is valid
+        if(_maxLPLoss > expTimeInfos[_expTime].maxLossLimit){
+            revert DefiBets__NoValidWinningPrice();
+        }
 
-        _updateBetInfo(_expTime,_maxUserWinnings,_maxLPLoss,_betSize);
+        _updateBetInfo(_expTime,_maxUserWinnings,_betSize);
 
-        _setPlayerBet(_account,_expTime,_betSize,_winning,_minPrice,_maxPrice);
+        _createBetData(_account,_expTime,_betSize,_winning,_minPrice,_maxPrice);
 
+        //Attention: This function has high gas costs!!!!
         _distributeWinningsToSlots( _minPrice, _maxPrice, _winning, _expTime);
 
         emit BetPlaced(_account,_betSize,_winning,_expTime,_minPrice,_maxPrice);
     }
 
+    function claimForAccount(address _account,uint256 _tokenId) external returns(uint256,uint256,bool) {
+        _isDefiBetManager();
+
+        Bet memory _betTokenInfo = getBetTokenData(_tokenId);
+        ExpTimeInfo memory _expInfo = expTimeInfos[_betTokenInfo.expTime];
+
+        if(_expInfo.finished != true){
+            revert DefiBets__NotEpxired();
+        }
+
+        if(ownerOf(_tokenId) != _account){
+            revert DefiBets__NotTheTokenOwner();
+        }
+
+
+        uint256 _tokensForClaim;
+        bool _profits;
+
+        if(_expInfo.expPrice >= _betTokenInfo.minPrice && _expInfo.expPrice < _betTokenInfo.maxPrice){
+            _tokensForClaim = _betTokenInfo.profit;
+
+            _profits = true;
+        }
+
+        
+        
+        _burn(_tokenId);
+
+        return (_tokensForClaim,_betTokenInfo.expTime,_profits);
+    }
+
+    function performExpiration(uint256 _expTime,uint256 _expPrice) external returns(uint256,bool) {
+        _isDefiBetManager();
+        _isInitialized();
+
+        _validExpirationTime(_expTime);
+
+        if(_expTime > block.timestamp) {
+            revert DefiBets__NotExecutableTime();
+        }
+
+        (uint256 _delta,bool _profit) = _evaluateProfits(_expTime,_expPrice);
+
+        //update the data 
+        expTimeInfos[_expTime].deltaValue = _delta;
+        expTimeInfos[_expTime].profit = _profit;
+
+        expTimeInfos[_expTime].finished = true;
+        expTimeInfos[_expTime].expPrice = _expPrice;
+
+        emit Expiration(_expTime,_profit,_delta);
+
+        return (_delta,_profit);
+    }
+
+    function initializeNewExpTime(uint256 _expTime,uint256 _maxLpLoss) external {
+        _isDefiBetManager();
+        _isValidActiveRange(_expTime);
+
+        if(expTimeInfos[_expTime].init == false){
+        _initExpTime(_expTime,_maxLpLoss);}
+    }
+
     /* ====== Setup Function ====== */
     
-    function setBetParamater(uint256 _maxLossPerDay,uint256 _minBetDuration,uint256 _maxBetDuration,uint256 _slot) external {
-        maxLossPerDay = _maxLossPerDay;
+    //TODO: Only the owner of the contract can call the function
+    function initializeData(uint256 _startExpTime,uint256 _maxLossPerExpTime,uint256 _minBetDuration,uint256 _maxBetDuration,uint256 _slot) external {
+        if(initialized){
+            revert DefiBets__AlreadyInitialized();
+        }
+
+        startExpTime = _startExpTime;
+        
+        setBetParamater(_minBetDuration,_maxBetDuration,_slot);
+
+        _initializeMaxWinningsPerExpTime(_maxLossPerExpTime);
+
+        initialized = true;
+    }
+
+    //TODO: Only the owner of the contract can call the function
+    function setBetParamater(uint256 _minBetDuration,uint256 _maxBetDuration,uint256 _slot) public {
+        
+        if(_minBetDuration >= _maxBetDuration){
+            revert DefiBets_NoValidParamters();
+        }
+
         minBetDuration = _minBetDuration;
         maxBetDuration = _maxBetDuration;
         slot = _slot;
 
-        emit BetParameterUpdated( maxLossPerDay, minBetDuration, maxBetDuration, slot);
+        emit BetParameterUpdated(minBetDuration,maxBetDuration,slot);
     }
 
     
     /* ====== Internal Functions ====== */
 
-    function _setPlayerBet(address _account,uint256 _expTime,uint256 _betSize,uint256 _winning,uint256 _minPrice,uint256 _maxPrice) internal {
-        PlayerBet memory _newBet;
+   
+
+    function _createBetData(address _account,uint256 _expTime,uint256 _betSize,uint256 _winning,uint256 _minPrice,uint256 _maxPrice) internal {
+     
+
+        tokenIds.increment();
+        uint256 newTokenId = tokenIds.current();
+        _mint(_account, newTokenId);
+
+        Bet memory _newBet;
 
         _newBet.betSize = _betSize;
         _newBet.minPrice = _minPrice;
         _newBet.maxPrice = _maxPrice;
         _newBet.profit = _winning;
+        _newBet.expTime = _expTime;
 
-        playerBets[_expTime][_account] = _newBet; 
+        bets[newTokenId] = _newBet;
 
     }
 
-    function _updateBetInfo(uint256 _expTime,uint256 _userWinnings,uint256 _maxLPLoss,uint256 _betSize) internal {
-        uint256 _totalBets = bets[_expTime].totalBets;
+    function _updateBetInfo(uint256 _expTime,uint256 _userWinnings,uint256 _betSize) internal {
+        uint256 _totalBets = expTimeInfos[_expTime].totalBets;
 
-        bets[_expTime].maxLPLoss = _maxLPLoss;
-        bets[_expTime].maxUserWinning = _userWinnings;
-        bets[_expTime].totalBets = _totalBets.add(_betSize);
+        expTimeInfos[_expTime].maxUserWinning = _userWinnings;
+        expTimeInfos[_expTime].totalBets = _totalBets.add(_betSize);
 
-        emit ExpiryTimeBetInfoUpdated(_expTime,bets[_expTime].totalBets,_userWinnings,_maxLPLoss);
+        emit ExpiryTimeBetInfoUpdated(_expTime,expTimeInfos[_expTime].totalBets,_userWinnings);
     }
 
     function _distributeWinningsToSlots(uint256 _minPrice,uint256 _maxPrice,uint256 _winning,uint256 _expTime)internal{
         
         uint256 _slotAmount = (_maxPrice.sub(_minPrice)).div(slot);
 
-        for(uint i = 0;i <= _slotAmount;i++){
+        for(uint i = 0;i < _slotAmount;i++){
             uint256 _slot = _minPrice.add(i.mul(slot));
             
             uint256 _slotWinning = betsWinningSlots[_expTime][_slot];
@@ -156,7 +267,7 @@ contract DefiBets {
 
     function _validExpirationTime(uint256 _expTime) internal view{
 
-        if((_expTime.sub(startExpTime)) % EXP_TIME_DELTA != 0){
+        if(expTimeInfos[_expTime].init != true){
             revert DefiBets__NoValidExpTime();
         }
     }
@@ -179,12 +290,61 @@ contract DefiBets {
         }
     }
 
-    
+    function _initializeMaxWinningsPerExpTime(uint256 _maxLossPerExpTime) internal {
+        uint256 _timeSteps = (maxBetDuration.sub(minBetDuration)).div(EXP_TIME_DELTA);
+
+        for(uint i = 0; i< _timeSteps;i++){
+            uint256 _expTime = startExpTime.add(EXP_TIME_DELTA.mul(i));
+
+          _initExpTime(_expTime,_maxLossPerExpTime);
+        }
+    }
+
+    function _initExpTime(uint256 _expTime,uint256 _maxLoss) internal {
+            
+            expTimeInfos[_expTime].maxLossLimit = _maxLoss;
+            expTimeInfos[_expTime].init = true;
+            expTimeInfos[_expTime].slotSize = slot;
+
+            emit EpxirationTimeCreated(_expTime,_maxLoss);
+    }
+
+    function _isInitialized() internal view {
+        if(initialized != true){
+            revert DefiBets__ParameterNotInitialized();
+        }
+    }
+
+
+
+    function _evaluateProfits(uint256 _expTime,uint256 _expPrice) internal view returns(uint256,bool){
+        uint256 _delta;
+        bool _profit;
+        uint256 _totalBets = expTimeInfos[_expTime].totalBets;
+        uint256 _winningsExist;
+
+        if(_expPrice % slot == 0){
+  
+            _winningsExist =  betsWinningSlots[_expTime][_expPrice];
+ 
+        }else{
+            _winningsExist = betsWinningSlots[_expTime][_expPrice.sub(_expPrice.mod(slot))];
+        }
+
+        _profit = _totalBets > _winningsExist;
+
+        _delta = _profit ? _totalBets.sub(_winningsExist) : _winningsExist.sub(_totalBets);
+
+        return (_delta,_profit);
+
+    }
+
+       
 
     /* ====== Pure/View Functions ====== */
 
     function calculateMaxUserWinnings(uint256 _expTime,uint256 _minPrice, uint256 _maxPrice, uint256 _winning) public view returns(uint256){
-        uint256 _maxUserWinnings = bets[_expTime].maxUserWinning;
+        uint256 _maxUserWinnings = expTimeInfos[_expTime].maxUserWinning;
 
         uint256 _slotAmount = (_maxPrice.sub(_minPrice)).div(slot);
 
@@ -209,12 +369,18 @@ contract DefiBets {
         return 0;
     }
 
-    function isExpTimeValid(uint256 _expTime) public view returns(bool){
-        return validExpTime[_expTime];
-    }
+   
 
     function getStartExpTime() public view returns(uint256){
         return startExpTime;
+    }
+
+    function getBetTokenData(uint256 _tokenId) public view returns (Bet memory){
+        if(_exists(_tokenId) != true){
+            revert DefiBets__TokenDontExists();
+        }
+
+        return bets[_tokenId];
     }
     
 }
