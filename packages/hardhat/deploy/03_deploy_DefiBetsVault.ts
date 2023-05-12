@@ -1,20 +1,21 @@
 import { DeployFunction } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-const deployDefiBetsContract: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
+const deployDefiBetsVaultContract: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     const { deployer } = await hre.getNamedAccounts();
     const { deploy, get } = hre.deployments;
 
     const managerContractAddress = (await get("DefiBetsManager")).address;
+    const tokenAddress = (await hre.ethers.getContract("MockDUSD")).address;
 
-    await deploy("DefiBets", {
+    await deploy("DefiBetsVault", {
         from: deployer,
+        args: [managerContractAddress, tokenAddress],
         log: true,
-        args: [managerContractAddress],
         autoMine: true,
     });
 };
 
-deployDefiBetsContract.tags = ["core"];
+deployDefiBetsVaultContract.tags = ["core"];
 
-export default deployDefiBetsContract;
+export default deployDefiBetsVaultContract;

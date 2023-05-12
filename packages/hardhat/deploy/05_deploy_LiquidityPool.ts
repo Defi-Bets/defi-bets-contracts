@@ -7,12 +7,14 @@ const deployLiquidityPoolContract: DeployFunction = async (hre: HardhatRuntimeEn
     const { deploy, get } = hre.deployments;
 
     const managerContractAddress = (await get("DefiBetsManager")).address;
+    const betVault = (await get("DefiBetsVault")).address;
+    const redeemVault = (await get("RedeemVault")).address;
 
     const token = (await hre.ethers.getContract("MockDUSD")).address;
     const lpPoolContract = await deploy("LiquidityPool", {
         from: deployer,
         log: true,
-        args: [managerContractAddress, token],
+        args: [managerContractAddress, token, betVault, redeemVault],
         autoMine: true,
     });
 
@@ -21,7 +23,7 @@ const deployLiquidityPoolContract: DeployFunction = async (hre: HardhatRuntimeEn
     const defiBetsAddress = (await get("DefiBets")).address;
     const mathContractAddress = (await get("MockMath")).address;
 
-    await managerContract.setAddresses(lpPoolContract.address, defiBetsAddress, mathContractAddress);
+    await managerContract.setAddresses(lpPoolContract.address, defiBetsAddress, mathContractAddress, betVault);
 };
 
 deployLiquidityPoolContract.tags = ["core"];

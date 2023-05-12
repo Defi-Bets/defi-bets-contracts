@@ -177,7 +177,8 @@ contract DefiBets is ERC721 {
         _isDefiBetManager();
         _isValidActiveRange(_expTime);
 
-        _initExpTime(_expTime,_maxLpLoss);
+        if(expTimeInfos[_expTime].init == false){
+        _initExpTime(_expTime,_maxLpLoss);}
     }
 
     /* ====== Setup Function ====== */
@@ -187,8 +188,6 @@ contract DefiBets is ERC721 {
         if(initialized){
             revert DefiBets__AlreadyInitialized();
         }
-
-
 
         startExpTime = _startExpTime;
         
@@ -315,6 +314,8 @@ contract DefiBets is ERC721 {
             revert DefiBets__ParameterNotInitialized();
         }
     }
+
+
 
     function _evaluateProfits(uint256 _expTime,uint256 _expPrice) internal view returns(uint256,bool){
         uint256 _delta;

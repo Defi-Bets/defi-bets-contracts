@@ -31,8 +31,19 @@ describe("DefiBetsManager unit test", () => {
         const DefiBetsVault = (await ethers.getContractFactory("DefiBetsVault")) as DefiBetsVault__factory;
         const vault = await DefiBetsVault.deploy(managerContract.address, mockDUSD.address);
 
+        const transactionCount = await deployer.getTransactionCount();
+        const redeemVaultAddress = await ethers.utils.getContractAddress({
+            from: deployer.address,
+            nonce: transactionCount + 1,
+        });
+
         const LiquidityPool = (await ethers.getContractFactory("LiquidityPool")) as LiquidityPool__factory;
-        const liquidityPool = await LiquidityPool.deploy(managerContract.address, mockDUSD.address);
+        const liquidityPool = await LiquidityPool.deploy(
+            managerContract.address,
+            mockDUSD.address,
+            vault.address,
+            redeemVaultAddress,
+        );
 
         await managerContract.setAddresses(liquidityPool.address, defiBets.address, mockMath.address, vault.address);
 

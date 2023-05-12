@@ -83,6 +83,10 @@ contract DefiBetsManager is Pausable,Ownable {
             IDefiBetsVault(vault).withdraw(liquidityPool,_delta,_expTime);
         }
 
+    }
+
+    function createNewExpTime(uint256 _expTime) external {
+        //TODO: Create the next ExpTime if it possible
 
     }
 
@@ -104,6 +108,14 @@ contract DefiBetsManager is Pausable,Ownable {
         defiBets = _defiBets;
         mathContract = _mathContract;
         vault = _vault;
+    }
+
+    function initializeBetsContract() external onlyOwner {
+        //TODO:Implement the bets initialize
+        //1. Get the total free Supply from the LP
+        //2. Divide the free Supply with the times of bets
+        //3. initialize the contract
+
     }
 
 

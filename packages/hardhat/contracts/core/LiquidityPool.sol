@@ -12,13 +12,22 @@ contract LiquidityPool is ERC20 {
 
     using SafeMath for uint256;
 
+
+    uint256 private constant MULTIPLIER = 1000000;
+
+
+
     /* ====== State Variables ====== */
 
     uint256 public totalTokenSupply;
+    
 
     address public token;
     address public managerContract;
     address public betVault;
+    address public redeemVault;
+
+    
 
     /* ====== Events ====== */
     event Deposit(address indexed account,uint256 amount,uint256 shares,uint256 totalTokens,uint256 totalSupply);
@@ -27,9 +36,11 @@ contract LiquidityPool is ERC20 {
     /* ====== Modifier ====== */
 
 
-    constructor(address _managerContract,address _token) ERC20("DefiB","DefiB"){
+    constructor(address _managerContract,address _token,address _betVault,address _redeemVault) ERC20("DefiB","DefiB"){
         managerContract = _managerContract;
         token = _token;
+        betVault = _betVault;
+        redeemVault = _redeemVault;
     }
 
     /* ====== Main Functions ====== */
@@ -128,6 +139,10 @@ contract LiquidityPool is ERC20 {
         */
 
        return _shares.mul(balanceTokens()).div(totalSupply());
+    }
+
+    function calcRedeemFraction(uint256 _amount) public view returns(uint256){
+
     }
 
     function balanceTokens() public view returns(uint256){
