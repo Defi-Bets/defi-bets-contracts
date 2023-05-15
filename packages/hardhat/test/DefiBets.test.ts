@@ -16,7 +16,7 @@ describe("DefiBets Unit test", () => {
         const [deployer, user, manager, badActor] = await ethers.getSigners();
 
         const DefiBets = (await ethers.getContractFactory("DefiBets")) as DefiBets__factory;
-        const defiBets: DefiBets = await DefiBets.deploy(manager.address);
+        const defiBets: DefiBets = await DefiBets.deploy("BTC", manager.address);
 
         return { defiBets, deployer, user, manager, badActor };
     }
@@ -93,7 +93,7 @@ describe("DefiBets Unit test", () => {
 
             const expTime = startTime.add(deltaTime.mul(10));
 
-            const winning = betSize.mul(2);
+            const winning = betSize.mul(3);
 
             await defiBets
                 .connect(manager)
@@ -101,10 +101,8 @@ describe("DefiBets Unit test", () => {
 
             // try to place the same bet on the same place => winnings not allowed
 
-            expect(
-                await defiBets
-                    .connect(manager)
-                    .setBetForAccount(user.address, betSize, minPrice, maxPrice, expTime, winning),
+            await expect(
+                defiBets.connect(manager).setBetForAccount(user.address, betSize, minPrice, maxPrice, expTime, winning),
             ).to.be.revertedWith("DefiBets__NoValidWinningPrice");
         });
     });

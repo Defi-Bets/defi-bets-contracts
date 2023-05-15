@@ -1,21 +1,27 @@
 import { expect } from "chai";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ethers } from "hardhat";
-import { DefiBetsManager, DefiBetsVault__factory, DefiBets__factory, LiquidityPool__factory } from "../typechain-types";
+import {
+    DefiBetsManager__factory,
+    DefiBetsVault__factory,
+    DefiBets__factory,
+    LiquidityPool__factory,
+    MockV3Aggregator__factory,
+} from "../typechain-types";
 
 const slot = ethers.utils.parseEther("200");
 const minBetDuration = 60 * 60 * 24 * 4;
 const maxBetDuration = 60 * 60 * 24 * 30;
-const maxLossPerDay = ethers.utils.parseEther("300");
 const dateString = Date.now();
 const startExpTime = Math.floor(new Date(dateString).getTime() / 1000);
+const priceAnswer = ethers.utils.parseEther("20000");
 
 describe("DefiBetsManager unit test", () => {
     async function deployDefiBetsManagerFixture() {
         const [deployer, user, lpStaker] = await ethers.getSigners();
 
-        const DefiBetsManager = await ethers.getContractFactory("DefiBetsManager");
-        const managerContract = (await DefiBetsManager.deploy()) as DefiBetsManager;
+        const DefiBetsManager = (await ethers.getContractFactory("DefiBetsManager")) as DefiBetsManager__factory;
+        const managerContract = await DefiBetsManager.deploy();
 
         const MockDUSD = await ethers.getContractFactory("MockDUSD");
         const mockDUSD = await MockDUSD.deploy();
@@ -24,15 +30,13 @@ describe("DefiBetsManager unit test", () => {
         const mockMath = await MockMath.deploy();
 
         const DefiBets = (await ethers.getContractFactory("DefiBets")) as DefiBets__factory;
-        const defiBets = await DefiBets.deploy(managerContract.address);
-
-        await defiBets.initializeData(startExpTime, maxLossPerDay, minBetDuration, maxBetDuration, slot);
+        const defiBets = await DefiBets.deploy("BTC", managerContract.address);
 
         const DefiBetsVault = (await ethers.getContractFactory("DefiBetsVault")) as DefiBetsVault__factory;
         const vault = await DefiBetsVault.deploy(managerContract.address, mockDUSD.address);
 
         const transactionCount = await deployer.getTransactionCount();
-        const redeemVaultAddress = await ethers.utils.getContractAddress({
+        const redeemVaultAddress = ethers.utils.getContractAddress({
             from: deployer.address,
             nonce: transactionCount + 1,
         });
@@ -45,10 +49,45 @@ describe("DefiBetsManager unit test", () => {
             redeemVaultAddress,
         );
 
-        await managerContract.setAddresses(liquidityPool.address, defiBets.address, mockMath.address, vault.address);
+        const PriceFeed = (await ethers.getContractFactory("MockV3Aggregator")) as MockV3Aggregator__factory;
+        const priceFeed = await PriceFeed.deploy(8, priceAnswer);
 
-        return { deployer, user, lpStaker, managerContract, defiBets, mockDUSD, vault };
+        await managerContract.setAddresses(liquidityPool.address, mockMath.address);
+
+        await managerContract.addUnderlyingToken("BTC", priceFeed.address, defiBets.address, vault.address);
+
+        const lpAmount = ethers.utils.parseEther("100000");
+        await mockDUSD.connect(lpStaker).mint(lpStaker.address, lpAmount);
+        await mockDUSD.connect(lpStaker).approve(liquidityPool.address, lpAmount);
+        await managerContract.connect(lpStaker).provideLP(lpAmount);
+
+        const hash = await managerContract.getUnderlyingByte("BTC");
+        await managerContract
+            .connect(deployer)
+            .initializeBets(hash, startExpTime, minBetDuration, maxBetDuration, slot);
+
+        return { deployer, user, lpStaker, managerContract, defiBets, mockDUSD, vault, liquidityPool };
     }
+
+    describe("#provideLP", () => {
+        it("successfull provide LP", async () => {
+            const { managerContract, lpStaker, mockDUSD, liquidityPool } = await loadFixture(
+                deployDefiBetsManagerFixture,
+            );
+
+            const totalSupply = await liquidityPool.totalTokenSupply();
+
+            const value = ethers.utils.parseEther("100");
+
+            await mockDUSD.mint(lpStaker.address, value);
+            await mockDUSD.connect(lpStaker).approve(liquidityPool.address, value);
+
+            await managerContract.connect(lpStaker).provideLP(value);
+
+            expect(await liquidityPool.balanceOf(lpStaker.address)).to.be.equal(value.add(totalSupply));
+            expect(await liquidityPool.totalTokenSupply()).to.be.equal(value.add(totalSupply));
+        });
+    });
 
     describe("#setBet", () => {
         it("successfull set a new bet", async () => {
@@ -68,7 +107,7 @@ describe("DefiBetsManager unit test", () => {
             await mockDUSD.connect(user).mint(user.address, betSize);
             await mockDUSD.connect(user).approve(vault.address, betSize);
 
-            await managerContract.connect(user).setBet(betSize, minPrice, maxPrice, expTime);
+            await managerContract.connect(user).setBet(betSize, minPrice, maxPrice, expTime, "BTC");
 
             expect((await defiBets.getBetTokenData(1)).betSize).to.be.equal(betSize);
         });

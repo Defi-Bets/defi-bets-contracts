@@ -21,6 +21,7 @@ contract LiquidityPool is ERC20 {
 
     uint256 public totalTokenSupply;
     
+    uint256 public maxLPLostPerTime;
 
     address public token;
     address public managerContract;
@@ -53,6 +54,8 @@ contract LiquidityPool is ERC20 {
         IERC20(token).transferFrom(_account,address(this),_amount);
 
         _mint(_account,_shares);
+
+        totalTokenSupply = totalTokenSupply.add(_amount);
 
         emit Deposit(_account,_amount,_shares,balanceTokens(),totalSupply());
     }
@@ -150,6 +153,13 @@ contract LiquidityPool is ERC20 {
     function balanceTokens() public view returns(uint256){
 
         return IERC20(token).balanceOf(address(this));
+    }
+
+    function maxLPLost() public view returns(uint256){
+
+        //TODO: Calculate the free token supply with tha maximum lost percent including redeemings
+
+        return totalTokenSupply.mul(50000).div(1000000);
     }
 
 }

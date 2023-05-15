@@ -1,6 +1,7 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 import { developmentChains } from "../helper-hardhat-config";
+import { ethers } from "hardhat";
 
 const deployMockContracts: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const network = hre.network.name;
@@ -22,6 +23,13 @@ const deployMockContracts: DeployFunction = async function (hre: HardhatRuntimeE
         await deploy("MockMath", {
             from: deployer,
             args: [],
+            log: true,
+            autoMine: true,
+        });
+
+        await deploy("MockV3Aggregator", {
+            from: deployer,
+            args: [8, ethers.utils.parseEther("25000")],
             log: true,
             autoMine: true,
         });
