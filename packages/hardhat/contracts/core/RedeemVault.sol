@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0 <0.9.0;
 
-
+error liquidityPool__Forbidden();
 
 contract RedeemVault {
 
@@ -40,6 +40,21 @@ contract RedeemVault {
 
     function addRedeem(address _account,uint256 _fractionReward,uint256 _start,uint256 _end) external {
 
+    }
+
+    function updateRewards(uint256 _amount,uint256 _expDate) external {
+
+    }
+
+    function executeRedeem(address _account) external {
+        
+    }
+
+
+    function _isLiquidityPool() internal view {
+        if(msg.sender != liquidityPool) {
+            revert liquidityPool__Forbidden();
+        }
     }
 
 }

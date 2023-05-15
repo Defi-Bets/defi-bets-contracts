@@ -4,11 +4,14 @@ pragma solidity >=0.8.0 <0.9.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import '../interface/core/ILiquidityPool.sol';
 import "../interface/core/IDefiBets.sol";
 import "../interface/math/IDefiBetsMath.sol";
 import "../interface/core/IDefiBetsVault.sol";
 
+
+error DefiBetsManager__NoValidUnderlyingToken();
 
 
 /**  @title DefiBets Manager Contract
@@ -27,6 +30,13 @@ contract DefiBetsManager is Pausable,Ownable {
     address public vault;
 
     address public token;
+
+    mapping(address => address) public tokenPriceFeeds;
+    mapping (address => bool) public validUnderlyingToken;
+
+    /* ====== Events ====== */
+    event UnderlyingTokenAdded(address token);
+    event PriceFeedUpdated(address token,address priceFeed);
 
     constructor(){
 
@@ -57,12 +67,12 @@ contract DefiBetsManager is Pausable,Ownable {
      */
     function redeemLPTokens(uint256 _amount) external whenNotPaused() {
 
-        ILiquidityPool(liquidityPool).redeemSharesForAccount(msg.sender,_amount);
+        //TODO: Implement the redeem function!!!!
 
     }
 
-    function setBet(uint256 _betSize,uint256 _minPrice,uint256 _maxPrice,uint256 _expTime) external whenNotPaused(){
-        
+    function setBet(uint256 _betSize,uint256 _minPrice,uint256 _maxPrice,uint256 _expTime,address _token) external whenNotPaused(){
+        _isValidUnderlyingToken(_token);
         
         uint256 _winning = IDefiBetsMath(mathContract).calculateWinning(_minPrice,_maxPrice,_betSize,_expTime);
         
@@ -71,9 +81,11 @@ contract DefiBetsManager is Pausable,Ownable {
         IDefiBetsVault(vault).deposit(msg.sender,_betSize,_expTime);
     }
 
-    function executeExpiration(uint256 _expTime) external {
+    function executeExpiration(uint256 _expTime,address _token) external {
 
-        //TODO: Code Mock Oracle for testing
+       _isValidUnderlyingToken(_token);
+
+       
 
         uint256 _price = 1000 ether;
 
@@ -110,17 +122,43 @@ contract DefiBetsManager is Pausable,Ownable {
         vault = _vault;
     }
 
-    function initializeBetsContract() external onlyOwner {
-        //TODO:Implement the bets initialize
-        //1. Get the total free Supply from the LP
-        //2. Divide the free Supply with the times of bets
-        //3. initialize the contract
+    function addUnderlyingToken(address _token,address _feed) external onlyOwner {
+        validUnderlyingToken[_token] = true;
 
+        updatePriceFeed(_token,_feed);
+
+        emit UnderlyingTokenAdded(_token);
+    } 
+
+    function updatePriceFeed(address _token,address _feed) public onlyOwner  {
+        _isValidUnderlyingToken(_token);
+
+        tokenPriceFeeds[_token] = _feed;
+
+        emit PriceFeedUpdated(_token,_feed);
     }
 
 
     /* ====== Internal Functions ====== */
 
+    function _isValidUnderlyingToken(address _token) internal view {
+        if(validUnderlyingToken[_token] == false){
+            revert DefiBetsManager__NoValidUnderlyingToken();
+        }
+    }
 
+
+    /* ====== Pure/View Functions ====== */
+
+    function getPrice(address _token,uint256 _expTime) public view returns(uint256){
+        uint256 price;
+        
+        if(tokenPriceFeeds[_token] != address(0) && block.timestamp >= _expTime){
+
+            address _priceFeed = tokenPriceFeeds[_token];
+
+            
+        }
+    }
 
 }

@@ -58,6 +58,8 @@ contract LiquidityPool is ERC20 {
     }
 
     function redeemSharesForAccount(address _account, uint256 _shares) external {
+        
+        //TODO: Update the new redeem concept
         _isManagerContract();
 
         _isValidAmount(_account,_shares);
