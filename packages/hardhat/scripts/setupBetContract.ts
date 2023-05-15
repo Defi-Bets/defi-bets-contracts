@@ -1,6 +1,6 @@
 import { ethers, network } from "hardhat";
 import { networkConfig, getNetworkIdFromName } from "../helper-hardhat-config";
-import { DefiBets } from "../typechain-types";
+import { DefiBetsManager } from "../typechain-types";
 
 async function main() {
     const networkName = network.name;
@@ -13,13 +13,17 @@ async function main() {
         const minDuration = networkConfig[chainId].minDuration;
         const maxDuration = networkConfig[chainId].maxDuration;
         const slot = networkConfig[chainId].slot;
-        const maxLoss = networkConfig[chainId].maxLossPerDay;
 
-        const defiBetContract = (await ethers.getContract("DefiBets")) as DefiBets;
+        const manager = (await ethers.getContract("DefiBetsManager")) as DefiBetsManager;
 
         console.log("🎛️  Setup the defi-bets contract...");
+        const owner = (await ethers.getSigners())[0];
 
-        const tx = await defiBetContract.setBetParamater(maxLoss, minDuration, maxDuration, slot);
+        const dateString = Date.now();
+        const startExpTime = Math.floor(new Date(dateString).getTime() / 1000);
+
+        const hash = await manager.getUnderlyingByte("BTC");
+        const tx = await manager.connect(owner).initializeBets(hash, startExpTime, minDuration, maxDuration, slot);
         await tx.wait();
 
         console.log("🎟️  finished. you can start betting.");

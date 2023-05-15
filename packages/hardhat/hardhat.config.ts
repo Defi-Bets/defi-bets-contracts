@@ -1,13 +1,8 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 import { HardhatUserConfig } from "hardhat/config";
-import "@nomicfoundation/hardhat-chai-matchers";
-import "@nomiclabs/hardhat-ethers";
-import "@nomiclabs/hardhat-etherscan";
-import "@typechain/hardhat";
-import "hardhat-gas-reporter";
+import "@nomicfoundation/hardhat-toolbox";
 import "hardhat-deploy";
-import "solidity-coverage";
 
 // If not set, it uses ours Alchemy's default API key.
 // You can get your own at https://dashboard.alchemyapi.io
@@ -32,7 +27,6 @@ const config: HardhatUserConfig = {
             },
         ],
     },
-
     defaultNetwork: "localhost",
     namedAccounts: {
         deployer: {
@@ -99,10 +93,6 @@ const config: HardhatUserConfig = {
     },
     mocha: {
         timeout: 100000,
-    },
-    typechain: {
-        outDir: "typechain",
-        target: "ethers-v5",
     },
 };
 

@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0 <0.9.0;
 
-
+error liquidityPool__Forbidden();
 
 contract RedeemVault {
 
@@ -17,6 +17,7 @@ contract RedeemVault {
         uint256 fractionReward;
     }
 
+    uint256 public lastSnapshot;
     mapping(uint256 => RewardSnapshot) public snapshots;
 
     mapping(address => Redeem) public redeems;
@@ -30,10 +31,30 @@ contract RedeemVault {
         liquidityPool = _liquidityPool;
         managerContract = _managerContract;
         token = _token;
+
+        RewardSnapshot storage _firstSnapshot = snapshots[block.timestamp];
+        _firstSnapshot.valid = true;
+
+        lastSnapshot = block.timestamp;
     }
 
     function addRedeem(address _account,uint256 _fractionReward,uint256 _start,uint256 _end) external {
 
+    }
+
+    function updateRewards(uint256 _amount,uint256 _expDate) external {
+
+    }
+
+    function executeRedeem(address _account) external {
+        
+    }
+
+
+    function _isLiquidityPool() internal view {
+        if(msg.sender != liquidityPool) {
+            revert liquidityPool__Forbidden();
+        }
     }
 
 }
