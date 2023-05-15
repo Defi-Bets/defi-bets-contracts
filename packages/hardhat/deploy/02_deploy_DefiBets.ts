@@ -10,7 +10,7 @@ const deployDefiBetsContract: DeployFunction = async (hre: HardhatRuntimeEnviron
     await deploy("DefiBets", {
         from: deployer,
         log: true,
-        args: [managerContractAddress],
+        args: ["BTC", managerContractAddress],
         autoMine: true,
     });
 };
