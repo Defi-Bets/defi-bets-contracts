@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "../interface/core/IDefiBets.sol";
 
 
 
@@ -21,7 +22,7 @@ error DefiBets__NotExecutableTime();
 error DefiBets__NotTheTokenOwner();
 error DefiBets__NotEpxired();
 
-contract DefiBets is ERC721,Ownable {
+contract DefiBets is ERC721, Ownable, IDefiBets {
 
     using SafeMath for uint256;
     using Counters for Counters.Counter;
@@ -200,15 +201,13 @@ contract DefiBets is ERC721,Ownable {
 
         startExpTime = _startExpTime;
         
-        setBetParamater(_minBetDuration,_maxBetDuration,_slot);
-
-        _initializeMaxWinningsPerExpTime(_maxLossPerExpTime);
+        setBetParamater(_maxLossPerExpTime,_minBetDuration,_maxBetDuration,_slot);
 
         initialized = true;
     }
 
-    
-    function setBetParamater(uint256 _minBetDuration,uint256 _maxBetDuration,uint256 _slot) public {
+    //TODO: Only the owner of the contract can call the function
+    function setBetParamater(uint256 _maxLossPerExpTime, uint256 _minBetDuration,uint256 _maxBetDuration,uint256 _slot) public {
         _isDefiBetManager();
         if(_minBetDuration >= _maxBetDuration){
             revert DefiBets_NoValidParamters();
@@ -217,6 +216,8 @@ contract DefiBets is ERC721,Ownable {
         minBetDuration = _minBetDuration;
         maxBetDuration = _maxBetDuration;
         slot = _slot;
+        
+        _initializeMaxWinningsPerExpTime(_maxLossPerExpTime);
 
         emit BetParameterUpdated(minBetDuration,maxBetDuration,slot);
     }

@@ -3,11 +3,12 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "../interface/core/IDefiBetsVault.sol";
 
 error DefiBetsVault__Forbidden();
 error DefiBetsVault__NotEnoughFunds();
 
-contract DefiBetsVault {
+contract DefiBetsVault is IDefiBetsVault{
 
     using SafeMath for uint256;
 
@@ -21,8 +22,7 @@ contract DefiBetsVault {
     address public defiBetsManager;
 
     /* ====== Events ====== */
-    event Deposit(uint256 expTime,uint256 amount,uint256 supply);
-    event Withdraw(address indexed to,uint256 amount,uint256 expTime,uint256 newSupply);
+    /* Events defined in Interface */
 
     constructor(address _defibetsManager,address _token){
         defiBetsManager = _defibetsManager;
