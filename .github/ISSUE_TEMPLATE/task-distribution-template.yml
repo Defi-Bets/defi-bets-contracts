@@ -1,0 +1,42 @@
+Certainly! Here's an example of a task distribution template in YAML format that you can use for GitHub:
+
+```yaml
+name: Task Distribution
+about: Use this template to distribute new tasks among team members
+
+title: "[Task]"
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Task Description
+
+        <!-- Provide a brief description of the task that needs to be completed -->
+
+        ## Task Details
+
+        <!-- Provide detailed information about the task, including steps to reproduce or specific requirements -->
+
+        ## Acceptance Criteria
+
+        <!-- Outline the specific criteria that must be met for the task to be considered complete -->
+
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+        - [ ] Criterion 3
+
+        ## Additional Information
+
+        <!-- Add any additional context or information that may be helpful for completing the task -->
+
+        ## Assignees
+
+        <!-- Tag the team members who will be responsible for completing the task -->
+
+        @assignee1
+        @assignee2
+        @assignee3
+```
+
+To use this template, save it as a YAML file, such as `task-distribution-template.yml`, and add it to the `.github/ISSUE_TEMPLATE` directory in your GitHub repository. When creating a new issue, select the "Task Distribution" template, fill in the details, assign team members, and track the progress of tasks within your repository.

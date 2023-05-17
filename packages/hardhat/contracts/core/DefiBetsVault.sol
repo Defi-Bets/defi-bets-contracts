@@ -3,33 +3,34 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "../interface/core/IDefiBetsVault.sol";
 
 error DefiBetsVault__Forbidden();
 error DefiBetsVault__NotEnoughFunds();
 
-contract DefiBetsVault is IDefiBetsVault{
+contract DefiBetsVault is IDefiBetsVault,Ownable{
 
     using SafeMath for uint256;
 
     /* ====== State Variables ====== */
 
-    uint256 public totalSupply;
+    uint256 public totalFees;
 
     mapping(uint256 => uint256) public expTimeSupply;
 
     address public token;
     address public defiBetsManager;
 
-    /* ====== Events ====== */
-    /* Events defined in Interface */
 
     constructor(address _defibetsManager,address _token){
         defiBetsManager = _defibetsManager;
         token = _token;
     }
 
-    function deposit(address _from,uint256 _amount,uint256 _expTime) external {
+    /* ====== Mutation Functions ====== */
+
+    function deposit(address _from,uint256 _amount,uint256 _expTime,uint256 _fees) external {
 
         _isManager();
 
@@ -38,9 +39,12 @@ contract DefiBetsVault is IDefiBetsVault{
         require(_success);
 
         uint256 _supply = expTimeSupply[_expTime];
-        expTimeSupply[_expTime] = _supply.add(_amount);
-    
-        emit Deposit(_expTime,_amount,expTimeSupply[_expTime]);
+        uint256 _totalFees = totalFees;
+
+        expTimeSupply[_expTime] = _supply.add(_amount).sub(_fees);
+        totalFees = _totalFees.add(_fees);
+
+        emit Deposit(_expTime,_amount,expTimeSupply[_expTime],totalFees);
     }
 
     function withdraw(address _to,uint256 _amount,uint256 _expTime) external {
