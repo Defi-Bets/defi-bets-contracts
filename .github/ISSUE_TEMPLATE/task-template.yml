@@ -1,0 +1,30 @@
+name: Task Distribution
+about: Use this template to distribute new tasks among team members
+
+title: "[Task]"
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Create a new tasks for the team, that need to be complete.
+  - type: textarea
+    attributes:
+      label: Task Details
+      description: A brief description of the task that needs to be completed
+      validations:
+        required: false
+
+  - type: textarea
+    attributes:
+      label: Additional Information
+      description: Any additional context or information that may be helpful for completing the task
+      validations:
+        required: false
+
+  - type: textarea
+    attributes:
+      label: Assigners
+      description: The team members who are be responsible for completing the task
+      validations:
+        required: false
