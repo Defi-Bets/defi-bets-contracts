@@ -68,7 +68,7 @@ export const ReadOnlyFunctionForm = ({ functionFragment, contractAddress }: TRea
           )}
         </div>
         <button
-          className={`btn btn-secondary btn-sm ${isFetching ? "loading" : ""}`}
+          className={`btn btn-primary btn-sm ${isFetching ? "loading" : ""}`}
           onClick={async () => {
             const { data } = await refetch();
             setResult(data);

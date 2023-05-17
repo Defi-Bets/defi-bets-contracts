@@ -127,7 +127,7 @@ export const WriteOnlyFunctionForm = ({
             data-tip={`${writeDisabled && "Wallet not connected or in the wrong network"}`}
           >
             <button
-              className={`btn btn-secondary btn-sm ${isLoading ? "loading" : ""}`}
+              className={`btn btn-primary btn-sm ${isLoading ? "loading" : ""}`}
               disabled={writeDisabled}
               onClick={handleWrite}
             >
