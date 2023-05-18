@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import '../interface/core/ILiquidityPool.sol';
 import "../interface/core/IDefiBets.sol";
 import "../interface/math/IDefiBetsMath.sol";
@@ -13,19 +14,26 @@ import "../interface/core/IDefiBetsVault.sol";
 
 error DefiBetsManager__NoValidUnderlying();
 error DefiBetsManager__NoLiquidity();
+error DefiBetsManager__FeeNotAllowed();
 
 
-/**  @title DefiBets Manager Contract
- *   @notice This contract controls the main functions of the protocol
- */
-
+/**
+* @title DefiBets Manager Contract
+* @notice This contract controls the main functions of the protocol, allowing users to interact with the decentralized betting platform. It manages liquidity, bets, winnings, and expiration of bets.
+*/
 contract DefiBetsManager is Pausable,Ownable {
+
+    using SafeMath for uint256;
+
+    uint256 public constant MAX_FEE = 5000; // Max Fee is 5% 
+    uint256 public constant MULTIPLIER = 1000;
 
     /* ====== State Variables ====== */
 
     address public liquidityPool;
     address public mathContract;
     
+    uint256 public fee;
 
     mapping(bytes32 => address) public underlyingPriceFeeds;
     mapping(bytes32 => bool) public validUnderlying;
@@ -35,21 +43,19 @@ contract DefiBetsManager is Pausable,Ownable {
     /* ====== Events ====== */
     event UnderlyingAdded(string underlying,bytes32 underlyingHash,address defiBets,address vault);
     event PriceFeedUpdated(bytes32 underlying,address priceFeed);
+    event FeeUpdated(uint256 fee);
 
     constructor(){
-
+       
     }
 
 
     /* ======= Mutation Functions ====== */
 
-
     /**
-     * @dev provideLP is called to provide new tokens to the liquidity pool
-     * 
-     * @param _amount - amount of token the caaller wants to deposit. The tokens has to be approved to the liquidity pool
-     * 
-     */
+    * @dev Provides liquidity to the liquidity pool on behalf of a user.
+    * @param _amount The amount of liquidity to be provided.
+    */
     function provideLP(uint256 _amount) external whenNotPaused() {
 
         ILiquidityPool(liquidityPool).depositForAccount(msg.sender,_amount);
@@ -57,33 +63,43 @@ contract DefiBetsManager is Pausable,Ownable {
     }
 
 
-    /**
-     * @dev with this function the caller can redeem his share of the liquidity pool and gets the share of tokens transferred to himself
-     * 
-     * @param _amount - amount of LP tokens the caller wants to redeem. The tokens do not have to be pre-approved.
-     * 
-     */
     function redeemLPTokens(uint256 _amount) external whenNotPaused() {
-
         //TODO: Implement the redeem function!!!!
-
     }
 
+
+    /**
+    * 
+    * @dev Sets a bet for a user in the decentralized betting platform.
+    * @param _betSize The size of the bet.
+    * @param _minPrice The minimum price for the bet.
+    * @param _maxPrice The maximum price for the bet.
+    * @param _expTime The expiration time for the bet.
+    * @param _underlying The underlying asset for the bet.
+    */
     function setBet(uint256 _betSize,uint256 _minPrice,uint256 _maxPrice,uint256 _expTime,string memory _underlying) external whenNotPaused(){
         bytes32 _hash = getUnderlyingByte(_underlying);
         _isValidUnderlying(_hash);
+
+        uint256 _fee = calculateFee(_betSize);
         
-        uint256 _winning = IDefiBetsMath(mathContract).calculateWinning(_minPrice,_maxPrice,_betSize,_expTime);
+        uint256 _winning = IDefiBetsMath(mathContract).calculateWinning(_minPrice,_maxPrice,_betSize.sub(_fee),_expTime);
 
         address _defiBets = defiBetsContracts[_hash];
         address _vault = vaults[_hash];
         
-        IDefiBets(_defiBets).setBetForAccount(msg.sender,_betSize,_minPrice,_maxPrice,_expTime,_winning);
+        IDefiBets(_defiBets).setBetForAccount(msg.sender,_betSize.sub(_fee),_minPrice,_maxPrice,_expTime,_winning);
 
-        IDefiBetsVault(_vault).deposit(msg.sender,_betSize,_expTime);
+        IDefiBetsVault(_vault).deposit(msg.sender,_betSize,_expTime,_fee);
     }
 
-    function claimWinnings(uint256 _tokenId,bytes32 _hash) external {
+
+    /**
+    * @dev Claims the winnings for a user based on a specified token ID and underlying asset hash.
+    * @param _tokenId The token ID representing the bet.
+    * @param _hash The hash of the underlying asset for the bet.
+    */
+    function claimWinnings(uint256 _tokenId,bytes32 _hash) external whenNotPaused() {
                 
         address _defiBets = defiBetsContracts[_hash];
         address _vault = vaults[_hash];
@@ -96,7 +112,13 @@ contract DefiBetsManager is Pausable,Ownable {
         }
     }
 
-    function executeExpiration(uint256 _expTime,string memory _underlying) external {
+
+    /**
+    * @dev Executes the expiration of a bet based on the specified expiration time and underlying asset.
+    * @param _expTime The expiration time of the bet.
+    * @param _underlying The underlying asset for the bet.
+    */
+    function executeExpiration(uint256 _expTime,string memory _underlying) external whenNotPaused() {
         bytes32 _hash = getUnderlyingByte(_underlying);
        _isValidUnderlying(_hash);
      
@@ -113,7 +135,7 @@ contract DefiBetsManager is Pausable,Ownable {
 
     }
 
-    function createNewExpTime(bytes32 _tokenHash) external {
+    function createNewExpTime(bytes32 _tokenHash) external whenNotPaused() {
         
         _isValidUnderlying(_tokenHash);
 
@@ -124,8 +146,6 @@ contract DefiBetsManager is Pausable,Ownable {
         IDefiBets(_defiBets).initializeNewExpTime(_maxLoss);
        
     }
-
-  
 
 
     /* ====== Setup Functions ====== */
@@ -168,6 +188,16 @@ contract DefiBetsManager is Pausable,Ownable {
         IDefiBets(_defiBets).initializeData(_startExpTime,_maxLoss,_minBetDuration,_maxBetDuration,_slot);
     }
 
+    function setFees(uint256 _newFee) external onlyOwner {
+        if(_newFee > MAX_FEE){
+            revert DefiBetsManager__FeeNotAllowed();
+        }
+
+        fee = _newFee;
+
+        emit FeeUpdated(fee);
+    }
+
 
     /* ====== Internal Functions ====== */
 
@@ -203,6 +233,12 @@ contract DefiBetsManager is Pausable,Ownable {
 
     function getUnderlyingByte(string memory _token) public pure returns(bytes32){
         return keccak256(bytes(_token));
+    }
+
+    function calculateFee(uint256 _amount) public view returns(uint256){
+
+        return _amount.sub(_amount.mul(MULTIPLIER).div(fee));
+
     }
 
 }

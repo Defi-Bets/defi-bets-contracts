@@ -1,6 +1,7 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 import { HardhatUserConfig } from "hardhat/config";
+//import "solidity-coverage";
 import "@nomicfoundation/hardhat-toolbox";
 import "hardhat-deploy";
 
@@ -77,6 +78,10 @@ const config: HardhatUserConfig = {
         },
         polygonMumbai: {
             url: `https://polygon-mumbai.g.alchemy.com/v2/${providerApiKey}`,
+            accounts: [deployerPrivateKey],
+        },
+        dmcTestnet: {
+            url: "http://35.187.53.161:20551",
             accounts: [deployerPrivateKey],
         },
     },
