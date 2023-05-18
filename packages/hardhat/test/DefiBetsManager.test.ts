@@ -56,6 +56,8 @@ describe("DefiBetsManager unit test", () => {
 
         await managerContract.addUnderlyingToken("BTC", priceFeed.address, defiBets.address, vault.address);
 
+        await managerContract.setFees(10);
+
         const lpAmount = ethers.utils.parseEther("100000");
         await mockDUSD.connect(lpStaker).mint(lpStaker.address, lpAmount);
         await mockDUSD.connect(lpStaker).approve(liquidityPool.address, lpAmount);
