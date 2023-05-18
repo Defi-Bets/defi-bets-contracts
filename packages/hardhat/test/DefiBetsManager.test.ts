@@ -70,7 +70,7 @@ describe("DefiBetsManager unit test", () => {
     }
 
     describe("#provideLP", () => {
-        it("successfull provide LP", async () => {
+        it("Should provide LP", async () => {
             const { managerContract, lpStaker, mockDUSD, liquidityPool } = await loadFixture(
                 deployDefiBetsManagerFixture,
             );
@@ -90,7 +90,7 @@ describe("DefiBetsManager unit test", () => {
     });
 
     describe("#setBet", () => {
-        it("successfull set a new bet", async () => {
+        it("Should set a new bet", async () => {
             const { managerContract, user, defiBets, mockDUSD, vault } = await loadFixture(
                 deployDefiBetsManagerFixture,
             );

@@ -22,7 +22,7 @@ describe("DefiBets Unit test", () => {
     }
 
     describe("#initializeData", () => {
-        it("successfull initialize the data", async () => {
+        it("Should initialize the data", async () => {
             const { defiBets, manager } = await loadFixture(deployDefiBetsFixture);
 
             await defiBets
@@ -34,7 +34,7 @@ describe("DefiBets Unit test", () => {
             expect(await defiBets.slot()).to.be.equal(slot);
         });
 
-        it("failed when the parameter already initialized", async () => {
+        it("Should fail with DefiBets__Forbidden when the parameter already initialized", async () => {
             const { defiBets, badActor } = await loadFixture(deployDefiBetsFixture);
 
             expect(
@@ -46,7 +46,7 @@ describe("DefiBets Unit test", () => {
     });
 
     describe("#setBetForAccount", () => {
-        it("successfull set a new bet for an account", async () => {
+        it("Should set a new bet for an account", async () => {
             const { defiBets, manager, user } = await loadFixture(deployDefiBetsFixture);
 
             await defiBets
@@ -78,7 +78,7 @@ describe("DefiBets Unit test", () => {
             expect(playerBet.maxPrice).to.be.equal(maxPrice);
         });
 
-        it("failed if the total winnings are not allowed", async () => {
+        it("Should fail with DefiBets__NoValidWinningPrice if the total winnings are not allowed", async () => {
             const { defiBets, manager, user } = await loadFixture(deployDefiBetsFixture);
 
             await defiBets
@@ -108,7 +108,7 @@ describe("DefiBets Unit test", () => {
     });
 
     describe("#performExpiration", () => {
-        it("successfull evaluate the winnings and profits", async () => {
+        it("Should evaluate the winnings and profits", async () => {
             const { manager, defiBets, user } = await loadFixture(deployDefiBetsFixture);
 
             await defiBets
