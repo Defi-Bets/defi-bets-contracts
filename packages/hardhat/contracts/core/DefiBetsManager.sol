@@ -15,6 +15,7 @@ import "../interface/core/IDefiBetsVault.sol";
 error DefiBetsManager__NoValidUnderlying();
 error DefiBetsManager__NoLiquidity();
 error DefiBetsManager__FeeNotAllowed();
+error DefiBetsManager__FeeWouldBeTooSmall();
 
 
 /**
@@ -25,15 +26,16 @@ contract DefiBetsManager is Pausable,Ownable {
 
     using SafeMath for uint256;
 
-    uint256 public constant MAX_FEE = 5000; // Max Fee is 5% 
+    uint256 public constant MAX_FEE_PPM = 50000; // in ppm (parts per million). 50.000 ppm = 5% = 0,050000
     uint256 public constant MULTIPLIER = 1000;
+    uint256 public constant MILLION = 1000000;
 
     /* ====== State Variables ====== */
 
     address public liquidityPool;
     address public mathContract;
     
-    uint256 public fee;
+    uint256 public feePpm;
 
     mapping(bytes32 => address) public underlyingPriceFeeds;
     mapping(bytes32 => bool) public validUnderlying;
@@ -43,7 +45,7 @@ contract DefiBetsManager is Pausable,Ownable {
     /* ====== Events ====== */
     event UnderlyingAdded(string underlying,bytes32 underlyingHash,address defiBets,address vault);
     event PriceFeedUpdated(bytes32 underlying,address priceFeed);
-    event FeeUpdated(uint256 fee);
+    event FeeUpdated(uint256 feePpm);
 
     constructor(){
        
@@ -188,14 +190,14 @@ contract DefiBetsManager is Pausable,Ownable {
         IDefiBets(_defiBets).initializeData(_startExpTime,_maxLoss,_minBetDuration,_maxBetDuration,_slot);
     }
 
-    function setFees(uint256 _newFee) external onlyOwner {
-        if(_newFee > MAX_FEE){
+    function setFeesPpm(uint256 _newFee) external onlyOwner {
+        if(_newFee > MAX_FEE_PPM){
             revert DefiBetsManager__FeeNotAllowed();
         }
 
-        fee = _newFee;
+        feePpm = _newFee;
 
-        emit FeeUpdated(fee);
+        emit FeeUpdated(feePpm);
     }
 
 
@@ -236,9 +238,16 @@ contract DefiBetsManager is Pausable,Ownable {
     }
 
     function calculateFee(uint256 _amount) public view returns(uint256){
+        // multiply amount with fee. But because fee is in parts per 1 million (ppm), divide by 1 million
+        uint256 _feeAmount = _amount.mul(feePpm).div(MILLION);  
 
-        return _amount.sub(_amount.mul(MULTIPLIER).div(fee));
+        if(0 == _feeAmount)
+        {
+            // amount or feePpm is extremely small. Do not accept.
+            revert DefiBetsManager__FeeWouldBeTooSmall();
+        }
 
+        return _feeAmount;
     }
 
 }
