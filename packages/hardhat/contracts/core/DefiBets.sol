@@ -57,7 +57,8 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
     bool private initialized;
     uint256 public minBetDuration;
     uint256 public maxBetDuration;
-    uint256 public slot;
+    uint256 public slot;                /* Steps of valid bet prices */
+    uint256 public maxWinMultiplier;    /* How much should a winner be able to multiply his bet amount (also important for minimum bet range) */
 
     
 
@@ -96,14 +97,10 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
         _isDefiBetManager();
         _isInitialized();
 
-
         // validate input paramaters
         _validExpirationTime(_expTime);
-        _isValidActiveRange(_expTime);
-        _validPrice(_minPrice);
-        _validPrice(_maxPrice);
-
-        
+        _isValidActiveTimeRange(_expTime);
+        _validPriceRange(_minPrice, _maxPrice);
 
         uint256 _maxUserWinnings = calculateMaxUserWinnings(_expTime,_minPrice,_maxPrice,_winning);
         
@@ -192,7 +189,7 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
     /* ====== Setup Function ====== */
     
     
-    function initializeData(uint256 _startExpTime,uint256 _maxLossPerExpTime,uint256 _minBetDuration,uint256 _maxBetDuration,uint256 _slot) external   {
+    function initializeData(uint256 _startExpTime, uint256 _maxLossPerExpTime, uint256 _minBetDuration, uint256 _maxBetDuration, uint256 _slot, uint256 _maxWinMultiplier) external   {
         _isDefiBetManager();
 
         if(initialized){
@@ -201,13 +198,13 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
 
         startExpTime = _startExpTime;
         
-        setBetParamater(_maxLossPerExpTime,_minBetDuration,_maxBetDuration,_slot);
+        setBetParamater(_maxLossPerExpTime,_minBetDuration,_maxBetDuration,_slot, _maxWinMultiplier);
 
         initialized = true;
     }
 
     //TODO: Only the owner of the contract can call the function
-    function setBetParamater(uint256 _maxLossPerExpTime, uint256 _minBetDuration,uint256 _maxBetDuration,uint256 _slot) public {
+    function setBetParamater(uint256 _maxLossPerExpTime, uint256 _minBetDuration,uint256 _maxBetDuration,uint256 _slot, uint256 _maxWinMultiplier) public {
         _isDefiBetManager();
         if(_minBetDuration >= _maxBetDuration){
             revert DefiBets_NoValidParamters();
@@ -216,6 +213,7 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
         minBetDuration = _minBetDuration;
         maxBetDuration = _maxBetDuration;
         slot = _slot;
+        maxWinMultiplier = _maxWinMultiplier;
         
         _initializeMaxWinningsPerExpTime(_maxLossPerExpTime);
 
@@ -282,14 +280,17 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
         }
     }
 
-    function _isValidActiveRange(uint256 _expTime) internal view {
+    function _isValidActiveTimeRange(uint256 _expTime) internal view {
         if(_expTime < block.timestamp.add(minBetDuration) || _expTime > block.timestamp.add(maxBetDuration)){
             revert DefiBets__OutOfActiveExpTimeRange();
         }
     }
 
-    function _validPrice(uint256 _price) internal view {
-        if(_price % slot != 0){
+    function _validPriceRange(uint256 minPrice, uint256 maxPrice) internal view {
+        if((0 != (minPrice % slot)) ||
+            (0 != (maxPrice % slot)) ||
+            (minPrice >= maxPrice))
+        {
             revert DefiBets__NoValidPrice();
         }
     }

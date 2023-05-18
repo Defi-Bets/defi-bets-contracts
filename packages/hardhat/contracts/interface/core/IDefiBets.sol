@@ -22,7 +22,7 @@ interface IDefiBets {
 
     function claimForAccount(address _account,uint256 _tokenId) external returns(uint256,uint256,bool);
 
-    function setBetParamater(uint256 _maxLossPerDay,uint256 _minBetDuration,uint256 _maxBetDuration,uint256 _slot) external;
+    function setBetParamater(uint256 _maxLossPerDay,uint256 _minBetDuration,uint256 _maxBetDuration,uint256 _slot,uint256 _maxWinMultiplier) external;
 
     function performExpiration(uint256 _expTime,uint256 _expPrice) external returns(uint256,bool) ;
 
@@ -30,5 +30,5 @@ interface IDefiBets {
 
     function lastActiveExpTime() external returns(uint256);
 
-    function initializeData(uint256 _startExpTime,uint256 _maxLossPerExpTime,uint256 _minBetDuration,uint256 _maxBetDuration,uint256 _slot) external;
+    function initializeData(uint256 _startExpTime,uint256 _maxLossPerExpTime,uint256 _minBetDuration,uint256 _maxBetDuration,uint256 _slot, uint256 _maxWinMultiplier) external;
 }

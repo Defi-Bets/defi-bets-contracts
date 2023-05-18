@@ -7,6 +7,7 @@ const slot = ethers.utils.parseEther("200");
 const minBetDuration = 60 * 60 * 24 * 4;
 const maxBetDuration = 60 * 60 * 24 * 30;
 const maxLossPerDay = ethers.utils.parseEther("300");
+const maxWinMultiplier = 40; // maximum win of user can be this * amount
 
 const dateString = Date.now();
 const startExpTime = Math.floor(new Date(dateString).getTime() / 1000);
@@ -27,7 +28,7 @@ describe("DefiBets Unit test", () => {
 
             await defiBets
                 .connect(manager)
-                .initializeData(startExpTime, maxLossPerDay, minBetDuration, maxBetDuration, slot);
+                .initializeData(startExpTime, maxLossPerDay, minBetDuration, maxBetDuration, slot, maxWinMultiplier);
 
             expect(await defiBets.maxBetDuration()).to.be.equal(maxBetDuration);
             expect(await defiBets.minBetDuration()).to.be.equal(minBetDuration);
@@ -40,7 +41,7 @@ describe("DefiBets Unit test", () => {
             expect(
                 defiBets
                     .connect(badActor)
-                    .initializeData(startExpTime, maxLossPerDay, maxBetDuration, minBetDuration, slot),
+                    .initializeData(startExpTime, maxLossPerDay, maxBetDuration, minBetDuration, slot, maxWinMultiplier),
             ).to.be.revertedWith("DefiBets__Forbidden");
         });
     });
@@ -51,7 +52,7 @@ describe("DefiBets Unit test", () => {
 
             await defiBets
                 .connect(manager)
-                .initializeData(startExpTime, maxLossPerDay, minBetDuration, maxBetDuration, slot);
+                .initializeData(startExpTime, maxLossPerDay, minBetDuration, maxBetDuration, slot, maxWinMultiplier);
 
             const betSize = ethers.utils.parseEther("100");
             const minPrice = ethers.utils.parseEther("20000");
@@ -83,7 +84,7 @@ describe("DefiBets Unit test", () => {
 
             await defiBets
                 .connect(manager)
-                .initializeData(startExpTime, maxLossPerDay, minBetDuration, maxBetDuration, slot);
+                .initializeData(startExpTime, maxLossPerDay, minBetDuration, maxBetDuration, slot, maxWinMultiplier);
             const betSize = ethers.utils.parseEther("100");
             const minPrice = ethers.utils.parseEther("20000");
             const maxPrice = ethers.utils.parseEther("25000");
@@ -113,7 +114,7 @@ describe("DefiBets Unit test", () => {
 
             await defiBets
                 .connect(manager)
-                .initializeData(startExpTime, maxLossPerDay, minBetDuration, maxBetDuration, slot);
+                .initializeData(startExpTime, maxLossPerDay, minBetDuration, maxBetDuration, slot, maxWinMultiplier);
             const betSize = ethers.utils.parseEther("50");
             const minPrice = ethers.utils.parseEther("2000");
             const maxPrice = ethers.utils.parseEther("2400");

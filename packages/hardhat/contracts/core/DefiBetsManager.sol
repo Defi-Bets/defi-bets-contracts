@@ -178,7 +178,7 @@ contract DefiBetsManager is Pausable,Ownable {
         emit PriceFeedUpdated(_hash,_feed);
     }
 
-    function initializeBets(bytes32 _hash,uint256 _startExpTime,uint256 _minBetDuration,uint256 _maxBetDuration,uint256 _slot) external onlyOwner {
+    function initializeBets(bytes32 _hash,uint256 _startExpTime,uint256 _minBetDuration,uint256 _maxBetDuration,uint256 _slot, uint256 _maxWinMultiplier) external onlyOwner {
         uint256 _maxLoss = ILiquidityPool(liquidityPool).maxLPLost();
 
         if(_maxLoss == 0){
@@ -187,7 +187,7 @@ contract DefiBetsManager is Pausable,Ownable {
 
         address _defiBets = defiBetsContracts[_hash];
 
-        IDefiBets(_defiBets).initializeData(_startExpTime,_maxLoss,_minBetDuration,_maxBetDuration,_slot);
+        IDefiBets(_defiBets).initializeData(_startExpTime,_maxLoss,_minBetDuration,_maxBetDuration,_slot,_maxWinMultiplier);
     }
 
     function setFeesPpm(uint256 _newFee) external onlyOwner {
