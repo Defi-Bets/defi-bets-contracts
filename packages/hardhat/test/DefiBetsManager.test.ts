@@ -15,6 +15,8 @@ const maxBetDuration = 60 * 60 * 24 * 30;
 const dateString = Date.now();
 const startExpTime = Math.floor(new Date(dateString).getTime() / 1000);
 const priceAnswer = ethers.utils.parseEther("20000");
+const feePpm = 20000;   // 2% Fee
+const MILLION = 1000000;
 
 describe("DefiBetsManager unit test", () => {
     async function deployDefiBetsManagerFixture() {
@@ -56,7 +58,7 @@ describe("DefiBetsManager unit test", () => {
 
         await managerContract.addUnderlyingToken("BTC", priceFeed.address, defiBets.address, vault.address);
 
-        await managerContract.setFees(10);
+        await managerContract.setFeesPpm(feePpm);
 
         const lpAmount = ethers.utils.parseEther("100000");
         await mockDUSD.connect(lpStaker).mint(lpStaker.address, lpAmount);
@@ -105,13 +107,14 @@ describe("DefiBetsManager unit test", () => {
             const betSize = ethers.utils.parseEther("100");
             const minPrice = ethers.utils.parseEther("20000");
             const maxPrice = ethers.utils.parseEther("25000");
+            const expectedFeeAmount = betSize.mul(feePpm).div(MILLION);
 
             await mockDUSD.connect(user).mint(user.address, betSize);
             await mockDUSD.connect(user).approve(vault.address, betSize);
 
             await managerContract.connect(user).setBet(betSize, minPrice, maxPrice, expTime, "BTC");
 
-            expect((await defiBets.getBetTokenData(1)).betSize).to.be.equal(betSize);
+            expect((await defiBets.getBetTokenData(1)).betSize).to.be.equal(betSize.sub(expectedFeeAmount));
         });
     });
 });
