@@ -7,6 +7,7 @@ const slot = ethers.utils.parseEther("200");
 const minBetDuration = 60 * 60 * 24 * 4;
 const maxBetDuration = 60 * 60 * 24 * 30;
 const maxLossPerDay = ethers.utils.parseEther("300");
+const maxWinMultiplier = 40; // maximum win of user can be this * amount
 
 const dateString = Date.now();
 const startExpTime = Math.floor(new Date(dateString).getTime() / 1000);
@@ -22,36 +23,36 @@ describe("DefiBets Unit test", () => {
     }
 
     describe("#initializeData", () => {
-        it("successfull initialize the data", async () => {
+        it("Should initialize the data", async () => {
             const { defiBets, manager } = await loadFixture(deployDefiBetsFixture);
 
             await defiBets
                 .connect(manager)
-                .initializeData(startExpTime, maxLossPerDay, minBetDuration, maxBetDuration, slot);
+                .initializeData(startExpTime, maxLossPerDay, minBetDuration, maxBetDuration, slot, maxWinMultiplier);
 
             expect(await defiBets.maxBetDuration()).to.be.equal(maxBetDuration);
             expect(await defiBets.minBetDuration()).to.be.equal(minBetDuration);
             expect(await defiBets.slot()).to.be.equal(slot);
         });
 
-        it("failed when the parameter already initialized", async () => {
+        it("Should fail with DefiBets__Forbidden when the parameter already initialized", async () => {
             const { defiBets, badActor } = await loadFixture(deployDefiBetsFixture);
 
             expect(
                 defiBets
                     .connect(badActor)
-                    .initializeData(startExpTime, maxLossPerDay, maxBetDuration, minBetDuration, slot),
+                    .initializeData(startExpTime, maxLossPerDay, maxBetDuration, minBetDuration, slot, maxWinMultiplier),
             ).to.be.revertedWith("DefiBets__Forbidden");
         });
     });
 
     describe("#setBetForAccount", () => {
-        it("successfull set a new bet for an account", async () => {
+        it("Should set a new bet for an account", async () => {
             const { defiBets, manager, user } = await loadFixture(deployDefiBetsFixture);
 
             await defiBets
                 .connect(manager)
-                .initializeData(startExpTime, maxLossPerDay, minBetDuration, maxBetDuration, slot);
+                .initializeData(startExpTime, maxLossPerDay, minBetDuration, maxBetDuration, slot, maxWinMultiplier);
 
             const betSize = ethers.utils.parseEther("100");
             const minPrice = ethers.utils.parseEther("20000");
@@ -78,12 +79,12 @@ describe("DefiBets Unit test", () => {
             expect(playerBet.maxPrice).to.be.equal(maxPrice);
         });
 
-        it("failed if the total winnings are not allowed", async () => {
+        it("Should fail with DefiBets__NoValidWinningPrice if the total winnings are not allowed", async () => {
             const { defiBets, manager, user } = await loadFixture(deployDefiBetsFixture);
 
             await defiBets
                 .connect(manager)
-                .initializeData(startExpTime, maxLossPerDay, minBetDuration, maxBetDuration, slot);
+                .initializeData(startExpTime, maxLossPerDay, minBetDuration, maxBetDuration, slot, maxWinMultiplier);
             const betSize = ethers.utils.parseEther("100");
             const minPrice = ethers.utils.parseEther("20000");
             const maxPrice = ethers.utils.parseEther("25000");
@@ -108,12 +109,12 @@ describe("DefiBets Unit test", () => {
     });
 
     describe("#performExpiration", () => {
-        it("successfull evaluate the winnings and profits", async () => {
+        it("Should evaluate the winnings and profits", async () => {
             const { manager, defiBets, user } = await loadFixture(deployDefiBetsFixture);
 
             await defiBets
                 .connect(manager)
-                .initializeData(startExpTime, maxLossPerDay, minBetDuration, maxBetDuration, slot);
+                .initializeData(startExpTime, maxLossPerDay, minBetDuration, maxBetDuration, slot, maxWinMultiplier);
             const betSize = ethers.utils.parseEther("50");
             const minPrice = ethers.utils.parseEther("2000");
             const maxPrice = ethers.utils.parseEther("2400");
