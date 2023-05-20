@@ -16,7 +16,6 @@ error DefiBetsManager__NoValidUnderlying();
 error DefiBetsManager__NoLiquidity();
 error DefiBetsManager__FeeNotAllowed();
 error DefiBetsManager__FeeWouldBeTooSmall();
-error DefiBetsManager__NullForbidden();
 
 
 /**
@@ -239,9 +238,6 @@ contract DefiBetsManager is Pausable,Ownable {
     }
 
     function calculateFee(uint256 _amount) public view returns(uint256){
-
-        _isNotNull(_amount);
-
         // multiply amount with fee. But because fee is in parts per 1 million (ppm), divide by 1 million
         uint256 _feeAmount = _amount.mul(feePpm).div(MILLION);  
 
@@ -252,12 +248,6 @@ contract DefiBetsManager is Pausable,Ownable {
         }
 
         return _feeAmount;
-    }
-
-    function _isNotNull(uint256 param) internal view {
-        if(0 == param) {
-            revert DefiBetsManager__NullForbidden();
-        }
     }
 
 }
