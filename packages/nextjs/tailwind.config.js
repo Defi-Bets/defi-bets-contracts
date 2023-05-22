@@ -6,6 +6,8 @@ module.exports = {
   // DaisyUI theme colors
   daisyui: {
     themes: [
+      "synthwave",
+      "bumblebee",
       {
         scaffoldEth: {
           primary: "#93BBFB",
@@ -85,6 +87,7 @@ module.exports = {
           },
         },
       },
+      "dark",
     ],
   },
   theme: {
