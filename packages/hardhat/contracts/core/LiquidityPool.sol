@@ -94,6 +94,13 @@ contract LiquidityPool is ERC20, ILiquidityPool {
         
     }
 
+    function transferTokensToVault(uint256 _amount) external {
+        _isManagerContract();
+
+        IERC20(token).transfer(betVault,_amount);
+
+    }
+
 
     /* ====== Internal Functions ====== */
 
@@ -102,6 +109,8 @@ contract LiquidityPool is ERC20, ILiquidityPool {
             revert LiquidityPool__AccessForbidden();
         }
     }
+
+    
 
     function _isValidAmount(address _account,uint256 _amount) internal view {
         uint256 _balance = balanceOf(_account);

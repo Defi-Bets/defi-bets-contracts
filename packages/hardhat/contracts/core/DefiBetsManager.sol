@@ -28,7 +28,6 @@ contract DefiBetsManager is Pausable,Ownable {
     using SafeMath for uint256;
 
     uint256 public constant MAX_FEE_PPM = 50000; // in ppm (parts per million). 50.000 ppm = 5% = 0,050000
-    uint256 public constant MULTIPLIER = 1000;
     uint256 public constant MILLION = 1000000;
 
     /* ====== State Variables ====== */
@@ -86,6 +85,7 @@ contract DefiBetsManager is Pausable,Ownable {
 
         uint256 _fee = calculateFee(_betSize);
         
+        //TODO: Implement the Math Libary
         uint256 _winning = IDefiBetsMath(mathContract).calculateWinning(_minPrice,_maxPrice,_betSize.sub(_fee),_expTime);
 
         address _defiBets = defiBetsContracts[_hash];
@@ -134,6 +134,10 @@ contract DefiBetsManager is Pausable,Ownable {
 
         if(_profit == true){
             IDefiBetsVault(_vault).withdraw(liquidityPool,_delta,_expTime);
+        }else{
+            ILiquidityPool(liquidityPool).transferTokensToVault(_delta);
+
+            IDefiBetsVault(_vault).depositFromLP(_expTime,_delta);
         }
 
     }
@@ -240,6 +244,10 @@ contract DefiBetsManager is Pausable,Ownable {
 
     function calculateFee(uint256 _amount) public view returns(uint256){
         _isNotNull(_amount);
+
+        if(feePpm == 0){
+            return 0;
+        }
         
         // multiply amount with fee. But because fee is in parts per 1 million (ppm), divide by 1 million
         uint256 _feeAmount = _amount.mul(feePpm).div(MILLION);  
@@ -253,7 +261,7 @@ contract DefiBetsManager is Pausable,Ownable {
         return _feeAmount;
     }
 
-    function _isNotNull(uint256 param) internal view {
+    function _isNotNull(uint256 param) internal pure {
         if(0 == param) {
             revert DefiBetsManager__ParamNull();
         }

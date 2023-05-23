@@ -38,10 +38,12 @@ contract DefiBetsVault is IDefiBetsVault,Ownable{
 
         require(_success);
 
-        uint256 _supply = expTimeSupply[_expTime];
+        
         uint256 _totalFees = totalFees;
-
+        
+        uint256 _supply = expTimeSupply[_expTime];
         expTimeSupply[_expTime] = _supply.add(_amount).sub(_fees);
+        
         totalFees = _totalFees.add(_fees);
 
         emit Deposit(_expTime,_amount,expTimeSupply[_expTime],totalFees);
@@ -67,6 +69,12 @@ contract DefiBetsVault is IDefiBetsVault,Ownable{
         emit Withdraw(_to,_amount,_expTime,expTimeSupply[_expTime]);
     }
 
+    function depositFromLP(uint256 _expTime,uint256 _amount) external {
+        _isManager();
+
+        _updateSupply(_expTime,_amount);
+    }
+
     
 
 
@@ -76,6 +84,11 @@ contract DefiBetsVault is IDefiBetsVault,Ownable{
         if(msg.sender != defiBetsManager){
             revert DefiBetsVault__Forbidden();
         }
+    }
+
+    function _updateSupply(uint256 _expTime,uint256 _amount) internal {
+        uint256 _supply = expTimeSupply[_expTime];
+        expTimeSupply[_expTime] = _supply.add(_amount);
     }
 
 }

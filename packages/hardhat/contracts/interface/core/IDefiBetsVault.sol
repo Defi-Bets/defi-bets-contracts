@@ -10,4 +10,6 @@ interface IDefiBetsVault {
 
     function withdraw(address _to,uint256 _amount,uint256 _expTime) external;
 
+    function depositFromLP(uint256 _expTime,uint256 _amount) external;
+
 }
