@@ -41,7 +41,14 @@ describe("DefiBets Unit test", () => {
             expect(
                 defiBets
                     .connect(badActor)
-                    .initializeData(startExpTime, maxLossPerDay, maxBetDuration, minBetDuration, slot, maxWinMultiplier),
+                    .initializeData(
+                        startExpTime,
+                        maxLossPerDay,
+                        maxBetDuration,
+                        minBetDuration,
+                        slot,
+                        maxWinMultiplier,
+                    ),
             ).to.be.revertedWith("DefiBets__Forbidden");
         });
     });
@@ -146,12 +153,6 @@ describe("DefiBets Unit test", () => {
             await time.increaseTo(expTime.add(1));
 
             const expPrice = ethers.utils.parseEther("2300");
-
-            const lowBoundary = await defiBets.betsWinningSlots(expTime, ethers.utils.parseEther("2200"));
-            console.log(lowBoundary.toString());
-
-            const upBoundary = await defiBets.betsWinningSlots(expTime, ethers.utils.parseEther("2400"));
-            console.log(upBoundary.toString());
 
             await defiBets.connect(manager).performExpiration(expTime, expPrice);
 

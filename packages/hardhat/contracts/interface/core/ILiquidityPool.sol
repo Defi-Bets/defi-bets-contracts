@@ -11,4 +11,6 @@ interface ILiquidityPool is IERC20 {
 
     function redeemSharesForAccount(address _account, uint256 _shares) external;
 
+    function transferTokensToVault(uint256 _amount) external;
+
 }

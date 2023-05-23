@@ -183,7 +183,10 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
         uint256 _expTime = lastActiveExpTime.add(EXP_TIME_DELTA);
 
         if(expTimeInfos[_expTime].init == false){
-        _initExpTime(_expTime,_maxLpLoss);}
+        _initExpTime(_expTime,_maxLpLoss);
+        
+        lastActiveExpTime = _expTime;
+        }
     }
 
     /* ====== Setup Function ====== */
@@ -354,7 +357,7 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
 
     function _isNextExpTimeValid() internal view {
         uint256 _nextExpTime = lastActiveExpTime.add(EXP_TIME_DELTA);
-        if(_nextExpTime > block.timestamp){
+        if(_nextExpTime > block.timestamp.add(maxBetDuration)){
             revert DefiBets__OutOfActiveExpTimeRange();
         }
 
