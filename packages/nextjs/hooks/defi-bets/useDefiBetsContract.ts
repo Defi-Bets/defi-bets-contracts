@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useManagerContract } from "./useManagerContract";
-import { getContractAbi } from "~~/utils/defi-bets";
-import { useChainId, useContract, useSigner } from "wagmi";
 import { Abi } from "abitype";
+import { useChainId, useContract, useSigner } from "wagmi";
+import { getContractAbi } from "~~/utils/defi-bets";
 
 export function useDefiBetsContract(hash?: string) {
   const [expTimes, setExpTimes] = useState<number[]>();
@@ -15,6 +15,14 @@ export function useDefiBetsContract(hash?: string) {
   const { data: signer } = useSigner();
 
   const defiBetsContract = useContract({ address: address, abi: contractAbi, signerOrProvider: signer });
+
+  const fetchBettingsFromExpTime = async (expTime: number) => {
+    const bettingEvents = await defiBetsContract?.queryFilter("BetPlaced");
+
+    bettingEvents?.filter(event => event?.args?.expDate === expTime);
+
+    console.log(bettingEvents);
+  };
 
   useEffect(() => {
     const getContractData = async () => {
@@ -35,7 +43,7 @@ export function useDefiBetsContract(hash?: string) {
       const _expTimes: number[] = [];
       expTimesEvents?.forEach(event => {
         if (event.args) {
-          expTimes?.push(event.args.expTime);
+          _expTimes?.push(event.args.expTime);
         }
       });
 
@@ -43,9 +51,10 @@ export function useDefiBetsContract(hash?: string) {
     }
     if (hash) {
       getContractData();
-      fetchEvents;
+      fetchEvents();
     }
-  });
+    console.log("run");
+  }, [hash, chainId, address, contractAbi]);
 
-  return { expTimes };
+  return { expTimes, fetchBettingsFromExpTime };
 }

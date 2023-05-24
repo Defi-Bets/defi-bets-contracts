@@ -1,9 +1,9 @@
 import Image from "next/image";
-import { HashtagIcon, CurrencyDollarIcon } from "@heroicons/react/24/outline";
+import { CurrencyDollarIcon, HashtagIcon } from "@heroicons/react/24/outline";
 
 const DefiBetsStat = () => {
   return (
-    <div className="stats stats-vertical lg:stats-horizontal shadow ">
+    <div className="stats stats-vertical lg:stats-horizontal shadow items-start mx-4 ">
       <div className="stat">
         <div className="stat-figure text-secondary">
           <div className="avatar  ">
