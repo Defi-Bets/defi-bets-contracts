@@ -4,7 +4,7 @@ import { Abi } from "abitype";
 import { useChainId, useContract, useSigner } from "wagmi";
 import { getContractAbi } from "~~/utils/defi-bets";
 
-export function useDefiBetsContract(hash?: string) {
+export function useDefiBetsContract(underlying?: string) {
   const [expTimes, setExpTimes] = useState<number[]>();
   const [address, setAddress] = useState<string>("");
   const [contractAbi, setContractAbi] = useState<Abi>();
@@ -26,8 +26,10 @@ export function useDefiBetsContract(hash?: string) {
 
   useEffect(() => {
     const getContractData = async () => {
-      const _address = await managerContract?.defiBetsContracts(hash);
-      const _abi = getContractAbi("DefiBets", chainId);
+      const _hash = await managerContract?.getUnderlyingByte(underlying ? underlying : "");
+
+      const _address = await managerContract?.defiBetsContracts(_hash ? _hash : "0x");
+      const _abi = getContractAbi("DefiBets");
 
       if (_address) {
         setAddress(_address);
@@ -49,12 +51,12 @@ export function useDefiBetsContract(hash?: string) {
 
       setExpTimes(_expTimes);
     }
-    if (hash) {
+    if (underlying) {
       getContractData();
       fetchEvents();
     }
     console.log("run");
-  }, [hash, chainId, address, contractAbi]);
+  }, [underlying, chainId, address, contractAbi]);
 
   return { expTimes, fetchBettingsFromExpTime };
 }

@@ -18,7 +18,7 @@ export const Dapp: NextPage = () => {
               <h2 className="card-title">Underlying: {underlying.name}</h2>
               <p>Actual Price: 25400 $</p>
               <div className="card-actions justify-end">
-                <Link href={`/dapp/${underlying.hash}`}>
+                <Link href={`/dapp/${underlying.name}`}>
                   <button className="btn btn-primary">Show Bets!</button>
                 </Link>
               </div>

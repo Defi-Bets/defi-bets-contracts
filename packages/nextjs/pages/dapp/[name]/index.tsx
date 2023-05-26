@@ -1,21 +1,20 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import { BettingModal } from "~~/components/defi-bets/BettingModal";
 import DefiBetsStat from "~~/components/defi-bets/DefiBetsStat";
 import { useDefiBetsContract } from "~~/hooks/defi-bets";
-import { BettingModal } from "~~/components/defi-bets/BettingModal";
 
 export default function UnderlyingDetail() {
   const [activeExpTime, setActiveExpTime] = useState<number>(0);
 
   const router = useRouter();
 
-  const { hash } = router.query;
-  const hashString = Array.isArray(hash) ? hash[0] : hash;
-  const { expTimes, fetchBettingsFromExpTime } = useDefiBetsContract(hashString);
+  const { name } = router.query;
+  const nameString = name ? name.toString() : "";
+
+  const { expTimes, fetchBettingsFromExpTime } = useDefiBetsContract(nameString);
 
   useEffect(() => {
-    console.log(activeExpTime);
-
     const getData = async () => {
       await fetchBettingsFromExpTime(activeExpTime);
     };
@@ -32,7 +31,7 @@ export default function UnderlyingDetail() {
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-2xl text-primary font-bold">Betting Overview</h1>
-            <BettingModal expTime={activeExpTime} hash={hashString ? hashString : ""} />
+            <BettingModal expTime={activeExpTime} underlying={nameString} />
           </div>
           <div className="form-control w-full max-w-xs">
             <label className="label">
@@ -49,7 +48,7 @@ export default function UnderlyingDetail() {
                 const isAactive = time === activeExpTime ? true : false;
 
                 return (
-                  <option disabled={isAactive} selected={isAactive} key={time} value={time}>
+                  <option disabled={isAactive} key={time} value={time} selected={isAactive}>
                     {formattedDate}
                   </option>
                 );

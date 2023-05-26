@@ -1,5 +1,7 @@
 import { GenericContractsDeclaration } from "../scaffold-eth/contract";
-import contracts from "~~/generated/deployedContracts";
+import contractsData from "~~/generated/deployedContracts";
+
+export const contracts = contractsData as GenericContractsDeclaration | null;
 
 export const getContractAbi = (contractName: string) => {
   const contractData = contracts as GenericContractsDeclaration;

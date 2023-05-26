@@ -1,46 +1,68 @@
 import { useEffect, useState } from "react";
 import Slider from "rc-slider";
 import "rc-slider/assets/index.css";
-import { useManagerContract } from "~~/hooks/defi-bets";
-import { BigNumber, ethers } from "ethers";
-import { usePrepareContractWrite, useContractWrite } from "wagmi";
+import { useSetBet } from "~~/hooks/defi-bets";
+import { useDefiBetsContracts } from "~~/hooks/defi-bets/useDefiBetsContracts";
+import { useStableToken } from "~~/hooks/defi-bets/useStableToken";
+import { convertToBNWithDecimals } from "~~/utils/defi-bets";
 
 interface BettingModalProps {
   expTime: number;
-  hash: string;
+  underlying: string;
 }
 
-export const BettingModal: React.FC<BettingModalProps> = ({ expTime, hash }) => {
-  const [rangeValues, setRangeValues] = useState<[number, number]>([24000, 26000]);
-  const [betSize, setBetsize] = useState<number>(0);
+export const BettingModal: React.FC<BettingModalProps> = ({ expTime, underlying }) => {
+  const [modalOpen, setModalOpen] = useState(false);
 
-  const { address, abi } = useManagerContract();
+  const {
+    setBet,
+    setBetSize,
+    betSize,
+    priceRange,
+    setPriceRange,
+    setVaultIsApproved,
+    vaultIsApproved,
+    isSuccess: isSuccesSetBet,
+  } = useSetBet(underlying, expTime);
 
-  const { config } = usePrepareContractWrite({
-    address: address,
-    abi: abi,
-    functionName: "setBet",
-    args: [
-      ethers.utils.parseEther(betSize.toString()),
-      ethers.utils.parseEther(rangeValues[0].toString()),
-      ethers.utils.parseEther(rangeValues[1].toString()),
-      expTime ? BigNumber.from(expTime) : ethers.constants.Zero,
-      "BTC",
-    ],
+  const { contractAddresses } = useDefiBetsContracts();
+
+  const { approve, isSuccess, setValue, allowance } = useStableToken(
+    contractAddresses["MockDUSD"],
+    contractAddresses["DefiBetsVault"],
+  );
+
+  useEffect(() => {
+    console.log(`Bet Size is: ${convertToBNWithDecimals(betSize).toString()}`);
+    console.log(`Allowance is ${allowance?.toString()}`);
+    console.log(priceRange);
+
+    if (allowance?.gte(convertToBNWithDecimals(betSize))) {
+      console.log("allowance is greater");
+      setVaultIsApproved(true);
+    } else {
+      console.log("allowance is lower");
+      setVaultIsApproved(false);
+    }
   });
 
-  const { writeAsync: writeBet } = useContractWrite(config);
-
-  const handleTransaction = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    e.preventDefault();
-    if (writeBet) {
-      await writeBet();
+  const handleSubmit = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    event.preventDefault();
+    console.log("Transaction");
+    if (vaultIsApproved && setBet) {
+      console.log("Set Bet");
+      setBet();
+    } else {
+      if (approve) {
+        console.log("Approve");
+        approve();
+      }
     }
   };
 
   const handleRangeChange = (values: number | number[]) => {
     if (Array.isArray(values)) {
-      setRangeValues([values[0], values[1]]);
+      setPriceRange([values[0], values[1]]);
     }
   };
 
@@ -53,7 +75,7 @@ export const BettingModal: React.FC<BettingModalProps> = ({ expTime, hash }) => 
       // Check if the value is within the desired range
       const numValue = parseFloat(value);
       if (!isNaN(numValue) && numValue >= 0 && numValue <= 50000) {
-        setRangeValues([parseFloat(value), rangeValues[1]]);
+        setPriceRange([parseFloat(value), priceRange[1]]);
       }
     }
   };
@@ -67,7 +89,8 @@ export const BettingModal: React.FC<BettingModalProps> = ({ expTime, hash }) => 
       // Check if the value is within the desired range
       const numValue = parseFloat(value);
       if (!isNaN(numValue) && numValue >= 0 && numValue <= 50000) {
-        setBetsize(parseFloat(value));
+        setBetSize(parseFloat(value));
+        setValue(parseFloat(value));
       }
     }
   };
@@ -87,25 +110,31 @@ export const BettingModal: React.FC<BettingModalProps> = ({ expTime, hash }) => 
     },
   };
 
-  useEffect(() => {
-    console.log(expTime);
-    console.log(rangeValues);
-  }, [rangeValues]);
-
   return (
     <>
-      <label htmlFor="betting-modal" className="btn">
+      <label
+        // htmlFor="betting-modal"
+        className="btn"
+        onClick={() => {
+          setModalOpen(!modalOpen);
+        }}
+      >
         Place Bet
       </label>
       <input type="checkbox" id="betting-modal" className="modal-toggle" />
-      <div className="modal modal-bottom sm:modal-middle">
+      <div className={`modal modal-bottom sm:modal-middle ${modalOpen ? "modal-open" : ""}`}>
         <div className="modal-box">
-          <label htmlFor="betting-modal" className="btn btn-sm btn-circle absolute right-2 top-2">
+          <label
+            className="btn btn-sm btn-circle absolute right-2 top-2"
+            onClick={() => {
+              setModalOpen(!modalOpen);
+            }}
+          >
             ✕
           </label>
           <h3 className="font-bold text-lg">Place your price bet!</h3>
           <p className="py-4">Choose the price range and the bet size.</p>
-          <div className="form-control mx-4 space-y-4 w-7/8">
+          <form className="form-control mx-4 space-y-4 w-7/8">
             <label className="label">
               <span className="label-text">BetSize</span>
             </label>
@@ -130,7 +159,7 @@ export const BettingModal: React.FC<BettingModalProps> = ({ expTime, hash }) => 
                     type="text"
                     placeholder="20000"
                     className="input input-bordered input-xs"
-                    value={rangeValues[0]}
+                    value={priceRange[0]}
                     onChange={handleMinPrice}
                   />
                 </label>
@@ -140,7 +169,7 @@ export const BettingModal: React.FC<BettingModalProps> = ({ expTime, hash }) => 
                     type="text"
                     placeholder="24000"
                     className="input input-bordered input-xs"
-                    value={rangeValues[1]}
+                    value={priceRange[1]}
                   />
                 </label>
               </div>
@@ -152,7 +181,7 @@ export const BettingModal: React.FC<BettingModalProps> = ({ expTime, hash }) => 
                   step={200}
                   marks={marks}
                   allowCross={false}
-                  value={rangeValues}
+                  value={priceRange}
                   onChange={handleRangeChange}
                   className="px-4 ml-1 w-full "
                   trackStyle={{ backgroundColor: "hsl(var(--p))" }}
@@ -163,14 +192,19 @@ export const BettingModal: React.FC<BettingModalProps> = ({ expTime, hash }) => 
                 />
               </div>
             </div>
-          </div>
+          </form>
 
           <div className="modal-action">
-            <label htmlFor="betting-modal" className="btn ">
+            <label
+              className="btn "
+              onClick={() => {
+                setModalOpen(!modalOpen);
+              }}
+            >
               Quit
             </label>
-            <button className="btn btn-primary" onClick={handleTransaction}>
-              Bet !
+            <button className={`btn btn-primary `} onClick={handleSubmit}>
+              {vaultIsApproved ? "Bet !" : "Approve Bet"}
             </button>
           </div>
         </div>
