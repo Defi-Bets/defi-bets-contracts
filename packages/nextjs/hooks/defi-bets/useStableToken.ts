@@ -37,7 +37,15 @@ export const useStableToken = (address: string, vault: string) => {
     watch: true,
   });
 
+  const { data: userAmount } = useContractRead({
+    address: address,
+    abi: erc20ABI,
+    functionName: "balanceOf",
+    args: [accountAddress ? accountAddress : "0x"],
+    watch: true,
+  });
+
   const { isLoading, isSuccess } = useWaitForTransaction({ hash: approveData?.hash });
 
-  return { setValue, isLoading, isSuccess, approve, allowance };
+  return { setValue, isLoading, isSuccess, approve, allowance, userAmount };
 };

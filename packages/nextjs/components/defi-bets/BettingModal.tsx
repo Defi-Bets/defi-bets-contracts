@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
+import { ethers } from "ethers";
 import Slider from "rc-slider";
 import "rc-slider/assets/index.css";
-import { useSetBet } from "~~/hooks/defi-bets";
+import { useDefiBets } from "~~/hooks/defi-bets";
 import { useDefiBetsContracts } from "~~/hooks/defi-bets/useDefiBetsContracts";
 import { useStableToken } from "~~/hooks/defi-bets/useStableToken";
 import { convertToBNWithDecimals } from "~~/utils/defi-bets";
@@ -23,11 +24,11 @@ export const BettingModal: React.FC<BettingModalProps> = ({ expTime, underlying 
     setVaultIsApproved,
     vaultIsApproved,
     isSuccess: isSuccesSetBet,
-  } = useSetBet(underlying, expTime);
+  } = useDefiBets(underlying, expTime);
 
   const { contractAddresses } = useDefiBetsContracts();
 
-  const { approve, isSuccess, setValue, allowance } = useStableToken(
+  const { approve, isSuccess, setValue, allowance, isLoading, userAmount } = useStableToken(
     contractAddresses["MockDUSD"],
     contractAddresses["DefiBetsVault"],
   );
@@ -52,6 +53,7 @@ export const BettingModal: React.FC<BettingModalProps> = ({ expTime, underlying 
     if (vaultIsApproved && setBet) {
       console.log("Set Bet");
       setBet();
+      setModalOpen(!modalOpen);
     } else {
       if (approve) {
         console.log("Approve");
@@ -68,7 +70,7 @@ export const BettingModal: React.FC<BettingModalProps> = ({ expTime, underlying 
 
   const handleMinPrice = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
-
+    console.log(value);
     // Check if the value is a valid number with optional decimal point
     const regex = /^\d*\.?\d*$/;
     if (regex.test(value) || value === "") {
@@ -88,9 +90,11 @@ export const BettingModal: React.FC<BettingModalProps> = ({ expTime, underlying 
     if (regex.test(value) || value === "") {
       // Check if the value is within the desired range
       const numValue = parseFloat(value);
-      if (!isNaN(numValue) && numValue >= 0 && numValue <= 50000) {
-        setBetSize(parseFloat(value));
-        setValue(parseFloat(value));
+      if (userAmount) {
+        if (!isNaN(numValue) && numValue >= 0 && numValue <= parseFloat(ethers.utils.formatEther(userAmount))) {
+          setBetSize(parseFloat(value));
+          setValue(parseFloat(value));
+        }
       }
     }
   };
@@ -134,7 +138,7 @@ export const BettingModal: React.FC<BettingModalProps> = ({ expTime, underlying 
           </label>
           <h3 className="font-bold text-lg">Place your price bet!</h3>
           <p className="py-4">Choose the price range and the bet size.</p>
-          <form className="form-control mx-4 space-y-4 w-7/8">
+          <form className="form-control mx-4  w-7/8">
             <label className="label">
               <span className="label-text">BetSize</span>
             </label>
@@ -147,6 +151,11 @@ export const BettingModal: React.FC<BettingModalProps> = ({ expTime, underlying 
                 className="input input-bordered appearance-none"
               />
               <span>DUSD</span>
+            </label>
+            <label className="label">
+              <span className="label-text-alt text-secondary">
+                max DUSD: {userAmount ? ethers.utils.formatEther(userAmount?.toString()) : ""}
+              </span>
             </label>
             <div className="w-full">
               <label className="label">
@@ -203,7 +212,7 @@ export const BettingModal: React.FC<BettingModalProps> = ({ expTime, underlying 
             >
               Quit
             </label>
-            <button className={`btn btn-primary `} onClick={handleSubmit}>
+            <button className={`btn btn-primary ${isLoading ? "loading" : ""} `} onClick={handleSubmit}>
               {vaultIsApproved ? "Bet !" : "Approve Bet"}
             </button>
           </div>

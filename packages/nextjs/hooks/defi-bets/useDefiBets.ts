@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useDefiBetsContracts } from "./useDefiBetsContracts";
 import { useDebounce } from "usehooks-ts";
-import { useContractWrite, usePrepareContractWrite, useWaitForTransaction } from "wagmi";
+import { useContractRead, useContractWrite, usePrepareContractWrite, useWaitForTransaction } from "wagmi";
 import { convertToBNWithDecimals } from "~~/utils/defi-bets";
 
-export const useSetBet = (underlying: string, expTime: number) => {
+export const useDefiBets = (underlying: string, expTime: number) => {
   const [betSize, setBetSize] = useState<number>(0);
   const [priceRange, setPriceRange] = useState<number[]>([20000, 25000]);
 
@@ -27,6 +27,9 @@ export const useSetBet = (underlying: string, expTime: number) => {
       underlying,
     ],
     enabled: vaultIsApproved && Boolean(debouncedBetSize),
+    onError: e => {
+      console.log(e);
+    },
   });
 
   const { data, write: setBet } = useContractWrite(config);

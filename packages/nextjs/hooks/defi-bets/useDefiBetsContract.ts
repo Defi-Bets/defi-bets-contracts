@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
 import { useManagerContract } from "./useManagerContract";
 import { Abi } from "abitype";
+import { ethers } from "ethers";
 import { useChainId, useContract, useSigner } from "wagmi";
 import { getContractAbi } from "~~/utils/defi-bets";
+
+export type BetData = { betSize: number; expDate: number; minPrice: number; maxPrice: number; profit: number };
 
 export function useDefiBetsContract(underlying?: string) {
   const [expTimes, setExpTimes] = useState<number[]>();
   const [address, setAddress] = useState<string>("");
   const [contractAbi, setContractAbi] = useState<Abi>();
+  const [betEvents, setBetEvents] = useState<BetData[]>();
 
   const { managerContract } = useManagerContract();
 
@@ -16,12 +20,24 @@ export function useDefiBetsContract(underlying?: string) {
 
   const defiBetsContract = useContract({ address: address, abi: contractAbi, signerOrProvider: signer });
 
-  const fetchBettingsFromExpTime = async (expTime: number) => {
+  const fetchBettingsFromExpTime = async () => {
     const bettingEvents = await defiBetsContract?.queryFilter("BetPlaced");
 
-    bettingEvents?.filter(event => event?.args?.expDate === expTime);
+    // bettingEvents?.filter(event => event?.args?.expDate.toNumber() === expTime);
+    const _bets: BetData[] = [];
+    bettingEvents?.map(event => {
+      if (event.args) {
+        _bets.push({
+          betSize: parseFloat(ethers.utils.formatUnits(event.args.betSize)),
+          expDate: parseInt(event.args.expDate),
+          minPrice: parseFloat(ethers.utils.formatUnits(event.args.minPrice)),
+          maxPrice: parseFloat(ethers.utils.formatUnits(event.args.maxPrice)),
+          profit: parseFloat(ethers.utils.formatUnits(event.args.profit)),
+        });
+      }
+    });
 
-    console.log(bettingEvents);
+    setBetEvents(_bets);
   };
 
   useEffect(() => {
@@ -58,5 +74,5 @@ export function useDefiBetsContract(underlying?: string) {
     console.log("run");
   }, [underlying, chainId, address, contractAbi]);
 
-  return { expTimes, fetchBettingsFromExpTime };
+  return { expTimes, fetchBettingsFromExpTime, betEvents };
 }

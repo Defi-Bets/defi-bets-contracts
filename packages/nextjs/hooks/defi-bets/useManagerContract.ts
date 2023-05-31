@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useChainId, useContract, useContractWrite, usePrepareContractWrite, useSigner } from "wagmi";
+import { useChainId, useContract, useSigner } from "wagmi";
 import abi from "~~/contract-abis/DefiBetsManager";
 import { getContractAddress } from "~~/utils/defi-bets";
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import { BetTable } from "~~/components/defi-bets/BetTable";
 import { BettingModal } from "~~/components/defi-bets/BettingModal";
 import DefiBetsStat from "~~/components/defi-bets/DefiBetsStat";
 import { useDefiBetsContract } from "~~/hooks/defi-bets";
@@ -12,11 +13,11 @@ export default function UnderlyingDetail() {
   const { name } = router.query;
   const nameString = name ? name.toString() : "";
 
-  const { expTimes, fetchBettingsFromExpTime } = useDefiBetsContract(nameString);
+  const { expTimes, fetchBettingsFromExpTime, betEvents } = useDefiBetsContract(nameString);
 
   useEffect(() => {
     const getData = async () => {
-      await fetchBettingsFromExpTime(activeExpTime);
+      await fetchBettingsFromExpTime();
     };
 
     getData();
@@ -57,6 +58,7 @@ export default function UnderlyingDetail() {
           </div>
         </div>
       </div>
+      {betEvents && <BetTable bets={betEvents} />}
     </div>
   );
 }

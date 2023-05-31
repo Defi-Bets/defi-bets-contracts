@@ -1,3 +1,3 @@
 export * from "./useManagerContract";
 export * from "./useDefiBetsContract";
-export * from "./useSetBet";
+export * from "./useDefiBets";
