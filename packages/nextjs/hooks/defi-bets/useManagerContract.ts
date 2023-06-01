@@ -1,55 +1,35 @@
-import { useEffect, useState } from "react";
-import { useChainId, useContract, useSigner } from "wagmi";
-import abi from "~~/contract-abis/DefiBetsManager";
-import { getContractAddress } from "~~/utils/defi-bets";
+import { useDefiBetsContracts } from "./useDefiBetsContracts";
+import { useContract, useContractRead, useSigner } from "wagmi";
 
 export type UnderlyingData = { address: string; name: string; vaultAddress: string; hash?: string };
 
-export function useManagerContract() {
-  const [address, setAddress] = useState<string>("");
-  const [underlyings, setUnderlyings] = useState<UnderlyingData[]>();
+export function useManagerContract(underlying: string) {
+  const { contractAbis, contractAddresses } = useDefiBetsContracts();
 
-  const chainId = useChainId();
+  const contractConfig = {
+    abi: contractAbis["DefiBetsManager"],
+    address: contractAddresses["DefiBetsManager"],
+  };
+
   const { data: signer } = useSigner();
 
   const managerContract = useContract({
-    address: address,
-    abi: abi,
+    ...contractConfig,
     signerOrProvider: signer,
   });
 
-  useEffect(() => {
-    const getContractData = () => {
-      const _address = getContractAddress("DefiBetsManager", chainId);
+  const { data: underlyingHash } = useContractRead({
+    ...contractConfig,
+    functionName: "getUnderlyingByte",
+    args: [underlying],
+  });
 
-      if (_address) {
-        setAddress(_address);
-      }
-    };
+  const { data: _underlyingAddress } = useContractRead({
+    ...contractConfig,
+    functionName: "defiBetsContracts",
+    args: [underlyingHash],
+    enabled: Boolean(underlyingHash),
+  });
 
-    async function fetchEvents() {
-      if (address) {
-        const underlyingEvents = await managerContract?.queryFilter("UnderlyingAdded");
-        const _underlyings: UnderlyingData[] = [];
-        underlyingEvents?.forEach(event => {
-          const args = event.args;
-          if (args) {
-            _underlyings.push({
-              address: args.defiBets,
-              name: args.underlying,
-              vaultAddress: args.vault,
-              hash: args.underlyingHash,
-            });
-          }
-        });
-
-        setUnderlyings(_underlyings);
-      }
-    }
-
-    getContractData();
-    fetchEvents();
-  }, [chainId, signer, managerContract]);
-
-  return { managerContract, underlyings, address, abi };
+  return { managerContract, underlyingAddress: _underlyingAddress as string };
 }

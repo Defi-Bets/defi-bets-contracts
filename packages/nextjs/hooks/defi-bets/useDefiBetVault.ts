@@ -1,5 +1,5 @@
-import { useContractRead } from "wagmi";
 import { useDefiBetsContracts } from "./useDefiBetsContracts";
+import { useContractRead } from "wagmi";
 
 export const useDefiBetsVault = (contractAddress: string) => {
   const { contractAbis } = useDefiBetsContracts();

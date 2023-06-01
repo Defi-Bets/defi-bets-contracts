@@ -46,9 +46,9 @@ export const Header = () => {
         </NavLink>
       </li>
       <li>
-        <NavLink href="/dapp">
+        <NavLink href="/defi-bets">
           <CubeIcon className="h-4 w-4" />
-          Dapp
+          Defi-Bets
         </NavLink>
       </li>
     </>
