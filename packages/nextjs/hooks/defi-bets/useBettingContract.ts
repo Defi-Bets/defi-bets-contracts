@@ -7,7 +7,7 @@ export type BetData = { betSize: number; expDate: number; minPrice: number; maxP
 
 export const useBettingContract = (underlyingAddress: string, expTime?: number, tokenId?: number) => {
   const [bets, setBets] = useState<BetData[]>();
-  const [expTimes, setExpTimes] = useState<number[]>();
+  const [expTimes, setExpTimes] = useState<number[]>([]);
 
   const { contractAbis } = useDefiBetsContracts();
   const abi = contractAbis["DefiBets"];
@@ -44,8 +44,8 @@ export const useBettingContract = (underlyingAddress: string, expTime?: number, 
   useContractEvent({
     ...contractConfig,
     eventName: "EpxirationTimeCreated",
-    listener(log) {
-      console.log(log);
+    listener: logs => {
+      setExpTimes(x => [...x, (logs as BigNumber).toNumber()]);
     },
   });
 
@@ -58,18 +58,18 @@ export const useBettingContract = (underlyingAddress: string, expTime?: number, 
   });
 
   useEffect(() => {
-    const fetchExpTimesFromUnderlying = async () => {
-      const expTimesEvents = await defiBetsContract?.queryFilter("EpxirationTimeCreated");
+    // const fetchExpTimesFromUnderlying = async () => {
+    //   const expTimesEvents = await defiBetsContract?.queryFilter("EpxirationTimeCreated");
 
-      const _expTimes: number[] = [];
-      expTimesEvents?.forEach(event => {
-        if (event.args) {
-          _expTimes?.push(event.args.expTime);
-        }
-      });
+    //   const _expTimes: number[] = [];
+    //   expTimesEvents?.forEach(event => {
+    //     if (event.args) {
+    //       _expTimes?.push(event.args.expTime);
+    //     }
+    //   });
 
-      setExpTimes(_expTimes);
-    };
+    //   setExpTimes(_expTimes);
+    // };
 
     const fetchBettingsFromExpTime = async () => {
       const bettingEvents = await defiBetsContract?.queryFilter("BetPlaced");
@@ -92,7 +92,7 @@ export const useBettingContract = (underlyingAddress: string, expTime?: number, 
     };
 
     fetchBettingsFromExpTime();
-    fetchExpTimesFromUnderlying();
+    // fetchExpTimesFromUnderlying();
   }, [defiBetsContract, expTimeInfo]);
 
   return { totalBets, tokenData, expTimes, bets, maxLossLimit, maxUserWinning };
