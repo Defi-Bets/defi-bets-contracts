@@ -3,8 +3,8 @@ import Image from "next/image";
 import { BigNumber, ethers } from "ethers";
 import { NextPage } from "next";
 import { CurrencyDollarIcon } from "@heroicons/react/24/outline";
+import { BettingModal } from "~~/components/defi-bets/BettingModal";
 import { ExpTimeSelector } from "~~/components/defi-bets/ExpTimeSelector";
-import Modal from "~~/components/ui/Modal";
 import { useBettingContract, useManagerContract } from "~~/hooks/defi-bets";
 
 const DefiBets: NextPage = () => {
@@ -95,18 +95,12 @@ const DefiBets: NextPage = () => {
           <button className="btn join-item">Execute Expiration</button>
         </div>
       </div>
-      <Modal open={open}>
-        <h3 className="font-bold text-lg">Congratulations random Internet user!</h3>
-        <p className="py-4">
-          You havve been selected for a chance to get one year of subscription to use Wikipedia for free!
-        </p>
-        <div className="modal-action">
-          {/* closes the modal */}
-          <button className="btn btn-primary" onClick={handleToggle}>
-            Yay!
-          </button>
-        </div>
-      </Modal>
+      <BettingModal
+        expTime={activeExpTime ? activeExpTime : 0}
+        underlying="BTC"
+        open={open}
+        handleToggle={handleToggle}
+      />
     </>
   );
 };
