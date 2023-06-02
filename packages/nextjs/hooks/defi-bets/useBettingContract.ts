@@ -45,6 +45,7 @@ export const useBettingContract = (underlyingAddress: string, expTime?: number, 
     ...contractConfig,
     eventName: "EpxirationTimeCreated",
     listener: logs => {
+      console.log(logs);
       setExpTimes(x => [...x, (logs as BigNumber).toNumber()]);
     },
   });
@@ -58,18 +59,18 @@ export const useBettingContract = (underlyingAddress: string, expTime?: number, 
   });
 
   useEffect(() => {
-    // const fetchExpTimesFromUnderlying = async () => {
-    //   const expTimesEvents = await defiBetsContract?.queryFilter("EpxirationTimeCreated");
+    const fetchExpTimesFromUnderlying = async () => {
+      const expTimesEvents = await defiBetsContract?.queryFilter("EpxirationTimeCreated");
 
-    //   const _expTimes: number[] = [];
-    //   expTimesEvents?.forEach(event => {
-    //     if (event.args) {
-    //       _expTimes?.push(event.args.expTime);
-    //     }
-    //   });
+      const _expTimes: number[] = [];
+      expTimesEvents?.forEach(event => {
+        if (event.args) {
+          _expTimes?.push(event.args.expTime);
+        }
+      });
 
-    //   setExpTimes(_expTimes);
-    // };
+      setExpTimes(_expTimes);
+    };
 
     const fetchBettingsFromExpTime = async () => {
       const bettingEvents = await defiBetsContract?.queryFilter("BetPlaced");
@@ -92,7 +93,7 @@ export const useBettingContract = (underlyingAddress: string, expTime?: number, 
     };
 
     fetchBettingsFromExpTime();
-    // fetchExpTimesFromUnderlying();
+    fetchExpTimesFromUnderlying();
   }, [defiBetsContract, expTimeInfo]);
 
   return { totalBets, tokenData, expTimes, bets, maxLossLimit, maxUserWinning };
