@@ -12,6 +12,13 @@ const deployMathLibraryDefibets: DeployFunction = async (hre: HardhatRuntimeEnvi
         log: true,
         autoMine: true,
     });
+
+    await deploy("UseMathLibraryDefibets", {
+        from: deployer,
+        args: [],
+        log: true,
+        autoMine: true,
+    });
 };
 
 deployMathLibraryDefibets.tags = ["tags"];
