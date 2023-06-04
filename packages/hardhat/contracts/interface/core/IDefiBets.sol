@@ -18,7 +18,7 @@ interface IDefiBets {
         bool claimed;
     }
 
-    function setBetForAccount(address _account,uint256 _betSize,uint256 _minPrice,uint256 _maxPrice,uint256 _expTime,uint256 _winning) external;
+    function setBetForAccount(address _account,uint256 _betSize,uint256 _minPrice,uint256 _maxPrice,uint256 _expTime,uint256 _winning) external returns(uint256,bool);
 
     function claimForAccount(address _account,uint256 _tokenId) external returns(uint256,uint256,bool);
 

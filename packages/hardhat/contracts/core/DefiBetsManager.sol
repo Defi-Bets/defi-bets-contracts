@@ -91,7 +91,7 @@ contract DefiBetsManager is Pausable,Ownable {
         address _defiBets = defiBetsContracts[_hash];
         address _vault = vaults[_hash];
         
-        IDefiBets(_defiBets).setBetForAccount(msg.sender,_betSize.sub(_fee),_minPrice,_maxPrice,_expTime,_winning);
+        _executeBetForAccount(_defiBets,_betSize.sub(_fee),_minPrice,_maxPrice,_expTime,_winning);
 
         IDefiBetsVault(_vault).deposit(msg.sender,_betSize,_expTime,_fee);
     }
@@ -212,6 +212,11 @@ contract DefiBetsManager is Pausable,Ownable {
         if(validUnderlying[_hash] == false){
             revert DefiBetsManager__NoValidUnderlying();
         }
+    }
+
+    function _executeBetForAccount(address _defiBets,uint256 _netBetSize,uint256 _minPrice,uint256 _maxPrice,uint256 _expTime,uint256 _winning) internal {
+          (uint256 _deltaLockedTokenSupply,bool _increase) = IDefiBets(_defiBets).setBetForAccount(msg.sender,_netBetSize,_minPrice,_maxPrice,_expTime,_winning);
+        ILiquidityPool(liquidityPool).updateLockedTokenSupply(_deltaLockedTokenSupply,_increase);
     }
 
 
