@@ -90,13 +90,13 @@ contract DefiBetsManager is Pausable,Ownable {
      
         uint256 _price = getCurrPrice(_hash);
         
-        uint256 probability = MathLibraryDefibets.calculateProbabilityRange(
-        _minPrice,
-        _maxPrice,
-        _price,      /* current price BTC */
-        200,        /* TODO: Implied Volatility 20% * 1000 (hard coded without oracle) */
-        30,         /* TODO: Implied Volatility is for 30 days (hard coded without oracle) */   
-        _expTime * 10000);     /* days untill expiry * 10000 */
+        // uint256 probability = MathLibraryDefibets.calculateProbabilityRange(
+        // _minPrice,
+        // _maxPrice,
+        // _price,      /* current price BTC */
+        // 200,        /* TODO: Implied Volatility 20% * 1000 (hard coded without oracle) */
+        // 30,         /* TODO: Implied Volatility is for 30 days (hard coded without oracle) */   
+        // _expTime * 10000);     /* days untill expiry * 10000 */
 
 
         uint256 _winning = 10000 / _betSize.sub(_fee);
