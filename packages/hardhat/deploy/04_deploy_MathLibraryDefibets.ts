@@ -18,10 +18,9 @@ const deployMathLibraryDefibets: DeployFunction = async (hre: HardhatRuntimeEnvi
         args: [],
         log: true,
         autoMine: true,
-        libraries:
-        {
-          MathLibraryDefibets: (await hre.ethers.getContract("MathLibraryDefibets")).address
-        }
+        libraries: {
+            MathLibraryDefibets: (await hre.ethers.getContract("MathLibraryDefibets")).address,
+        },
     });
 };
 

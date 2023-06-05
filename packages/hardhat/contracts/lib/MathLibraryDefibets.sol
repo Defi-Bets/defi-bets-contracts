@@ -39,7 +39,7 @@ library MathLibraryDefibets {
             (curr_price * implied_volatility_1000 * Math.sqrt(days_until_expiry_10000 / implied_volatility_days));
     }
 
-    function toUint16(bytes memory _bytes, uint256 _start) internal view returns (uint16) {
+    function toUint16(bytes memory _bytes, uint256 _start) internal pure returns (uint16) {
         require(_bytes.length >= _start + 2, "toUint16_outOfBounds");
         uint16 tempUint;
 
@@ -54,7 +54,7 @@ library MathLibraryDefibets {
     function lookupZtableFromStdDeviation(
         uint256 std_deviation,
         bool use_negative_z_table
-    ) private view returns (uint16) {
+    ) private pure returns (uint16) {
         uint256 index = std_deviation / 500;
 
         if(Z_TABLE_MAX < index)
@@ -73,19 +73,20 @@ library MathLibraryDefibets {
     }
 
     function calculateProbabilityForBetPrice(
-        int256 bet_price,
+        uint256 bet_price,
         uint256 curr_price,
         uint256 implied_volatility_1000 /* multiplied by 1000 */,
         uint256 implied_volatility_days,
         uint256 days_until_expiry_10000 /* multiplied by 10.000 */
     ) public view returns (uint16) {
-        int256 delta = 0;
+        uint256 delta = 0;
         bool use_negative_z_table = false;
 
-        delta = bet_price - int256(curr_price); /* calculate distance (delta) to current price */
-        if (delta < 0) {
+        if (curr_price > bet_price) {
             use_negative_z_table = true;
-            delta = -delta; /* use absolute and no negative values for calculations */
+            delta = curr_price - bet_price; /* calculate distance (delta) to current price */
+        }else{
+            delta = bet_price - curr_price; /* calculate distance (delta) to current price */
         }
         uint256 std_deviation = calculateStandardDeviation(
             uint256(delta),
@@ -101,8 +102,8 @@ library MathLibraryDefibets {
     }
 
     function calculateProbabilityRange(
-        int256 bet_range_lower,
-        int256 bet_range_higher,
+        uint256 bet_range_lower,
+        uint256 bet_range_higher,
         uint256 curr_price,
         uint256 implied_volatility_1000 /* multiplied by 1000 */,
         uint256 implied_volatility_days,
