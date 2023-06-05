@@ -11,6 +11,9 @@ import "../interface/core/IDefiBets.sol";
 import "../interface/math/IDefiBetsMath.sol";
 import "../interface/core/IDefiBetsVault.sol";
 
+// Library import
+import "../lib/MathLibraryDefibets.sol";
+
 
 error DefiBetsManager__NoValidUnderlying();
 error DefiBetsManager__NoLiquidity();
@@ -84,9 +87,19 @@ contract DefiBetsManager is Pausable,Ownable {
         _isValidUnderlying(_hash);
 
         uint256 _fee = calculateFee(_betSize);
+     
+        uint256 _price = getCurrPrice(_hash);
         
-        //TODO: Implement the Math Libary
-        uint256 _winning = IDefiBetsMath(mathContract).calculateWinning(_minPrice,_maxPrice,_betSize.sub(_fee),_expTime);
+        uint256 probability = MathLibraryDefibets.calculateProbabilityRange(
+        _minPrice,
+        _maxPrice,
+        _price,      /* current price BTC */
+        200,        /* TODO: Implied Volatility 20% * 1000 (hard coded without oracle) */
+        30,         /* TODO: Implied Volatility is for 30 days (hard coded without oracle) */   
+        _expTime * 10000);     /* days untill expiry * 10000 */
+
+
+        uint256 _winning = 10000 / _betSize.sub(_fee);
 
         address _defiBets = defiBetsContracts[_hash];
         address _vault = vaults[_hash];
@@ -221,6 +234,24 @@ contract DefiBetsManager is Pausable,Ownable {
 
 
     /* ====== Pure/View Functions ====== */
+
+    function getCurrPrice(bytes32 _hash) public view returns(uint256){
+        uint256 price;
+        
+
+        address _priceFeed = underlyingPriceFeeds[_hash];
+
+        //TODO: Calculate the price for the expTime
+        ( ,
+        int256 answer,
+        ,
+        ,
+        ) = AggregatorV3Interface(_priceFeed).latestRoundData();
+
+        price = uint256(answer);
+
+        return price;
+    }
 
     function getPrice(bytes32 _hash,uint256 _expTime) public view returns(uint256){
         uint256 price;
