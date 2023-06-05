@@ -89,17 +89,8 @@ contract DefiBetsManager is Pausable,Ownable {
         uint256 _fee = calculateFee(_betSize);
      
         uint256 _price = getCurrPrice(_hash);
-        
-        // uint256 probability = MathLibraryDefibets.calculateProbabilityRange(
-        // _minPrice,
-        // _maxPrice,
-        // _price,      /* current price BTC */
-        // 200,        /* TODO: Implied Volatility 20% * 1000 (hard coded without oracle) */
-        // 30,         /* TODO: Implied Volatility is for 30 days (hard coded without oracle) */   
-        // _expTime * 10000);     /* days untill expiry * 10000 */
 
-
-        uint256 _winning = 10000 / _betSize.sub(_fee);
+        uint256 _winning = calculateWinning(_price,_betSize,_fee,_minPrice,_maxPrice,_expTime);
 
         address _defiBets = defiBetsContracts[_hash];
         address _vault = vaults[_hash];
@@ -295,6 +286,19 @@ contract DefiBetsManager is Pausable,Ownable {
         }
 
         return _feeAmount;
+    }
+
+    function calculateWinning(uint256 _price,uint256 _betSize,uint256 _fee,uint256 _minPrice,uint256 _maxPrice,uint256 _expTime) public view returns (uint256){
+        //Probabiliy per 10000
+        uint256 probability = MathLibraryDefibets.calculateProbabilityRange(
+        _minPrice,
+        _maxPrice,
+        _price,      /* current price BTC */
+        200,        /* TODO: Implied Volatility 20% * 1000 (hard coded without oracle) */
+        30,         /* TODO: Implied Volatility is for 30 days (hard coded without oracle) */   
+        _expTime * 10000);     /* days untill expiry * 10000 */
+
+        return (_betSize.sub(_fee)).mul(probability).div(10000);
     }
 
     function _isNotNull(uint256 param) internal pure {

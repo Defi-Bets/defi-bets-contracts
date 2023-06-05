@@ -6,6 +6,7 @@ import {
     DefiBetsVault__factory,
     DefiBets__factory,
     LiquidityPool__factory,
+    MathLibraryDefibets__factory,
     MockV3Aggregator__factory,
 } from "../typechain-types";
 
@@ -23,7 +24,16 @@ describe("DefiBetsManager unit test", () => {
     async function deployDefiBetsManagerFixture() {
         const [deployer, user, lpStaker] = await ethers.getSigners();
 
-        const DefiBetsManager = (await ethers.getContractFactory("DefiBetsManager")) as DefiBetsManager__factory;
+        const MathLibraryDefiBets = (await ethers.getContractFactory(
+            "MathLibraryDefibets",
+        )) as MathLibraryDefibets__factory;
+        const mathLibraryDefiBets = MathLibraryDefiBets.deploy();
+
+        const DefiBetsManager = (await ethers.getContractFactory("DefiBetsManager", {
+            libraries: {
+                MathLibraryDefibets: (await mathLibraryDefiBets).address,
+            },
+        })) as DefiBetsManager__factory;
         const managerContract = await DefiBetsManager.deploy();
 
         const MockDUSD = await ethers.getContractFactory("MockDUSD");
