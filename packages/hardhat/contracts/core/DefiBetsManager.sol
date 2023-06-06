@@ -69,7 +69,7 @@ contract DefiBetsManager is Pausable,Ownable {
 
 
     function redeemLPTokens(uint256 _amount) external whenNotPaused() {
-        //TODO: Implement the redeem function!!!!
+        ILiquidityPool(liquidityPool).redeemSharesForAccount(msg.sender,_amount);
     }
 
 

@@ -31,7 +31,7 @@ contract LiquidityPool is ERC20, ILiquidityPool {
     address public token;
     address public managerContract;
     address public betVault;
-    address public redeemVault;
+    
 
     
 
@@ -43,11 +43,10 @@ contract LiquidityPool is ERC20, ILiquidityPool {
     /* ====== Modifier ====== */
 
 
-    constructor(address _managerContract,address _token,address _betVault,address _redeemVault) ERC20("DefiB","DefiB"){
+    constructor(address _managerContract,address _token,address _betVault) ERC20("DefiB","DefiB"){
         managerContract = _managerContract;
         token = _token;
         betVault = _betVault;
-        redeemVault = _redeemVault;
     }
 
     /* ====== Main Functions ====== */
@@ -67,14 +66,14 @@ contract LiquidityPool is ERC20, ILiquidityPool {
     }
 
     function redeemSharesForAccount(address _account, uint256 _shares) external {
-        
-        
+                
         _isManagerContract();
 
         _isValidAmount(_account,_shares);
 
-
         uint256 _tokens = calcTokensToWithdraw(_shares);
+
+        _isEnoughFreeTokenSupply(_tokens);
 
         _burn(_account,_shares);
 
@@ -139,6 +138,8 @@ contract LiquidityPool is ERC20, ILiquidityPool {
             revert LiquidityPool__NotEnoughFreeSuppy();
         }
     }
+
+   
 
     /* ====== Pure/View Functions ====== */
 
