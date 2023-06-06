@@ -6,6 +6,7 @@ import {
     DefiBetsVault__factory,
     DefiBets__factory,
     LiquidityPool__factory,
+    MathLibraryDefibets__factory,
     MockV3Aggregator__factory,
 } from "../typechain-types";
 
@@ -23,7 +24,16 @@ describe("DefiBetsManager unit test", () => {
     async function deployDefiBetsManagerFixture() {
         const [deployer, user, lpStaker] = await ethers.getSigners();
 
-        const DefiBetsManager = (await ethers.getContractFactory("DefiBetsManager")) as DefiBetsManager__factory;
+        const MathLibraryDefiBets = (await ethers.getContractFactory(
+            "MathLibraryDefibets",
+        )) as MathLibraryDefibets__factory;
+        const mathLibraryDefiBets = MathLibraryDefiBets.deploy();
+
+        const DefiBetsManager = (await ethers.getContractFactory("DefiBetsManager", {
+            libraries: {
+                MathLibraryDefibets: (await mathLibraryDefiBets).address,
+            },
+        })) as DefiBetsManager__factory;
         const managerContract = await DefiBetsManager.deploy();
 
         const MockDUSD = await ethers.getContractFactory("MockDUSD");
@@ -38,19 +48,8 @@ describe("DefiBetsManager unit test", () => {
         const DefiBetsVault = (await ethers.getContractFactory("DefiBetsVault")) as DefiBetsVault__factory;
         const vault = await DefiBetsVault.deploy(managerContract.address, mockDUSD.address);
 
-        const transactionCount = await deployer.getTransactionCount();
-        const redeemVaultAddress = ethers.utils.getContractAddress({
-            from: deployer.address,
-            nonce: transactionCount + 1,
-        });
-
         const LiquidityPool = (await ethers.getContractFactory("LiquidityPool")) as LiquidityPool__factory;
-        const liquidityPool = await LiquidityPool.deploy(
-            managerContract.address,
-            mockDUSD.address,
-            vault.address,
-            redeemVaultAddress,
-        );
+        const liquidityPool = await LiquidityPool.deploy(managerContract.address, mockDUSD.address, vault.address);
 
         const PriceFeed = (await ethers.getContractFactory("MockV3Aggregator")) as MockV3Aggregator__factory;
         const priceFeed = await PriceFeed.deploy(8, priceAnswer);

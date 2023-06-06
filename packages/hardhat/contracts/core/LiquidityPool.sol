@@ -8,6 +8,7 @@ import '../interface/core/ILiquidityPool.sol';
 
 error LiquidityPool__AccessForbidden();
 error LiquidityPool__NotAllowedAmount();
+error LiquidityPool__NotEnoughFreeSuppy();
 
 contract LiquidityPool is ERC20, ILiquidityPool {
 
@@ -21,28 +22,31 @@ contract LiquidityPool is ERC20, ILiquidityPool {
     /* ====== State Variables ====== */
 
     uint256 public totalTokenSupply;
+
+    uint256 public lockedTokenSupply;
     
-    uint256 public maxLPLostPerTime;
+    
+    // uint256 public maxLPLostPerTime;
 
     address public token;
     address public managerContract;
     address public betVault;
-    address public redeemVault;
+    
 
     
 
     /* ====== Events ====== */
     event Deposit(address indexed account,uint256 amount,uint256 shares,uint256 totalTokens,uint256 totalSupply);
     event Redeem(address indexed account, uint256 shares,uint256 amount,uint256 totalTokens, uint256 totalSupply);
+    event LockedSupplyUpdated(uint256 lockedTokenSupply);
 
     /* ====== Modifier ====== */
 
 
-    constructor(address _managerContract,address _token,address _betVault,address _redeemVault) ERC20("DefiB","DefiB"){
+    constructor(address _managerContract,address _token,address _betVault) ERC20("DefiB","DefiB"){
         managerContract = _managerContract;
         token = _token;
         betVault = _betVault;
-        redeemVault = _redeemVault;
     }
 
     /* ====== Main Functions ====== */
@@ -62,14 +66,14 @@ contract LiquidityPool is ERC20, ILiquidityPool {
     }
 
     function redeemSharesForAccount(address _account, uint256 _shares) external {
-        
-        //TODO: Update the new redeem concept
+                
         _isManagerContract();
 
         _isValidAmount(_account,_shares);
 
-
         uint256 _tokens = calcTokensToWithdraw(_shares);
+
+        _isEnoughFreeTokenSupply(_tokens);
 
         _burn(_account,_shares);
 
@@ -92,6 +96,16 @@ contract LiquidityPool is ERC20, ILiquidityPool {
         }
 
         
+    }
+
+    function updateLockedTokenSupply(uint256 _delta,bool _increase) external {
+        _isManagerContract();
+
+        uint256 _lockedTokenSupply = lockedTokenSupply;
+
+        lockedTokenSupply = _increase ? _lockedTokenSupply.add(_delta) : _lockedTokenSupply.sub(lockedTokenSupply);
+
+        emit LockedSupplyUpdated(lockedTokenSupply);
     }
 
     function transferTokensToVault(uint256 _amount) external {
@@ -119,6 +133,14 @@ contract LiquidityPool is ERC20, ILiquidityPool {
         }
     }
 
+    function _isEnoughFreeTokenSupply(uint256 _amount) internal view {
+        if(totalTokenSupply.sub(lockedTokenSupply) < _amount){
+            revert LiquidityPool__NotEnoughFreeSuppy();
+        }
+    }
+
+   
+
     /* ====== Pure/View Functions ====== */
 
     function calcSharesToMint(uint256 _amount) public view returns(uint256){
@@ -137,7 +159,7 @@ contract LiquidityPool is ERC20, ILiquidityPool {
        }
 
         
-        return _amount.mul(totalSupply()).div(balanceTokens());
+        return _amount.mul(totalTokenSupply).div(balanceTokens());
 
     }
 
@@ -153,12 +175,10 @@ contract LiquidityPool is ERC20, ILiquidityPool {
         a = sB / T
         */
 
-       return _shares.mul(balanceTokens()).div(totalSupply());
+       return _shares.mul(totalTokenSupply).div(totalSupply());
     }
 
-    function calcRedeemFraction(uint256 _amount) public view returns(uint256){
-
-    }
+    
 
     function balanceTokens() public view returns(uint256){
 

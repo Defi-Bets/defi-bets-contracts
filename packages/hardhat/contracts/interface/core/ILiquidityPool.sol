@@ -13,4 +13,6 @@ interface ILiquidityPool is IERC20 {
 
     function transferTokensToVault(uint256 _amount) external;
 
+     function updateLockedTokenSupply(uint256 _delta,bool _increase) external;
+
 }

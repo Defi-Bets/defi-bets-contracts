@@ -111,7 +111,7 @@ describe("DefiBets Unit test", () => {
 
             await expect(
                 defiBets.connect(manager).setBetForAccount(user.address, betSize, minPrice, maxPrice, expTime, winning),
-            ).to.be.revertedWith("DefiBets__NoValidWinningPrice");
+            ).to.be.revertedWithCustomError(defiBets, "DefiBets__NoValidWinningPrice");
         });
     });
 

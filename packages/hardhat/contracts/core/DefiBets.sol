@@ -93,7 +93,7 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
     }
 
     /* ====== Mutation Functions ====== */
-    function setBetForAccount(address _account,uint256 _betSize,uint256 _minPrice,uint256 _maxPrice,uint256 _expTime,uint256 _winning) external {
+    function setBetForAccount(address _account,uint256 _betSize,uint256 _minPrice,uint256 _maxPrice,uint256 _expTime,uint256 _winning) external returns(uint256,bool) {
         _isDefiBetManager();
         _isInitialized();
 
@@ -102,10 +102,13 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
         _isValidActiveTimeRange(_expTime);
         _validPriceRange(_minPrice, _maxPrice);
 
+        uint256 _maxLPLossBefore = calculateMaxLPLoss(expTimeInfos[_expTime].maxUserWinning,expTimeInfos[_expTime].totalBets);
+
         uint256 _maxUserWinnings = calculateMaxUserWinnings(_expTime,_minPrice,_maxPrice,_winning);
         
-        uint256 _maxLPLoss = calculateMaxLPLoss(_maxUserWinnings,expTimeInfos[_expTime].totalBets);
+        uint256 _maxLPLoss = calculateMaxLPLoss(_maxUserWinnings,expTimeInfos[_expTime].totalBets.add(_betSize));
 
+        //TODO: Fix the maxLossLimat into a relativ value
         if(_maxLPLoss > expTimeInfos[_expTime].maxLossLimit){
             revert DefiBets__NoValidWinningPrice();
         }
@@ -116,8 +119,11 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
 
         //Attention: This function has high gas costs!!!!
         _distributeWinningsToSlots( _minPrice, _maxPrice, _winning, _expTime);
-
+        
         emit BetPlaced(_account,_betSize,_winning,_expTime,_minPrice,_maxPrice);
+
+        return _maxLPLossBefore > _maxLPLoss ? (_maxLPLoss.sub(_maxLPLossBefore),false) : (_maxLPLoss.sub(_maxLPLossBefore),true);
+
     }
 
     function claimForAccount(address _account,uint256 _tokenId) external returns(uint256,uint256,bool) {
