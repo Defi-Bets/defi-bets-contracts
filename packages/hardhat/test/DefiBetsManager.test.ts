@@ -39,9 +39,6 @@ describe("DefiBetsManager unit test", () => {
         const MockDUSD = await ethers.getContractFactory("MockDUSD");
         const mockDUSD = await MockDUSD.deploy();
 
-        const MockMath = await ethers.getContractFactory("MockMath");
-        const mockMath = await MockMath.deploy();
-
         const DefiBets = (await ethers.getContractFactory("DefiBets")) as DefiBets__factory;
         const defiBets = await DefiBets.deploy("BTC", managerContract.address);
 
@@ -54,7 +51,7 @@ describe("DefiBetsManager unit test", () => {
         const PriceFeed = (await ethers.getContractFactory("MockV3Aggregator")) as MockV3Aggregator__factory;
         const priceFeed = await PriceFeed.deploy(8, priceAnswer);
 
-        await managerContract.setAddresses(liquidityPool.address, mockMath.address);
+        await managerContract.setAddresses(liquidityPool.address);
 
         await managerContract.addUnderlyingToken("BTC", priceFeed.address, defiBets.address, vault.address);
 

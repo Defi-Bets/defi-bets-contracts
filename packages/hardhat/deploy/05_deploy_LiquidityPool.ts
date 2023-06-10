@@ -20,9 +20,8 @@ const deployLiquidityPoolContract: DeployFunction = async (hre: HardhatRuntimeEn
     const managerContract: DefiBetsManager = await hre.ethers.getContract("DefiBetsManager");
 
     const defiBetsAddress = (await get("DefiBets")).address;
-    const mathContractAddress = (await get("MockMath")).address;
 
-    await managerContract.setAddresses(lpPoolContract.address, mathContractAddress);
+    await managerContract.setAddresses(lpPoolContract.address);
 
     const feedAddress = (await get("MockV3Aggregator")).address;
     await managerContract.addUnderlyingToken("BTC", feedAddress, defiBetsAddress, betVault);
