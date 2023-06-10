@@ -36,7 +36,6 @@ contract DefiBetsManager is Pausable,Ownable {
     /* ====== State Variables ====== */
 
     address public liquidityPool;
-    address public mathContract;
     
     uint256 public feePpm;
 
@@ -161,9 +160,8 @@ contract DefiBetsManager is Pausable,Ownable {
 
     /* ====== Setup Functions ====== */
 
-    function setAddresses(address _liquidityPool,address _mathContract) external onlyOwner {
+    function setAddresses(address _liquidityPool) external onlyOwner {
         liquidityPool = _liquidityPool;
-        mathContract = _mathContract;
     }
 
     function addUnderlyingToken(string memory _underlying,address _feed,address _defiBets,address _vault) external onlyOwner {

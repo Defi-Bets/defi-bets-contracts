@@ -20,13 +20,6 @@ const deployMockContracts: DeployFunction = async function (hre: HardhatRuntimeE
             autoMine: true,
         });
 
-        await deploy("MockMath", {
-            from: deployer,
-            args: [],
-            log: true,
-            autoMine: true,
-        });
-
         await deploy("MockV3Aggregator", {
             from: deployer,
             args: [8, ethers.utils.parseEther("25000")],
