@@ -14,18 +14,15 @@ contract LiquidityPool is ERC20, ILiquidityPool {
 
     using SafeMath for uint256;
 
-
     uint256 private constant MULTIPLIER = 1000000;
-
-
 
     /* ====== State Variables ====== */
 
     uint256 public totalTokenSupply;
-
     uint256 public lockedTokenSupply;
     
-    
+    uint256 public maxLostPerTimeInPercent; // in ppm (parts per million). 50.000 ppm = 5% = 0,050000
+
     // uint256 public maxLPLostPerTime;
 
     address public token;
@@ -43,10 +40,11 @@ contract LiquidityPool is ERC20, ILiquidityPool {
     /* ====== Modifier ====== */
 
 
-    constructor(address _managerContract,address _token,address _betVault) ERC20("DefiB","DefiB"){
+    constructor(address _managerContract,address _token,address _betVault,uint256 _maxLossPerTimePercent) ERC20("DefiB","DefiB"){
         managerContract = _managerContract;
         token = _token;
         betVault = _betVault;
+        maxLostPerTimeInPercent = _maxLossPerTimePercent;
     }
 
     /* ====== Main Functions ====== */
@@ -189,7 +187,7 @@ contract LiquidityPool is ERC20, ILiquidityPool {
 
         //TODO: Calculate the free token supply with tha maximum lost percent including redeemings
 
-        return totalTokenSupply.mul(50000).div(1000000);
+        return totalTokenSupply.mul(maxLostPerTimeInPercent).div(MULTIPLIER);
     }
 
 }

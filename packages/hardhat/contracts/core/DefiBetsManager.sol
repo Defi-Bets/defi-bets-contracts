@@ -197,6 +197,8 @@ contract DefiBetsManager is Pausable,Ownable {
         IDefiBets(_defiBets).initializeData(_startExpTime,_maxLoss,_minBetDuration,_maxBetDuration,_slot,_maxWinMultiplier);
     }
 
+   
+
     function setFeesPpm(uint256 _newFee) external onlyOwner {
         if(_newFee > MAX_FEE_PPM){
             revert DefiBetsManager__FeeNotAllowed();

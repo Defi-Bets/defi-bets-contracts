@@ -10,10 +10,13 @@ const deployLiquidityPoolContract: DeployFunction = async (hre: HardhatRuntimeEn
     const betVault = (await get("DefiBetsVault")).address;
 
     const token = (await hre.ethers.getContract("MockDUSD")).address;
+
+    const maxLossPerTime = 50000;
+
     const lpPoolContract = await deploy("LiquidityPool", {
         from: deployer,
         log: true,
-        args: [managerContractAddress, token, betVault],
+        args: [managerContractAddress, token, betVault, maxLossPerTime],
         autoMine: true,
     });
 

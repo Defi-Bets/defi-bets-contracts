@@ -3,6 +3,8 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ethers } from "hardhat";
 import { LiquidityPool__factory, MockDUSD__factory } from "../typechain-types";
 
+const maxLossPerTime = 50000;
+
 describe("LiquidityPool unit test", () => {
     async function deployLiquidityPoolFixture() {
         const [deployer, lpProvider, manager, betVault] = await ethers.getSigners();
@@ -11,7 +13,12 @@ describe("LiquidityPool unit test", () => {
         const stableToken = await MockDUSD.deploy();
 
         const LiquidityPool = (await ethers.getContractFactory("LiquidityPool")) as LiquidityPool__factory;
-        const liquidityPool = await LiquidityPool.deploy(manager.address, stableToken.address, betVault.address);
+        const liquidityPool = await LiquidityPool.deploy(
+            manager.address,
+            stableToken.address,
+            betVault.address,
+            maxLossPerTime,
+        );
 
         return { stableToken, lpProvider, manager, liquidityPool, deployer };
     }

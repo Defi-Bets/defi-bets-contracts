@@ -66,7 +66,7 @@ describe("DefiBets Unit test", () => {
             const maxPrice = ethers.utils.parseEther("25000");
 
             const startTime = await defiBets.getStartExpTime();
-            const deltaTime = await defiBets.EXP_TIME_DELTA();
+            const deltaTime = await defiBets.timeDelta();
 
             const expTime = startTime.add(deltaTime.mul(10));
 
@@ -97,7 +97,7 @@ describe("DefiBets Unit test", () => {
             const maxPrice = ethers.utils.parseEther("25000");
 
             const startTime = await defiBets.getStartExpTime();
-            const deltaTime = await defiBets.EXP_TIME_DELTA();
+            const deltaTime = await defiBets.timeDelta();
 
             const expTime = startTime.add(deltaTime.mul(10));
 
@@ -127,7 +127,7 @@ describe("DefiBets Unit test", () => {
             const maxPrice = ethers.utils.parseEther("2400");
 
             const startTime = await defiBets.getStartExpTime();
-            const deltaTime = await defiBets.EXP_TIME_DELTA();
+            const deltaTime = await defiBets.timeDelta();
 
             const expTime = startTime.add(deltaTime.mul(10));
 

@@ -19,6 +19,7 @@ const priceAnswer = ethers.utils.parseEther("20000");
 const feePpm = 20000; // 2% Fee
 const MILLION = 1000000;
 const maxWinMultiplier = 40; // maximum win of user can be this * amount
+const maxLossPerTime = 50000;
 
 describe("DefiBetsManager unit test", () => {
     async function deployDefiBetsManagerFixture() {
@@ -46,7 +47,12 @@ describe("DefiBetsManager unit test", () => {
         const vault = await DefiBetsVault.deploy(managerContract.address, mockDUSD.address);
 
         const LiquidityPool = (await ethers.getContractFactory("LiquidityPool")) as LiquidityPool__factory;
-        const liquidityPool = await LiquidityPool.deploy(managerContract.address, mockDUSD.address, vault.address);
+        const liquidityPool = await LiquidityPool.deploy(
+            managerContract.address,
+            mockDUSD.address,
+            vault.address,
+            maxLossPerTime,
+        );
 
         const PriceFeed = (await ethers.getContractFactory("MockV3Aggregator")) as MockV3Aggregator__factory;
         const priceFeed = await PriceFeed.deploy(8, priceAnswer);
@@ -141,7 +147,7 @@ describe("DefiBetsManager unit test", () => {
             );
 
             const startTime = await defiBets.getStartExpTime();
-            const deltaTime = await defiBets.EXP_TIME_DELTA();
+            const deltaTime = await defiBets.timeDelta();
 
             const expTime = startTime.add(deltaTime.mul(15));
 
@@ -163,7 +169,7 @@ describe("DefiBetsManager unit test", () => {
             );
 
             const startTime = await defiBets.getStartExpTime();
-            const deltaTime = await defiBets.EXP_TIME_DELTA();
+            const deltaTime = await defiBets.timeDelta();
 
             const expTime = startTime.add(deltaTime.mul(15));
 
@@ -202,7 +208,7 @@ describe("DefiBetsManager unit test", () => {
 
             const maxDuration = await defiBets.maxBetDuration();
 
-            const delta = await defiBets.EXP_TIME_DELTA();
+            const delta = await defiBets.timeDelta();
 
             const blockNo = await ethers.provider.getBlockNumber();
             const block = await ethers.provider.getBlock(blockNo);
