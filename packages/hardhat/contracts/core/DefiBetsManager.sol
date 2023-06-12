@@ -20,6 +20,7 @@ error DefiBetsManager__NoLiquidity();
 error DefiBetsManager__FeeNotAllowed();
 error DefiBetsManager__FeeWouldBeTooSmall();
 error DefiBetsManager__ParamNull();
+error DefiBetsManager__NotValidRoundId();
 
 
 /**
@@ -123,12 +124,13 @@ contract DefiBetsManager is Pausable,Ownable {
     * @dev Executes the expiration of a bet based on the specified expiration time and underlying asset.
     * @param _expTime The expiration time of the bet.
     * @param _underlying The underlying asset for the bet.
+    * @param _roundId The round id for a valid price of the underlying
     */
-    function executeExpiration(uint256 _expTime,string memory _underlying) external whenNotPaused() {
+    function executeExpiration(uint256 _expTime,string memory _underlying,uint80 _roundId) external whenNotPaused() {
         bytes32 _hash = getUnderlyingByte(_underlying);
        _isValidUnderlying(_hash);
      
-        uint256 _price = getPrice(_hash,_expTime);
+        uint256 _price = getPrice(_hash,_expTime,_roundId);
 
         address _defiBets = defiBetsContracts[_hash];
         address _vault = vaults[_hash];
@@ -223,6 +225,29 @@ contract DefiBetsManager is Pausable,Ownable {
         ILiquidityPool(liquidityPool).updateLockedTokenSupply(_deltaLockedTokenSupply,_increase);
     }
 
+    function _isRoundIdValid(uint256 _expTime,uint80 _roundId,uint80 _latestRoundId,uint256 _latestRoundIdTimestamp,address _priceFeed) internal view {
+       bool _valid = true;
+
+       if(_roundId > _latestRoundId){
+        _valid = false;
+       }
+
+
+        if(_roundId < _latestRoundId){
+
+            (,,,uint256 _timestamp,) = AggregatorV3Interface(_priceFeed).getRoundData(_roundId+1);
+            _valid = _timestamp >= _expTime;
+        }
+
+        if(_roundId == _latestRoundId){
+        _valid = _latestRoundIdTimestamp <= _expTime;
+        }
+       
+       if(_valid == false ){
+        revert DefiBetsManager__NotValidRoundId();
+       }
+    }
+
 
     /* ====== Pure/View Functions ====== */
 
@@ -232,7 +257,7 @@ contract DefiBetsManager is Pausable,Ownable {
 
         address _priceFeed = underlyingPriceFeeds[_hash];
 
-        //TODO: Calculate the price for the expTime
+        
         ( ,
         int256 answer,
         ,
@@ -244,22 +269,29 @@ contract DefiBetsManager is Pausable,Ownable {
         return price;
     }
 
-    function getPrice(bytes32 _hash,uint256 _expTime) public view returns(uint256){
+    function getPrice(bytes32 _hash,uint256 _expTime,uint80 _roundId) public view returns(uint256){
         uint256 price;
         
         if(underlyingPriceFeeds[_hash] != address(0) && block.timestamp >= _expTime){
 
             address _priceFeed = underlyingPriceFeeds[_hash];
 
-            //TODO: Calculate the price for the expTime
-            ( ,
-            int256 answer,
+            (uint80 _latestRoundId,int256 _latestAnswer,,uint256 _latestTimestamp,) = AggregatorV3Interface(_priceFeed).latestRoundData();
+
+            _isRoundIdValid(_expTime,_roundId,_latestRoundId,_latestTimestamp,_priceFeed);
+
+
+            if(_latestRoundId == _roundId){
+                price = uint256(_latestAnswer);
+            }else{
+                 ( ,
+            int256 _answer,
             ,
             ,
-            ) = AggregatorV3Interface(_priceFeed).latestRoundData();
-
-            price = uint256(answer);
-
+            ) = AggregatorV3Interface(_priceFeed).getRoundData(_roundId);
+             price = uint256(_answer);
+            }
+        
         }
 
         return price;

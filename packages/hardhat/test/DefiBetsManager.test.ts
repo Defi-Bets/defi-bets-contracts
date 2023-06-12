@@ -7,6 +7,7 @@ import {
     DefiBets__factory,
     LiquidityPool__factory,
     MathLibraryDefibets__factory,
+    MockV3Aggregator,
     MockV3Aggregator__factory,
 } from "../typechain-types";
 
@@ -190,13 +191,20 @@ describe("DefiBetsManager unit test", () => {
         it("Should execute the expiration after passing the timestamp", async () => {
             const { managerContract, defiBets } = await loadFixture(deployDefiBetsManagerFixture);
 
-            const firstExpTime = await defiBets.getStartExpTime();
+            const lastActiveExpTime = await defiBets.lastActiveExpTime();
+
+            const underlyingByte = await managerContract.getUnderlyingByte("BTC");
+            const _priceFeedAddress = await managerContract.underlyingPriceFeeds(underlyingByte);
+
+            const priceFeed = (await ethers.getContractAt("MockV3Aggregator", _priceFeedAddress)) as MockV3Aggregator;
+
+            const answer = await priceFeed.latestRoundData();
 
             //increase the time and pass the first exp time
+            await time.increaseTo(lastActiveExpTime.add(1));
+            await managerContract.executeExpiration(lastActiveExpTime, "BTC", answer.roundId);
 
-            await managerContract.executeExpiration(firstExpTime, "BTC");
-
-            expect((await defiBets.expTimeInfos(startExpTime)).finished).to.be.equal(true);
+            expect((await defiBets.expTimeInfos(lastActiveExpTime)).finished).to.be.equal(true);
         });
     });
 
@@ -239,6 +247,7 @@ describe("DefiBetsManager unit test", () => {
             const minBoundary = ethers.utils.parseEther("20000");
             const maxBoundary = ethers.utils.parseEther("25000");
             const lastActiveExpTime = await defiBets.lastActiveExpTime();
+            console.log(lastActiveExpTime.toString());
 
             await managerContract.connect(user).setBet(betSize, minBoundary, maxBoundary, lastActiveExpTime, "BTC");
 
@@ -247,7 +256,11 @@ describe("DefiBetsManager unit test", () => {
             const expProfit = (await defiBets.getBetTokenData(1)).profit;
 
             await time.increaseTo(lastActiveExpTime.add(1));
-            await managerContract.executeExpiration(lastActiveExpTime, "BTC");
+
+            const answer = await priceFeed.latestRoundData();
+            console.log(answer.updatedAt.toString());
+
+            await managerContract.executeExpiration(lastActiveExpTime, "BTC", answer.roundId);
 
             const hash = await managerContract.getUnderlyingByte("BTC");
             await managerContract.connect(user).claimWinnings(1, hash);
