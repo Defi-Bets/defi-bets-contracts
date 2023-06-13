@@ -11,6 +11,9 @@ export const networkConfig: INetworkConfig = {
         slot: ethers.utils.parseEther("200"),
         fee: 0,
         payoutRatio: 90,
+        decimalsIV: 4,
+        initialAnswerIV: 2000,
+        periodIV: 30 * 60 * 60 * 24,
     },
     1133: {
         name: "dmcTestnet",

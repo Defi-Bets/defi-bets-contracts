@@ -24,6 +24,6 @@ const deployMathLibraryDefibets: DeployFunction = async (hre: HardhatRuntimeEnvi
     });
 };
 
-deployMathLibraryDefibets.tags = ["tags"];
+deployMathLibraryDefibets.tags = ["core"];
 
 export default deployMathLibraryDefibets;
