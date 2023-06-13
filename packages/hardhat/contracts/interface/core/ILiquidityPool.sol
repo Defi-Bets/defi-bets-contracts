@@ -5,6 +5,9 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 interface ILiquidityPool is IERC20 {
 
+    function totalTokenSupply() external view returns(uint256);
+    function lockedTokenSupply() external view returns(uint256);
+
     function maxLPLost() external returns(uint256);
     
     function depositForAccount(address _account,uint256 _amount) external;
@@ -13,6 +16,7 @@ interface ILiquidityPool is IERC20 {
 
     function transferTokensToVault(uint256 _amount) external;
 
-     function updateLockedTokenSupply(uint256 _delta,bool _increase) external;
+    function updateLockedTokenSupply(uint256 _delta,bool _increase,uint256 _expTime) external;
 
+    function resetLockedTokens(uint256 _expTime) external;
 }

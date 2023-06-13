@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "../interface/core/IDefiBets.sol";
+import "../interface/core/IDefiBetsManager.sol";
 
 
 
@@ -21,6 +22,7 @@ error DefiBets__TokenDontExists();
 error DefiBets__NotExecutableTime();
 error DefiBets__NotTheTokenOwner();
 error DefiBets__NotEpxired();
+error DefiBets__NotActive();
 
 contract DefiBets is ERC721, Ownable, IDefiBets {
 
@@ -49,7 +51,7 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
         uint256 maxPrice;
     }
 
-    uint256 public constant EXP_TIME_DELTA = 60*60*24;
+    uint256 private constant MULTIPLIER = 1000000;
 
     /* ====== State Variables ====== */
     Counters.Counter private tokenIds;
@@ -59,12 +61,15 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
     uint256 public maxBetDuration;
     uint256 public slot;                /* Steps of valid bet prices */
     uint256 public maxWinMultiplier;    /* How much should a winner be able to multiply his bet amount (also important for minimum bet range) */
+    uint256 public timeDelta;
+
+    bool public isActive;
 
     
 
 
     //All mappings can be searched with the expiration date.
-    uint256 private  startExpTime;
+    uint256 private  dependentTimeStamp;
     uint256 public lastActiveExpTime;
     mapping(uint256 => bool) private validExpTime;
     mapping(uint256 => ExpTimeInfo) public expTimeInfos;
@@ -73,6 +78,7 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
     mapping(uint => mapping(uint256 => uint256)) public betsWinningSlots;
 
     address public defiBetsManager;
+
     
 
 
@@ -90,6 +96,10 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
         underlying = _underlying;
         
         defiBetsManager = _defiBetsManager;
+
+        isActive = true;
+
+        timeDelta = 60*60*24;
     }
 
     /* ====== Mutation Functions ====== */
@@ -107,11 +117,13 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
         uint256 _maxUserWinnings = calculateMaxUserWinnings(_expTime,_minPrice,_maxPrice,_winning);
         
         uint256 _maxLPLoss = calculateMaxLPLoss(_maxUserWinnings,expTimeInfos[_expTime].totalBets.add(_betSize));
+ 
 
-        //TODO: Fix the maxLossLimat into a relativ value
-        if(_maxLPLoss > expTimeInfos[_expTime].maxLossLimit){
+        bool _valid = _isMaxLossValid(_maxLPLossBefore,_maxLPLoss,expTimeInfos[_expTime].maxLossLimit);
+         if(_valid == false){
             revert DefiBets__NoValidWinningPrice();
         }
+
 
         _updateBetInfo(_expTime,_maxUserWinnings,_betSize);
 
@@ -149,8 +161,6 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
 
             _profits = true;
         }
-
-        
         
         _burn(_tokenId);
 
@@ -184,9 +194,11 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
     function initializeNewExpTime(uint256 _maxLpLoss) external {
         _isDefiBetManager();
         
+        _isActive();
+
         _isNextExpTimeValid();
 
-        uint256 _expTime = lastActiveExpTime.add(EXP_TIME_DELTA);
+        uint256 _expTime = dependentTimeStamp > lastActiveExpTime ? dependentTimeStamp.add(timeDelta) : lastActiveExpTime.add(timeDelta) ;
 
         if(expTimeInfos[_expTime].init == false){
         _initExpTime(_expTime,_maxLpLoss);
@@ -198,22 +210,20 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
     /* ====== Setup Function ====== */
     
     
-    function initializeData(uint256 _startExpTime, uint256 _maxLossPerExpTime, uint256 _minBetDuration, uint256 _maxBetDuration, uint256 _slot, uint256 _maxWinMultiplier) external   {
+    function initializeData(uint256 _dependentTimeStamp, uint256 _maxLossPerExpTime, uint256 _minBetDuration, uint256 _maxBetDuration, uint256 _slot, uint256 _maxWinMultiplier) external   {
         _isDefiBetManager();
 
         if(initialized){
             revert DefiBets__AlreadyInitialized();
         }
-
-        startExpTime = _startExpTime;
         
-        setBetParamater(_maxLossPerExpTime,_minBetDuration,_maxBetDuration,_slot, _maxWinMultiplier);
+        setBetParamater(_maxLossPerExpTime,_minBetDuration,_maxBetDuration,_slot, _maxWinMultiplier,60*60*24,_dependentTimeStamp);
 
         initialized = true;
     }
 
-    //TODO: Only the owner of the contract can call the function
-    function setBetParamater(uint256 _maxLossPerExpTime, uint256 _minBetDuration,uint256 _maxBetDuration,uint256 _slot, uint256 _maxWinMultiplier) public {
+    
+    function setBetParamater(uint256 _maxLossPerExpTime, uint256 _minBetDuration,uint256 _maxBetDuration,uint256 _slot, uint256 _maxWinMultiplier,uint256 _timeDelta,uint256 _dependentTimeStamp) public  {
         _isDefiBetManager();
         if(_minBetDuration >= _maxBetDuration){
             revert DefiBets_NoValidParamters();
@@ -223,10 +233,16 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
         maxBetDuration = _maxBetDuration;
         slot = _slot;
         maxWinMultiplier = _maxWinMultiplier;
+        timeDelta = _timeDelta;
+        dependentTimeStamp = _dependentTimeStamp;
         
         _initializeMaxWinningsPerExpTime(_maxLossPerExpTime);
 
         emit BetParameterUpdated(minBetDuration,maxBetDuration,slot);
+    }
+
+    function stop() external onlyOwner {
+        isActive = false;
     }
 
     
@@ -310,16 +326,22 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
         }
     }
 
+    function _isActive() internal view {
+        if(isActive == false){
+            revert DefiBets__NotActive();
+        }
+    }
+
     function _initializeMaxWinningsPerExpTime(uint256 _maxLossPerExpTime) internal {
-        uint256 _timeSteps = (maxBetDuration.sub(minBetDuration)).div(EXP_TIME_DELTA);
+        uint256 _timeSteps = (maxBetDuration.sub(minBetDuration)).div(timeDelta);
 
         for(uint i = 0; i< _timeSteps;i++){
-            uint256 _expTime = startExpTime.add(EXP_TIME_DELTA.mul(i));
+            uint256 _expTime = dependentTimeStamp.add(timeDelta.mul(i));
 
           _initExpTime(_expTime,_maxLossPerExpTime);
         }
 
-        lastActiveExpTime = startExpTime.add(EXP_TIME_DELTA.mul(_timeSteps.sub(1)));
+        lastActiveExpTime = dependentTimeStamp.add(timeDelta.mul(_timeSteps.sub(1)));
     }
 
     function _initExpTime(uint256 _expTime,uint256 _maxLoss) internal {
@@ -362,11 +384,32 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
     }
 
     function _isNextExpTimeValid() internal view {
-        uint256 _nextExpTime = lastActiveExpTime.add(EXP_TIME_DELTA);
+        uint256 _nextExpTime = lastActiveExpTime.add(timeDelta);
         if(_nextExpTime > block.timestamp.add(maxBetDuration)){
             revert DefiBets__OutOfActiveExpTimeRange();
         }
 
+
+    }
+
+    function _isMaxLossValid(uint256 _maxLossBefore,uint256 _maxLoss,uint256 _allowedLossPercent) internal view returns(bool){
+        
+
+        (uint256 _totalSupply,uint256 _lockedSupply) = IDefiBetsManager(defiBetsManager).getLPTokenSupplies();
+
+        uint256 _allowedLoss = _totalSupply.mul(_allowedLossPercent).div(MULTIPLIER);
+
+        if(_maxLoss > _allowedLoss){
+            return false;
+        }
+
+        uint256 _delta = _maxLoss > _maxLossBefore ? _maxLoss.sub(_maxLossBefore) : 0;
+
+        if(_delta > _totalSupply.sub(_lockedSupply)){
+            return false;
+        }
+
+        return true;
 
     }
 
@@ -398,10 +441,8 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
         return 0;
     }
 
-   
-
-    function getStartExpTime() public view returns(uint256){
-        return startExpTime;
+    function getDependentExpTime() public view returns(uint256){
+        return dependentTimeStamp;
     }
 
     function getBetTokenData(uint256 _tokenId) public view returns (Bet memory){

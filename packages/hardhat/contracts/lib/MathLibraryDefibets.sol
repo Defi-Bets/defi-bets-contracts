@@ -27,16 +27,18 @@ library MathLibraryDefibets {
         return x >= 0 ? x : -x;
     }
 
+
     function calculateStandardDeviation(
-        uint256 delta,
-        uint256 curr_price,
-        uint256 implied_volatility_1000,
-        uint256 days_until_expiry_10000,
-        uint256 implied_volatility_days
-    ) internal pure returns (uint256) {
-        return
-            (delta * BILLION) /
-            (curr_price * implied_volatility_1000 * Math.sqrt(days_until_expiry_10000 / implied_volatility_days));
+        uint256 currPrice,
+        uint256 impliedVolatility30,
+        uint256 timeUntilEpxiry,
+        uint256 impliedVolatitityTime
+    ) internal view returns (uint256) {
+
+        uint256 adjImpliedVol = (impliedVolatility30.mul(Math.sqrt(timeUntilEpxiry.mul(10**8).div(impliedVolatitityTime)))).div(10000);
+        console.log("adjImplVol %i",adjImpliedVol);
+
+        return (currPrice.mul(adjImpliedVol)).div(10000);
     }
 
     function toUint16(bytes memory _bytes, uint256 _start) internal pure returns (uint16) {
@@ -50,19 +52,30 @@ library MathLibraryDefibets {
         return tempUint;
     }
 
+    /**
+     * 
+     * @dev - return the zScore with 4 decimals 
+     */
+    function calculateZScore(uint256 _delta,uint256 _stdDeviation) internal pure returns(uint256){
+
+        return _delta.mul(10**4).div(_stdDeviation);
+
+    }
+
 
     function lookupZtableFromStdDeviation(
-        uint256 std_deviation,
-        bool use_negative_z_table
-    ) private pure returns (uint16) {
-        uint256 index = std_deviation / 500;
+        uint256 zScore,
+        bool useNegativeZTable
+    ) private view returns (uint16) {
+        uint256 index = zScore.div(500);
 
         if(Z_TABLE_MAX < index)
         {
             index = Z_TABLE_MAX;
+            
         }
-
-        if (use_negative_z_table) {
+        console.log("index %i",index);
+        if (useNegativeZTable) {
             // use negative Z-Table
             index = Z_TABLE_MAX - index; /* Invert for negative Z-Table values */
             return toUint16(z_table_negative, index);
@@ -73,61 +86,71 @@ library MathLibraryDefibets {
     }
 
     function calculateProbabilityForBetPrice(
-        uint256 bet_price,
-        uint256 curr_price,
-        uint256 implied_volatility_1000 /* multiplied by 1000 */,
-        uint256 implied_volatility_days,
-        uint256 days_until_expiry_10000 /* multiplied by 10.000 */
-    ) public view returns (uint16) {
+        uint256 betPrice,
+        uint256 currPrice,
+        uint256 stdDeviation
+    ) internal view returns (uint16) {
         uint256 delta = 0;
-        bool use_negative_z_table = false;
+        bool isNegative = false;
 
-        if (curr_price > bet_price) {
-            use_negative_z_table = true;
-            delta = curr_price - bet_price; /* calculate distance (delta) to current price */
+        if (currPrice > betPrice) {
+            isNegative = true;
+            delta = currPrice.sub(betPrice); 
         }else{
-            delta = bet_price - curr_price; /* calculate distance (delta) to current price */
+            delta = betPrice.sub(currPrice); 
         }
-        uint256 std_deviation = calculateStandardDeviation(
-            uint256(delta),
-            curr_price,
-            implied_volatility_1000,
-            days_until_expiry_10000,
-            implied_volatility_days
-        );
+        
+        uint256 zScore = calculateZScore(delta,stdDeviation);
+        console.log("zScore: %i", zScore);
+        console.log("stdDeviation: %i %b", stdDeviation, isNegative);
 
-        console.log("std_deviation: %i %b", std_deviation, use_negative_z_table);
-
-        return lookupZtableFromStdDeviation(std_deviation, use_negative_z_table);
+        return lookupZtableFromStdDeviation(zScore, isNegative);
     }
 
+
+    /**
+     * 
+     * @param lowerPrice - lower price of the price range with decimals
+     * @param upperPrice - upper price of the price range with decimals
+     * @param currPrice  - the current price of the underlying with decimals
+     * @param impliedVolatility - the implied volatility for x days in promille => 30% = 3000
+     * @param impliedVolatilityTime - the time of the volatility in seconds
+     * @param timeUntilEpxiry - the remaining time until expiration in seconds
+     */
     function calculateProbabilityRange(
-        uint256 bet_range_lower,
-        uint256 bet_range_higher,
-        uint256 curr_price,
-        uint256 implied_volatility_1000 /* multiplied by 1000 */,
-        uint256 implied_volatility_days,
-        uint256 days_until_expiry_10000 /* multiplied by 10.000 */
+        uint256 lowerPrice,
+        uint256 upperPrice,
+        uint256 currPrice,
+        uint256 impliedVolatility ,
+        uint256 impliedVolatilityTime,
+        uint256 timeUntilEpxiry 
     ) public view returns (uint256) {
 
         // Sanity checks
-        if((bet_range_lower < 0) || (bet_range_higher < 0) || (curr_price < 0))
+        if((lowerPrice < 0) || (upperPrice < 0) || (currPrice < 0))
         {
             revert MathLibraryDefibets__WrongParameter();
         }
+
+         uint256 stdDeviation = calculateStandardDeviation(
+            currPrice,
+            impliedVolatility,
+            timeUntilEpxiry,
+            impliedVolatilityTime
+        );
 
         //-----------------------------------------------------
         // 1. calculate probability for lower range boundary
         //-----------------------------------------------------
 
-        uint16 propability_lower_10000 = calculateProbabilityForBetPrice(bet_range_lower, curr_price, implied_volatility_1000, implied_volatility_days, days_until_expiry_10000);
+        uint16 propability_lower_10000 = calculateProbabilityForBetPrice(lowerPrice, currPrice, stdDeviation);
 
 
         //-----------------------------------------------------
         // 2. calculate probability for higher range boundary
         //-----------------------------------------------------
         
-        uint16 propability_higher_10000 = calculateProbabilityForBetPrice(bet_range_higher, curr_price, implied_volatility_1000, implied_volatility_days, days_until_expiry_10000);
+        uint16 propability_higher_10000 = calculateProbabilityForBetPrice(upperPrice, currPrice, stdDeviation);
 
 
         //---------------------------------------------------------------

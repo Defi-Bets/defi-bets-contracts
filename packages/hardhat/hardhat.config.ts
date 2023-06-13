@@ -49,41 +49,10 @@ const config: HardhatUserConfig = {
             url: `https://eth-mainnet.alchemyapi.io/v2/${providerApiKey}`,
             accounts: [deployerPrivateKey],
         },
-        sepolia: {
-            url: `https://eth-sepolia.g.alchemy.com/v2/${providerApiKey}`,
-            accounts: [deployerPrivateKey],
-        },
-        goerli: {
-            url: `https://eth-goerli.alchemyapi.io/v2/${providerApiKey}`,
-            accounts: [deployerPrivateKey],
-        },
-        arbitrum: {
-            url: `https://arb-mainnet.g.alchemy.com/v2/${providerApiKey}`,
-            accounts: [deployerPrivateKey],
-        },
-        arbitrumGoerli: {
-            url: `https://arb-goerli.g.alchemy.com/v2/${providerApiKey}`,
-            accounts: [deployerPrivateKey],
-        },
-        optimism: {
-            url: `https://opt-mainnet.g.alchemy.com/v2/${providerApiKey}`,
-            accounts: [deployerPrivateKey],
-        },
-        optimismGoerli: {
-            url: `https://opt-goerli.g.alchemy.com/v2/${providerApiKey}`,
-            accounts: [deployerPrivateKey],
-        },
-        polygon: {
-            url: `https://polygon-mainnet.g.alchemy.com/v2/${providerApiKey}`,
-            accounts: [deployerPrivateKey],
-        },
-        polygonMumbai: {
-            url: `https://polygon-mumbai.g.alchemy.com/v2/${providerApiKey}`,
-            accounts: [deployerPrivateKey],
-        },
         dmcTestnet: {
-            url: "http://35.187.53.161:20551",
+            url: "https://testnet-dmc.mydefichain.com:20551/",
             accounts: [deployerPrivateKey],
+            chainId: 1133,
         },
     },
     verify: {
@@ -93,7 +62,7 @@ const config: HardhatUserConfig = {
     },
     gasReporter: {
         currency: "USD",
-        gasPrice: 1,
+        gasPrice: 15,
         enabled: process.env.ENABLE_GAS === "true",
         coinmarketcap: process.env.COINMARKET_CAP_API,
     },

@@ -10,6 +10,7 @@ import '../interface/core/ILiquidityPool.sol';
 import "../interface/core/IDefiBets.sol";
 import "../interface/math/IDefiBetsMath.sol";
 import "../interface/core/IDefiBetsVault.sol";
+import "../interface/core/IDefiBetsManager.sol";
 
 // Library import
 import "../lib/MathLibraryDefibets.sol";
@@ -20,15 +21,21 @@ error DefiBetsManager__NoLiquidity();
 error DefiBetsManager__FeeNotAllowed();
 error DefiBetsManager__FeeWouldBeTooSmall();
 error DefiBetsManager__ParamNull();
+error DefiBetsManager__NotValidRoundId();
 
 
 /**
 * @title DefiBets Manager Contract
 * @notice This contract controls the main functions of the protocol, allowing users to interact with the decentralized betting platform. It manages liquidity, bets, winnings, and expiration of bets.
 */
-contract DefiBetsManager is Pausable,Ownable {
+contract DefiBetsManager is Pausable,Ownable,IDefiBetsManager {
 
     using SafeMath for uint256;
+
+    struct IVFeed{
+        address feedAddress;
+        uint256 impliedVolatilityTime;
+    }
 
     uint256 public constant MAX_FEE_PPM = 50000; // in ppm (parts per million). 50.000 ppm = 5% = 0,050000
     uint256 public constant MILLION = 1000000;
@@ -38,7 +45,9 @@ contract DefiBetsManager is Pausable,Ownable {
     address public liquidityPool;
     
     uint256 public feePpm;
+    uint8 public payoutRatio;
 
+    mapping(bytes32 => IVFeed) public underlyingIVFeeds;
     mapping(bytes32 => address) public underlyingPriceFeeds;
     mapping(bytes32 => bool) public validUnderlying;
     mapping(bytes32 => address) public defiBetsContracts;
@@ -49,8 +58,9 @@ contract DefiBetsManager is Pausable,Ownable {
     event PriceFeedUpdated(bytes32 underlying,address priceFeed);
     event FeeUpdated(uint256 feePpm);
 
-    constructor(){
-       
+    constructor(uint256 _feePpm,uint8 _payoutRatio){
+       feePpm = _feePpm;
+       payoutRatio = _payoutRatio;
     }
 
 
@@ -123,12 +133,13 @@ contract DefiBetsManager is Pausable,Ownable {
     * @dev Executes the expiration of a bet based on the specified expiration time and underlying asset.
     * @param _expTime The expiration time of the bet.
     * @param _underlying The underlying asset for the bet.
+    * @param _roundId The round id for a valid price of the underlying
     */
-    function executeExpiration(uint256 _expTime,string memory _underlying) external whenNotPaused() {
+    function executeExpiration(uint256 _expTime,string memory _underlying,uint80 _roundId) external whenNotPaused() {
         bytes32 _hash = getUnderlyingByte(_underlying);
        _isValidUnderlying(_hash);
      
-        uint256 _price = getPrice(_hash,_expTime);
+        uint256 _price = getPrice(_hash,_expTime,_roundId);
 
         address _defiBets = defiBetsContracts[_hash];
         address _vault = vaults[_hash];
@@ -142,6 +153,8 @@ contract DefiBetsManager is Pausable,Ownable {
 
             IDefiBetsVault(_vault).depositFromLP(_expTime,_delta);
         }
+
+        ILiquidityPool(liquidityPool).resetLockedTokens(_expTime);
 
     }
 
@@ -197,6 +210,8 @@ contract DefiBetsManager is Pausable,Ownable {
         IDefiBets(_defiBets).initializeData(_startExpTime,_maxLoss,_minBetDuration,_maxBetDuration,_slot,_maxWinMultiplier);
     }
 
+   
+
     function setFeesPpm(uint256 _newFee) external onlyOwner {
         if(_newFee > MAX_FEE_PPM){
             revert DefiBetsManager__FeeNotAllowed();
@@ -217,8 +232,38 @@ contract DefiBetsManager is Pausable,Ownable {
     }
 
     function _executeBetForAccount(address _defiBets,uint256 _netBetSize,uint256 _minPrice,uint256 _maxPrice,uint256 _expTime,uint256 _winning) internal {
-          (uint256 _deltaLockedTokenSupply,bool _increase) = IDefiBets(_defiBets).setBetForAccount(msg.sender,_netBetSize,_minPrice,_maxPrice,_expTime,_winning);
-        ILiquidityPool(liquidityPool).updateLockedTokenSupply(_deltaLockedTokenSupply,_increase);
+        
+        (uint256 _deltaLockedTokenSupply,bool _increase) = IDefiBets(_defiBets).setBetForAccount(msg.sender,_netBetSize,_minPrice,_maxPrice,_expTime,_winning);
+       
+        ILiquidityPool(liquidityPool).updateLockedTokenSupply(_deltaLockedTokenSupply,_increase,_expTime);
+        
+    }
+
+    function _isRoundIdValid(uint256 _expTime,uint80 _roundId,uint80 _latestRoundId,uint256 _latestRoundIdTimestamp,address _priceFeed) internal view {
+       bool _valid = true;
+
+       if(_roundId > _latestRoundId){
+        _valid = false;
+       }
+
+
+        if(_roundId < _latestRoundId){
+
+            (,,,uint256 _timestamp,) = AggregatorV3Interface(_priceFeed).getRoundData(_roundId+1);
+            _valid = _timestamp >= _expTime;
+        }
+
+        if(_roundId == _latestRoundId){
+        _valid = _latestRoundIdTimestamp <= _expTime;
+        }
+       
+       if(_valid == false ){
+        revert DefiBetsManager__NotValidRoundId();
+       }
+    }
+
+    function _calculateWinnings(uint256 _value,uint256 _probability) internal view returns(uint256){
+        return (_value).mul(10000).div(_probability).mul(payoutRatio).div(100);
     }
 
 
@@ -230,7 +275,7 @@ contract DefiBetsManager is Pausable,Ownable {
 
         address _priceFeed = underlyingPriceFeeds[_hash];
 
-        //TODO: Calculate the price for the expTime
+        
         ( ,
         int256 answer,
         ,
@@ -239,25 +284,36 @@ contract DefiBetsManager is Pausable,Ownable {
 
         price = uint256(answer);
 
+       
+
         return price;
     }
 
-    function getPrice(bytes32 _hash,uint256 _expTime) public view returns(uint256){
+    function getPrice(bytes32 _hash,uint256 _expTime,uint80 _roundId) public view returns(uint256){
         uint256 price;
         
         if(underlyingPriceFeeds[_hash] != address(0) && block.timestamp >= _expTime){
 
             address _priceFeed = underlyingPriceFeeds[_hash];
 
-            //TODO: Calculate the price for the expTime
-            ( ,
-            int256 answer,
+            (uint80 _latestRoundId,int256 _latestAnswer,,uint256 _latestTimestamp,) = AggregatorV3Interface(_priceFeed).latestRoundData();
+
+            _isRoundIdValid(_expTime,_roundId,_latestRoundId,_latestTimestamp,_priceFeed);
+
+
+            if(_latestRoundId == _roundId){
+                price = uint256(_latestAnswer);
+            }else{
+                 ( ,
+            int256 _answer,
             ,
             ,
-            ) = AggregatorV3Interface(_priceFeed).latestRoundData();
+            ) = AggregatorV3Interface(_priceFeed).getRoundData(_roundId);
+             price = uint256(_answer);
+            }
 
-            price = uint256(answer);
 
+        
         }
 
         return price;
@@ -292,17 +348,25 @@ contract DefiBetsManager is Pausable,Ownable {
         _minPrice,
         _maxPrice,
         _price,      /* current price BTC */
-        200,        /* TODO: Implied Volatility 20% * 1000 (hard coded without oracle) */
-        30,         /* TODO: Implied Volatility is for 30 days (hard coded without oracle) */   
-        _expTime * 10000);     /* days untill expiry * 10000 */
+        2000,        /* TODO: Implied Volatility 20% * 10000 (hard coded without oracle) */
+        30*60*60*24,         /* TODO: Implied Volatility is for 30 days (hard coded without oracle) */   
+        (_expTime.sub(block.timestamp)));     /* days untill expiry * 10000 */
 
-        return (_betSize.sub(_fee)).mul(probability).div(10000);
+        return _calculateWinnings(_betSize.sub(_fee),probability);
     }
 
     function _isNotNull(uint256 param) internal pure {
         if(0 == param) {
             revert DefiBetsManager__ParamNull();
         }
+    }
+
+    function getLPTokenSupplies() external view returns(uint256,uint256){
+        uint256 _totalSupply = ILiquidityPool(liquidityPool).totalTokenSupply();
+        uint256 _lockedSupply = ILiquidityPool(liquidityPool).lockedTokenSupply();
+
+        return (_totalSupply,_lockedSupply);
+
     }
 
 }
