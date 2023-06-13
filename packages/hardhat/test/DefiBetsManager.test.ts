@@ -147,7 +147,7 @@ describe("DefiBetsManager unit test", () => {
                 deployDefiBetsManagerFixture,
             );
 
-            const startTime = await defiBets.getStartExpTime();
+            const startTime = await defiBets.getDependentExpTime();
             const deltaTime = await defiBets.timeDelta();
 
             const expTime = startTime.add(deltaTime.mul(15));
@@ -169,7 +169,7 @@ describe("DefiBetsManager unit test", () => {
                 deployDefiBetsManagerFixture,
             );
 
-            const startTime = await defiBets.getStartExpTime();
+            const startTime = await defiBets.getDependentExpTime();
             const deltaTime = await defiBets.timeDelta();
 
             const expTime = startTime.add(deltaTime.mul(15));

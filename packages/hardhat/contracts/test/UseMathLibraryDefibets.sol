@@ -7,10 +7,10 @@ import "../lib/MathLibraryDefibets.sol";
 contract UseMathLibraryDefibets {
     constructor() {}
 
-    function calculateProbabilityRange() external returns (uint256){
+    function calculateProbabilityRange() external view returns (uint256){
         uint256 probability = MathLibraryDefibets.calculateProbabilityRange(
         25000, /* target price from BTC 25.000 $ */
-        26000,      /* to BTC 30.000 $ */
+        30000,      /* to BTC 30.000 $ */
         26000,      /* current price BTC 26.000 $ */
         200,        /* Implied Volatility 20% * 1000 */
         30,         /* Implied volatility is for 30 days */   

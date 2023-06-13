@@ -89,7 +89,7 @@ library MathLibraryDefibets {
             delta = bet_price - curr_price; /* calculate distance (delta) to current price */
         }
         uint256 std_deviation = calculateStandardDeviation(
-            uint256(delta),
+            delta,
             curr_price,
             implied_volatility_1000,
             days_until_expiry_10000,
