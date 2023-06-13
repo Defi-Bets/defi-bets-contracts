@@ -53,6 +53,7 @@ const config: HardhatUserConfig = {
             url: "https://testnet-dmc.mydefichain.com:20551/",
             accounts: [deployerPrivateKey],
             chainId: 1133,
+            gas: 30_000_000,
         },
     },
     verify: {
