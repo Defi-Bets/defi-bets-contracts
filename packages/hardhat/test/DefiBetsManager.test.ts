@@ -153,8 +153,8 @@ describe("DefiBetsManager unit test", () => {
             const expTime = startTime.add(deltaTime.mul(15));
 
             const betSize = ethers.utils.parseEther("100");
-            const minPrice = ethers.utils.parseEther("20000");
-            const maxPrice = ethers.utils.parseEther("25000");
+            const minPrice = ethers.utils.parseEther("19000");
+            const maxPrice = ethers.utils.parseEther("21000");
             const expectedFeeAmount = betSize.mul(feePpm).div(MILLION);
 
             await mockDUSD.connect(user).mint(user.address, betSize);

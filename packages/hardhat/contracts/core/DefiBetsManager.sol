@@ -266,6 +266,8 @@ contract DefiBetsManager is Pausable,Ownable {
 
         price = uint256(answer);
 
+       
+
         return price;
     }
 
@@ -291,6 +293,8 @@ contract DefiBetsManager is Pausable,Ownable {
             ) = AggregatorV3Interface(_priceFeed).getRoundData(_roundId);
              price = uint256(_answer);
             }
+
+
         
         }
 
@@ -326,9 +330,9 @@ contract DefiBetsManager is Pausable,Ownable {
         _minPrice,
         _maxPrice,
         _price,      /* current price BTC */
-        200,        /* TODO: Implied Volatility 20% * 1000 (hard coded without oracle) */
-        30,         /* TODO: Implied Volatility is for 30 days (hard coded without oracle) */   
-        _expTime * 10000);     /* days untill expiry * 10000 */
+        2000,        /* TODO: Implied Volatility 20% * 10000 (hard coded without oracle) */
+        30*60*60*24,         /* TODO: Implied Volatility is for 30 days (hard coded without oracle) */   
+        (_expTime.sub(block.timestamp)));     /* days untill expiry * 10000 */
 
         return (_betSize.sub(_fee)).mul(probability).div(10000);
     }
