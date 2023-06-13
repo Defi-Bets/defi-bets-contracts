@@ -29,13 +29,13 @@ contract LiquidityPool is ERC20, ILiquidityPool {
     address public managerContract;
     address public betVault;
     
-
+    mapping(uint256 => uint256) public lockedPerExpTime;
     
 
     /* ====== Events ====== */
     event Deposit(address indexed account,uint256 amount,uint256 shares,uint256 totalTokens,uint256 totalSupply);
     event Redeem(address indexed account, uint256 shares,uint256 amount,uint256 totalTokens, uint256 totalSupply);
-    event LockedSupplyUpdated(uint256 lockedTokenSupply);
+    event LockedSupplyUpdated(uint256 lockedTokenSupply,uint256 expTime,uint256 lockedPerExpTime);
 
     /* ====== Modifier ====== */
 
@@ -96,14 +96,18 @@ contract LiquidityPool is ERC20, ILiquidityPool {
         
     }
 
-    function updateLockedTokenSupply(uint256 _delta,bool _increase) external {
+    function updateLockedTokenSupply(uint256 _delta,bool _increase,uint256 _expTime) external {
         _isManagerContract();
 
         uint256 _lockedTokenSupply = lockedTokenSupply;
 
         lockedTokenSupply = _increase ? _lockedTokenSupply.add(_delta) : _lockedTokenSupply.sub(lockedTokenSupply);
 
-        emit LockedSupplyUpdated(lockedTokenSupply);
+        uint256 _lockedPerExpTime = lockedPerExpTime[_expTime];
+
+        lockedPerExpTime[_expTime] = _increase ? _lockedPerExpTime.add(_delta) : _lockedPerExpTime.sub(lockedTokenSupply);
+
+        emit LockedSupplyUpdated(lockedTokenSupply,_expTime,lockedPerExpTime[_expTime]);
     }
 
     function transferTokensToVault(uint256 _amount) external {
@@ -112,6 +116,22 @@ contract LiquidityPool is ERC20, ILiquidityPool {
         IERC20(token).transfer(betVault,_amount);
 
     }
+
+    function resetLockedTokens(uint256 _expTime) external {
+        _isManagerContract();
+
+
+        uint256 _resetValue = lockedPerExpTime[_expTime];
+
+        uint256 _totalLockedTokens = lockedTokenSupply;
+
+        lockedTokenSupply = _totalLockedTokens.sub(_resetValue);
+        lockedPerExpTime[_expTime] = 0;
+
+        emit LockedSupplyUpdated(lockedTokenSupply,_expTime,lockedPerExpTime[_expTime]);
+    }
+
+    
 
 
     /* ====== Internal Functions ====== */
@@ -185,9 +205,11 @@ contract LiquidityPool is ERC20, ILiquidityPool {
 
     function maxLPLost() public view returns(uint256){
 
-        //TODO: Calculate the free token supply with tha maximum lost percent including redeemings
+        
 
-        return totalTokenSupply.mul(maxLostPerTimeInPercent).div(MULTIPLIER);
+        return maxLostPerTimeInPercent;
     }
+
+    
 
 }

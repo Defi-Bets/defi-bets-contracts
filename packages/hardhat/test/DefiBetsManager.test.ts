@@ -21,6 +21,7 @@ const feePpm = 20000; // 2% Fee
 const MILLION = 1000000;
 const maxWinMultiplier = 40; // maximum win of user can be this * amount
 const maxLossPerTime = 50000;
+const payoutRatio = 90;
 
 describe("DefiBetsManager unit test", () => {
     async function deployDefiBetsManagerFixture() {
@@ -36,7 +37,7 @@ describe("DefiBetsManager unit test", () => {
                 MathLibraryDefibets: (await mathLibraryDefiBets).address,
             },
         })) as DefiBetsManager__factory;
-        const managerContract = await DefiBetsManager.deploy();
+        const managerContract = await DefiBetsManager.deploy(feePpm, payoutRatio);
 
         const MockDUSD = await ethers.getContractFactory("MockDUSD");
         const mockDUSD = await MockDUSD.deploy();
@@ -245,7 +246,7 @@ describe("DefiBetsManager unit test", () => {
             await mockDUSD.connect(user).approve(vault.address, betSize);
 
             const minBoundary = ethers.utils.parseEther("20000");
-            const maxBoundary = ethers.utils.parseEther("25000");
+            const maxBoundary = ethers.utils.parseEther("35000");
             const lastActiveExpTime = await defiBets.lastActiveExpTime();
             console.log(lastActiveExpTime.toString());
 

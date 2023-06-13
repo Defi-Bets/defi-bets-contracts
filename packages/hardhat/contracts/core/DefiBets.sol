@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "../interface/core/IDefiBets.sol";
+import "../interface/core/IDefiBetsManager.sol";
 
 
 
@@ -50,6 +51,7 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
         uint256 maxPrice;
     }
 
+    uint256 private constant MULTIPLIER = 1000000;
 
     /* ====== State Variables ====== */
     Counters.Counter private tokenIds;
@@ -76,6 +78,7 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
     mapping(uint => mapping(uint256 => uint256)) public betsWinningSlots;
 
     address public defiBetsManager;
+
     
 
 
@@ -114,11 +117,13 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
         uint256 _maxUserWinnings = calculateMaxUserWinnings(_expTime,_minPrice,_maxPrice,_winning);
         
         uint256 _maxLPLoss = calculateMaxLPLoss(_maxUserWinnings,expTimeInfos[_expTime].totalBets.add(_betSize));
+ 
 
-        //TODO: Fix the maxLossLimat into a relativ value
-        if(_maxLPLoss > expTimeInfos[_expTime].maxLossLimit){
+        bool _valid = _isMaxLossValid(_maxLPLossBefore,_maxLPLoss,expTimeInfos[_expTime].maxLossLimit);
+         if(_valid == false){
             revert DefiBets__NoValidWinningPrice();
         }
+
 
         _updateBetInfo(_expTime,_maxUserWinnings,_betSize);
 
@@ -384,6 +389,27 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
             revert DefiBets__OutOfActiveExpTimeRange();
         }
 
+
+    }
+
+    function _isMaxLossValid(uint256 _maxLossBefore,uint256 _maxLoss,uint256 _allowedLossPercent) internal view returns(bool){
+        
+
+        (uint256 _totalSupply,uint256 _lockedSupply) = IDefiBetsManager(defiBetsManager).getLPTokenSupplies();
+
+        uint256 _allowedLoss = _totalSupply.mul(_allowedLossPercent).div(MULTIPLIER);
+
+        if(_maxLoss > _allowedLoss){
+            return false;
+        }
+
+        uint256 _delta = _maxLoss > _maxLossBefore ? _maxLoss.sub(_maxLossBefore) : 0;
+
+        if(_delta > _totalSupply.sub(_lockedSupply)){
+            return false;
+        }
+
+        return true;
 
     }
 

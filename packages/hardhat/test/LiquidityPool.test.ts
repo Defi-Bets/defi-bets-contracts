@@ -85,7 +85,7 @@ describe("LiquidityPool unit test", () => {
 
             //2. Lock the tokens
             const lockAmount = ethers.utils.parseEther("100");
-            await liquidityPool.connect(manager).updateLockedTokenSupply(lockAmount, true);
+            await liquidityPool.connect(manager).updateLockedTokenSupply(lockAmount, true, 1000);
 
             //3. Try to redeem the total deposits
             await expect(

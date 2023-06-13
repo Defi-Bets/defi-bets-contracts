@@ -10,6 +10,7 @@ import '../interface/core/ILiquidityPool.sol';
 import "../interface/core/IDefiBets.sol";
 import "../interface/math/IDefiBetsMath.sol";
 import "../interface/core/IDefiBetsVault.sol";
+import "../interface/core/IDefiBetsManager.sol";
 
 // Library import
 import "../lib/MathLibraryDefibets.sol";
@@ -27,9 +28,14 @@ error DefiBetsManager__NotValidRoundId();
 * @title DefiBets Manager Contract
 * @notice This contract controls the main functions of the protocol, allowing users to interact with the decentralized betting platform. It manages liquidity, bets, winnings, and expiration of bets.
 */
-contract DefiBetsManager is Pausable,Ownable {
+contract DefiBetsManager is Pausable,Ownable,IDefiBetsManager {
 
     using SafeMath for uint256;
+
+    struct IVFeed{
+        address feedAddress;
+        uint256 impliedVolatilityTime;
+    }
 
     uint256 public constant MAX_FEE_PPM = 50000; // in ppm (parts per million). 50.000 ppm = 5% = 0,050000
     uint256 public constant MILLION = 1000000;
@@ -39,7 +45,9 @@ contract DefiBetsManager is Pausable,Ownable {
     address public liquidityPool;
     
     uint256 public feePpm;
+    uint8 public payoutRatio;
 
+    mapping(bytes32 => IVFeed) public underlyingIVFeeds;
     mapping(bytes32 => address) public underlyingPriceFeeds;
     mapping(bytes32 => bool) public validUnderlying;
     mapping(bytes32 => address) public defiBetsContracts;
@@ -50,8 +58,9 @@ contract DefiBetsManager is Pausable,Ownable {
     event PriceFeedUpdated(bytes32 underlying,address priceFeed);
     event FeeUpdated(uint256 feePpm);
 
-    constructor(){
-       
+    constructor(uint256 _feePpm,uint8 _payoutRatio){
+       feePpm = _feePpm;
+       payoutRatio = _payoutRatio;
     }
 
 
@@ -145,6 +154,8 @@ contract DefiBetsManager is Pausable,Ownable {
             IDefiBetsVault(_vault).depositFromLP(_expTime,_delta);
         }
 
+        ILiquidityPool(liquidityPool).resetLockedTokens(_expTime);
+
     }
 
     function createNewExpTime(bytes32 _tokenHash) external whenNotPaused() {
@@ -221,8 +232,11 @@ contract DefiBetsManager is Pausable,Ownable {
     }
 
     function _executeBetForAccount(address _defiBets,uint256 _netBetSize,uint256 _minPrice,uint256 _maxPrice,uint256 _expTime,uint256 _winning) internal {
-          (uint256 _deltaLockedTokenSupply,bool _increase) = IDefiBets(_defiBets).setBetForAccount(msg.sender,_netBetSize,_minPrice,_maxPrice,_expTime,_winning);
-        ILiquidityPool(liquidityPool).updateLockedTokenSupply(_deltaLockedTokenSupply,_increase);
+        
+        (uint256 _deltaLockedTokenSupply,bool _increase) = IDefiBets(_defiBets).setBetForAccount(msg.sender,_netBetSize,_minPrice,_maxPrice,_expTime,_winning);
+       
+        ILiquidityPool(liquidityPool).updateLockedTokenSupply(_deltaLockedTokenSupply,_increase,_expTime);
+        
     }
 
     function _isRoundIdValid(uint256 _expTime,uint80 _roundId,uint80 _latestRoundId,uint256 _latestRoundIdTimestamp,address _priceFeed) internal view {
@@ -246,6 +260,10 @@ contract DefiBetsManager is Pausable,Ownable {
        if(_valid == false ){
         revert DefiBetsManager__NotValidRoundId();
        }
+    }
+
+    function _calculateWinnings(uint256 _value,uint256 _probability) internal view returns(uint256){
+        return (_value).mul(10000).div(_probability).mul(payoutRatio).div(100);
     }
 
 
@@ -334,13 +352,21 @@ contract DefiBetsManager is Pausable,Ownable {
         30*60*60*24,         /* TODO: Implied Volatility is for 30 days (hard coded without oracle) */   
         (_expTime.sub(block.timestamp)));     /* days untill expiry * 10000 */
 
-        return (_betSize.sub(_fee)).mul(probability).div(10000);
+        return _calculateWinnings(_betSize.sub(_fee),probability);
     }
 
     function _isNotNull(uint256 param) internal pure {
         if(0 == param) {
             revert DefiBetsManager__ParamNull();
         }
+    }
+
+    function getLPTokenSupplies() external view returns(uint256,uint256){
+        uint256 _totalSupply = ILiquidityPool(liquidityPool).totalTokenSupply();
+        uint256 _lockedSupply = ILiquidityPool(liquidityPool).lockedTokenSupply();
+
+        return (_totalSupply,_lockedSupply);
+
     }
 
 }
