@@ -16,12 +16,11 @@ contract DefiBetOracle is AggregatorV3Interface,Ownable {
     mapping(uint80 => uint256) public getTimestamp;
     mapping(uint80 => uint256) public getStartedAt;
 
-    constructor(uint8 _decimals,int256 _initialAnswer,string memory _description,uint256 _version){
+    constructor(uint8 _decimals,string memory _description,uint256 _version){
       decimals = _decimals;
       description = _description;
       version = _version;
 
-      updateAnswer(_initialAnswer);
     }
 
     function updateAnswer(int256 _answer) public onlyOwner{

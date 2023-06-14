@@ -1,6 +1,7 @@
 import { DeployFunction } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { networkConfig, getNetworkIdFromName } from "../../helper-hardhat-config";
+import { ImpliedVolatilityOracle } from "../../typechain-types";
 
 const deployImpliedVolatilityOracle: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     const { deployer } = await hre.getNamedAccounts();
@@ -22,10 +23,15 @@ const deployImpliedVolatilityOracle: DeployFunction = async (hre: HardhatRuntime
 
         await deploy("ImpliedVolatilityOracle", {
             from: deployer,
-            args: [decimals, initialAnswerIV, description, version, underlying, period],
+            args: [decimals, description, version, underlying, period],
             log: true,
             autoMine: true,
         });
+
+        const oracleContract = (await hre.ethers.getContract("ImpliedVolatilityOracle")) as ImpliedVolatilityOracle;
+        console.log("Updating the initial answer...");
+        await oracleContract.updateAnswer(initialAnswerIV);
+        console.log("finished!");
     } else {
         console.log("Missing parameters in hardhat helper config...");
     }
