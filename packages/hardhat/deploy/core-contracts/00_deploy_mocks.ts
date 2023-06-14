@@ -1,6 +1,6 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
-import { developmentChains } from "../helper-hardhat-config";
+import { developmentChains } from "../../helper-hardhat-config";
 import { ethers } from "hardhat";
 
 const deployMockContracts: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {

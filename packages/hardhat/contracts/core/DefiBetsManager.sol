@@ -34,7 +34,7 @@ contract DefiBetsManager is Pausable,Ownable,IDefiBetsManager {
 
     struct IVFeed{
         address feedAddress;
-        uint256 impliedVolatilityTime;
+        uint256 period;
     }
 
     uint256 public constant MAX_FEE_PPM = 50000; // in ppm (parts per million). 50.000 ppm = 5% = 0,050000
@@ -57,6 +57,7 @@ contract DefiBetsManager is Pausable,Ownable,IDefiBetsManager {
     event UnderlyingAdded(string underlying,bytes32 underlyingHash,address defiBets,address vault);
     event PriceFeedUpdated(bytes32 underlying,address priceFeed);
     event FeeUpdated(uint256 feePpm);
+    event IVFeedUpdated(bytes32 underlying,address feed,uint256 period);
 
     constructor(uint256 _feePpm,uint8 _payoutRatio){
        feePpm = _feePpm;
@@ -196,6 +197,14 @@ contract DefiBetsManager is Pausable,Ownable,IDefiBetsManager {
         underlyingPriceFeeds[_hash] = _feed;
 
         emit PriceFeedUpdated(_hash,_feed);
+    }
+
+    function updateIVFeed(bytes32 _hash,address _feed, uint256 _period) public onlyOwner{
+        _isValidUnderlying(_hash);
+
+        underlyingIVFeeds[_hash] = IVFeed(_feed,_period);
+
+        emit IVFeedUpdated(_hash,_feed,_period);
     }
 
     function initializeBets(bytes32 _hash,uint256 _startExpTime,uint256 _minBetDuration,uint256 _maxBetDuration,uint256 _slot, uint256 _maxWinMultiplier) external onlyOwner {

@@ -11,6 +11,9 @@ export const networkConfig: INetworkConfig = {
         slot: ethers.utils.parseEther("200"),
         fee: 0,
         payoutRatio: 90,
+        decimalsIV: 4,
+        initialAnswerIV: 2000,
+        periodIV: 30 * 60 * 60 * 24,
     },
     1133: {
         name: "dmcTestnet",
@@ -22,10 +25,13 @@ export const networkConfig: INetworkConfig = {
         volatilityFeed: "0x",
         timeDelta: 43200,
         slot: ethers.utils.parseEther("50"),
+        decimalsIV: 4,
+        initialAnswerIV: 2000,
+        periodIV: 30 * 60 * 60 * 24,
     },
 };
 
-export const developmentChains = ["hardhat", "localhost"];
+export const developmentChains = ["hardhat", "localhost", "dmcTestnet"];
 export const testNetworks = ["polygonMumbai"];
 
 export const deploymentFilesLocation = "./deployments";

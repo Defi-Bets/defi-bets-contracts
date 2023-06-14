@@ -1,6 +1,6 @@
 import { DeployFunction } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { networkConfig, getNetworkIdFromName } from "../helper-hardhat-config";
+import { networkConfig, getNetworkIdFromName } from "../../helper-hardhat-config";
 
 const deployDefiBetsManagerContract: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     const { deployer } = await hre.getNamedAccounts();
@@ -31,6 +31,6 @@ const deployDefiBetsManagerContract: DeployFunction = async (hre: HardhatRuntime
     }
 };
 
-deployDefiBetsManagerContract.tags = ["tags"];
+deployDefiBetsManagerContract.tags = ["core"];
 
 export default deployDefiBetsManagerContract;
