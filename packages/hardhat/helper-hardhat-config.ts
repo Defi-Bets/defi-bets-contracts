@@ -14,6 +14,8 @@ export const networkConfig: INetworkConfig = {
         decimalsIV: 4,
         initialAnswerIV: 2000,
         periodIV: 30 * 60 * 60 * 24,
+        decimalsPriceFeed: 18,
+        initialAnswerPrice: ethers.utils.parseEther("25918"),
     },
     1133: {
         name: "dmcTestnet",
@@ -28,6 +30,8 @@ export const networkConfig: INetworkConfig = {
         decimalsIV: 4,
         initialAnswerIV: 2000,
         periodIV: 30 * 60 * 60 * 24,
+        decimalsPriceFeed: 18,
+        initialAnswerPrice: ethers.utils.parseEther("25918"),
     },
 };
 

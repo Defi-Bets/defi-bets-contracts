@@ -10,4 +10,5 @@ temp
 cache
 artifacts
 
-deployments
+deployments/localhost
+deployments/dmcTestnet/solcInputs
