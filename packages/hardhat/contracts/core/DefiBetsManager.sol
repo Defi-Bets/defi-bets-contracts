@@ -100,7 +100,7 @@ contract DefiBetsManager is Pausable,Ownable,IDefiBetsManager {
      
         uint256 _price = getCurrPrice(_hash);
 
-        uint256 _winning = calculateWinning(_price,_betSize,_fee,_minPrice,_maxPrice,_expTime);
+        uint256 _winning = calculateWinning(_price,_betSize,_fee,_minPrice,_maxPrice,_expTime,_hash);
 
         address _defiBets = defiBetsContracts[_hash];
         address _vault = vaults[_hash];
@@ -272,6 +272,7 @@ contract DefiBetsManager is Pausable,Ownable,IDefiBetsManager {
     }
 
     function _calculateWinnings(uint256 _value,uint256 _probability) internal view returns(uint256){
+        
         return (_value).mul(10000).div(_probability).mul(payoutRatio).div(100);
     }
 
@@ -351,14 +352,15 @@ contract DefiBetsManager is Pausable,Ownable,IDefiBetsManager {
         return _feeAmount;
     }
 
-    function calculateWinning(uint256 _price,uint256 _betSize,uint256 _fee,uint256 _minPrice,uint256 _maxPrice,uint256 _expTime) public view returns (uint256){
+    function calculateWinning(uint256 _price,uint256 _betSize,uint256 _fee,uint256 _minPrice,uint256 _maxPrice,uint256 _expTime,bytes32 _hash) public view returns (uint256){
+
         //Probabiliy per 10000
         uint256 probability = MathLibraryDefibets.calculateProbabilityRange(
         _minPrice,
         _maxPrice,
         _price,      /* current price BTC */
-        2000,        /* TODO: Implied Volatility 20% * 10000 (hard coded without oracle) */
-        30*60*60*24,         /* TODO: Implied Volatility is for 30 days (hard coded without oracle) */   
+        getImplVol(_hash),       
+        underlyingIVFeeds[_hash].period,      
         (_expTime.sub(block.timestamp)));     /* days untill expiry * 10000 */
 
         return _calculateWinnings(_betSize.sub(_fee),probability);
@@ -375,6 +377,19 @@ contract DefiBetsManager is Pausable,Ownable,IDefiBetsManager {
         uint256 _lockedSupply = ILiquidityPool(liquidityPool).lockedTokenSupply();
 
         return (_totalSupply,_lockedSupply);
+
+    }
+
+    function getImplVol(bytes32 _hash) public view returns(uint256){
+
+
+        ( ,
+        int256 answer,
+        ,
+        ,
+        ) = AggregatorV3Interface(underlyingIVFeeds[_hash].feedAddress).latestRoundData();
+
+        return uint256(answer);
 
     }
 
