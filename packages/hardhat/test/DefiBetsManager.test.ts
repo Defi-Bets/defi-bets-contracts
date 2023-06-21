@@ -5,6 +5,7 @@ import {
     DefiBetsManager__factory,
     DefiBetsVault__factory,
     DefiBets__factory,
+    ImpliedVolatilityOracle__factory,
     LiquidityPool__factory,
     MathLibraryDefibets__factory,
     MockV3Aggregator,
@@ -26,6 +27,13 @@ const payoutRatio = 90;
 describe("DefiBetsManager unit test", () => {
     async function deployDefiBetsManagerFixture() {
         const [deployer, user, lpStaker] = await ethers.getSigners();
+
+        const ImpliedVolatilityOracle = (await ethers.getContractFactory(
+            "ImpliedVolatilityOracle",
+        )) as ImpliedVolatilityOracle__factory;
+
+        const ivOracle = await ImpliedVolatilityOracle.deploy(18, "IV Oracle", 1, "BTC", 30 * 60 * 60 * 24);
+        await ivOracle.updateAnswer(2000);
 
         const MathLibraryDefiBets = (await ethers.getContractFactory(
             "MathLibraryDefibets",
@@ -62,6 +70,8 @@ describe("DefiBetsManager unit test", () => {
         await managerContract.setAddresses(liquidityPool.address);
 
         await managerContract.addUnderlyingToken("BTC", priceFeed.address, defiBets.address, vault.address);
+        const underlyingHash = await managerContract.getUnderlyingByte("BTC");
+        await managerContract.updateIVFeed(underlyingHash, ivOracle.address, 30 * 60 * 60 * 24);
 
         await managerContract.setFeesPpm(feePpm);
 

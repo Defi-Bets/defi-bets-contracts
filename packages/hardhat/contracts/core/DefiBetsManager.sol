@@ -272,6 +272,7 @@ contract DefiBetsManager is Pausable,Ownable,IDefiBetsManager {
     }
 
     function _calculateWinnings(uint256 _value,uint256 _probability) internal view returns(uint256){
+        
         return (_value).mul(10000).div(_probability).mul(payoutRatio).div(100);
     }
 
