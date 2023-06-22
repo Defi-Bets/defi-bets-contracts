@@ -13,7 +13,7 @@ const deployLiquidityPoolContract: DeployFunction = async (hre: HardhatRuntimeEn
 
     const maxLossPerTime = 50000;
 
-    const lpPoolContract = await deploy("LiquidityPool", {
+    await deploy("LiquidityPool", {
         from: deployer,
         log: true,
         args: [managerContractAddress, token, betVault, maxLossPerTime],
