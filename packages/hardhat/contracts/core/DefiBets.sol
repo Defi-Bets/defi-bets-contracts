@@ -167,7 +167,7 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
         return (_tokensForClaim,_betTokenInfo.expTime,_profits);
     }
 
-    function performExpiration(uint256 _expTime,uint256 _expPrice) external returns(uint256,bool) {
+    function performExpiration(uint256 _expTime,uint256 _expPrice) external returns(uint256,bool, uint256) {
         _isDefiBetManager();
         _isInitialized();
 
@@ -177,7 +177,7 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
             revert DefiBets__NotExecutableTime();
         }
 
-        (uint256 _delta,bool _profit) = _evaluateProfits(_expTime,_expPrice);
+        (uint256 _delta,bool _profit, uint256 _playerWinnings) = _evaluateProfits(_expTime,_expPrice);
 
         //update the data 
         expTimeInfos[_expTime].deltaValue = _delta;
@@ -188,7 +188,7 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
 
         emit Expiration(_expTime,_profit,_delta);
 
-        return (_delta,_profit);
+        return (_delta, _profit, _playerWinnings);
     }
 
     function initializeNewExpTime(uint256 _maxLpLoss) external {
@@ -361,7 +361,7 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
 
 
 
-    function _evaluateProfits(uint256 _expTime,uint256 _expPrice) internal view returns(uint256,bool){
+    function _evaluateProfits(uint256 _expTime,uint256 _expPrice) internal view returns(uint256,bool, uint256){
         uint256 _delta;
         bool _profit;
         uint256 _totalBets = expTimeInfos[_expTime].totalBets;
@@ -374,12 +374,13 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
         }else{
             _winningsExist = betsWinningSlots[_expTime][_expPrice.sub(_expPrice.mod(slot))];
         }
+        
 
         _profit = _totalBets > _winningsExist;
 
         _delta = _profit ? _totalBets.sub(_winningsExist) : _winningsExist.sub(_totalBets);
 
-        return (_delta,_profit);
+        return (_delta, _profit, _winningsExist);
 
     }
 
