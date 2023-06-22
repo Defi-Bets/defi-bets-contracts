@@ -5,12 +5,17 @@ import "../interface/core/IDefiBetsManager.sol";
 import "../interface/core/IDefiBets.sol";
 
 contract MockManager is IDefiBetsManager{
-    function getLPTokenSupplies() external view returns(uint256,uint256){
+    function getLPTokenSupplies() external pure returns(uint256,uint256){
         uint256 _totalSupply = 6000*10**18;
         uint256 _lockedSupply = 0;
 
         return (_totalSupply,_lockedSupply);
 
+    }
+
+    function setNewPayoutFactor(uint256 _payoutFactor) external
+    {
+        // dummy
     }
 
     function initialize(address defiBets,uint256 startExpTime,uint256 maxLossPerDay,uint256 minBetDuration,uint256 maxBetDuration,uint256 slot, uint256 maxWinMultiplier) external {
