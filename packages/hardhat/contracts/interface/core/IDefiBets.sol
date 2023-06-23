@@ -24,7 +24,7 @@ interface IDefiBets {
 
     function setBetParamater(uint256 _maxLossPerDay,uint256 _minBetDuration,uint256 _maxBetDuration,uint256 _slot,uint256 _maxWinMultiplier,uint256 _timeDelta,uint256 _dependentTimeStamp) external;
 
-    function performExpiration(uint256 _expTime,uint256 _expPrice) external returns(uint256,bool) ;
+    function performExpiration(uint256 _expTime,uint256 _expPrice) external returns(uint256,bool, uint256) ;
 
     function initializeNewExpTime(uint256 _maxLpLoss) external ;
 

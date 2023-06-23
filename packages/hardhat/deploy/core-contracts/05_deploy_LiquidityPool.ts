@@ -13,7 +13,7 @@ const deployLiquidityPoolContract: DeployFunction = async (hre: HardhatRuntimeEn
 
     const maxLossPerTime = 50000;
 
-    const lpPoolContract = await deploy("LiquidityPool", {
+    await deploy("LiquidityPool", {
         from: deployer,
         log: true,
         args: [managerContractAddress, token, betVault, maxLossPerTime],
@@ -23,8 +23,6 @@ const deployLiquidityPoolContract: DeployFunction = async (hre: HardhatRuntimeEn
     const managerContract: DefiBetsManager = await hre.ethers.getContract("DefiBetsManager");
 
     const defiBetsAddress = (await get("DefiBets")).address;
-
-    await managerContract.setAddresses(lpPoolContract.address);
 
     const feedAddress = (await get("MockV3Aggregator")).address;
     await managerContract.addUnderlyingToken("BTC", feedAddress, defiBetsAddress, betVault);

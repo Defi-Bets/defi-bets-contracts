@@ -11,6 +11,7 @@ import "../interface/core/IDefiBets.sol";
 import "../interface/math/IDefiBetsMath.sol";
 import "../interface/core/IDefiBetsVault.sol";
 import "../interface/core/IDefiBetsManager.sol";
+import "../interface/core/IDefiBetsPayoutRatio.sol";
 
 // Library import
 import "../lib/MathLibraryDefibets.sol";
@@ -22,6 +23,7 @@ error DefiBetsManager__FeeNotAllowed();
 error DefiBetsManager__FeeWouldBeTooSmall();
 error DefiBetsManager__ParamNull();
 error DefiBetsManager__NotValidRoundId();
+error DefiBetsManager__AccessForbidden();
 
 
 /**
@@ -43,9 +45,10 @@ contract DefiBetsManager is Pausable,Ownable,IDefiBetsManager {
     /* ====== State Variables ====== */
 
     address public liquidityPool;
+    address public payoutRatioContract;
     
     uint256 public feePpm;
-    uint8 public payoutRatio;
+    uint256 public payoutFactor;       /* payout per 100 */
 
     mapping(bytes32 => IVFeed) public underlyingIVFeeds;
     mapping(bytes32 => address) public underlyingPriceFeeds;
@@ -59,9 +62,9 @@ contract DefiBetsManager is Pausable,Ownable,IDefiBetsManager {
     event FeeUpdated(uint256 feePpm);
     event IVFeedUpdated(bytes32 underlying,address feed,uint256 period);
 
-    constructor(uint256 _feePpm,uint8 _payoutRatio){
+    constructor(uint256 _feePpm,uint8 _startPayoutFactor){
        feePpm = _feePpm;
-       payoutRatio = _payoutRatio;
+       payoutFactor = _startPayoutFactor;
     }
 
 
@@ -107,6 +110,8 @@ contract DefiBetsManager is Pausable,Ownable,IDefiBetsManager {
         
         _executeBetForAccount(_defiBets,_betSize.sub(_fee),_minPrice,_maxPrice,_expTime,_winning);
 
+        IDefiBetsPayoutRatio(payoutRatioContract).updateLpWins(_betSize.sub(_fee));
+
         IDefiBetsVault(_vault).deposit(msg.sender,_betSize,_expTime,_fee);
     }
 
@@ -145,9 +150,11 @@ contract DefiBetsManager is Pausable,Ownable,IDefiBetsManager {
         address _defiBets = defiBetsContracts[_hash];
         address _vault = vaults[_hash];
 
-        (uint256 _delta,bool _profit) = IDefiBets(_defiBets).performExpiration(_expTime,_price);
+        (uint256 _delta,bool _profit, uint256 _playerWinnings) = IDefiBets(_defiBets).performExpiration(_expTime,_price);
 
         if(_profit == true){
+            IDefiBetsPayoutRatio(payoutRatioContract).updatePlayerWins(payoutFactor, _playerWinnings);
+
             IDefiBetsVault(_vault).withdraw(liquidityPool,_delta,_expTime);
         }else{
             ILiquidityPool(liquidityPool).transferTokensToVault(_delta);
@@ -174,8 +181,9 @@ contract DefiBetsManager is Pausable,Ownable,IDefiBetsManager {
 
     /* ====== Setup Functions ====== */
 
-    function setAddresses(address _liquidityPool) external onlyOwner {
+    function setAddresses(address _liquidityPool, address _payoutRatioContract) external onlyOwner {
         liquidityPool = _liquidityPool;
+        payoutRatioContract = _payoutRatioContract;
     }
 
     function addUnderlyingToken(string memory _underlying,address _feed,address _defiBets,address _vault) external onlyOwner {
@@ -240,6 +248,12 @@ contract DefiBetsManager is Pausable,Ownable,IDefiBetsManager {
         }
     }
 
+    function _isPayoutRatioContract() internal view {
+        if(msg.sender != payoutRatioContract){
+            revert DefiBetsManager__AccessForbidden();
+        }
+    }
+
     function _executeBetForAccount(address _defiBets,uint256 _netBetSize,uint256 _minPrice,uint256 _maxPrice,uint256 _expTime,uint256 _winning) internal {
         
         (uint256 _deltaLockedTokenSupply,bool _increase) = IDefiBets(_defiBets).setBetForAccount(msg.sender,_netBetSize,_minPrice,_maxPrice,_expTime,_winning);
@@ -273,7 +287,7 @@ contract DefiBetsManager is Pausable,Ownable,IDefiBetsManager {
 
     function _calculateWinnings(uint256 _value,uint256 _probability) internal view returns(uint256){
         
-        return (_value).mul(10000).div(_probability).mul(payoutRatio).div(100);
+        return (_value).mul(10000).div(_probability).mul(payoutFactor).div(100);
     }
 
 
@@ -391,6 +405,11 @@ contract DefiBetsManager is Pausable,Ownable,IDefiBetsManager {
 
         return uint256(answer);
 
+    }
+
+    function setNewPayoutFactor(uint256 _payoutFactor) external {
+        _isPayoutRatioContract();
+        payoutFactor = _payoutFactor;
     }
 
 }
