@@ -3,6 +3,7 @@ import { loadFixture, time } from "@nomicfoundation/hardhat-network-helpers";
 import { ethers } from "hardhat";
 import {
     DefiBetsManager__factory,
+    DefiBetsPayoutRatio__factory,
     DefiBetsVault__factory,
     DefiBets__factory,
     ImpliedVolatilityOracle__factory,
@@ -22,7 +23,9 @@ const feePpm = 20000; // 2% Fee
 const MILLION = 1000000;
 const maxWinMultiplier = 40; // maximum win of user can be this * amount
 const maxLossPerTime = 50000;
-const payoutRatio = 90;
+const startPayoutFactor = 90;
+const moduloDays = 7
+const targetPayoutRatio = 90
 
 describe("DefiBetsManager unit test", () => {
     async function deployDefiBetsManagerFixture() {
@@ -45,7 +48,7 @@ describe("DefiBetsManager unit test", () => {
                 MathLibraryDefibets: (await mathLibraryDefiBets).address,
             },
         })) as DefiBetsManager__factory;
-        const managerContract = await DefiBetsManager.deploy(feePpm, payoutRatio);
+        const managerContract = await DefiBetsManager.deploy(feePpm, startPayoutFactor);
 
         const MockDUSD = await ethers.getContractFactory("MockDUSD");
         const mockDUSD = await MockDUSD.deploy();
@@ -67,7 +70,10 @@ describe("DefiBetsManager unit test", () => {
         const PriceFeed = (await ethers.getContractFactory("MockV3Aggregator")) as MockV3Aggregator__factory;
         const priceFeed = await PriceFeed.deploy(8, priceAnswer);
 
-        await managerContract.setAddresses(liquidityPool.address);
+        const DefiBetsPayoutRatio = (await ethers.getContractFactory('DefiBetsPayoutRatio')) as DefiBetsPayoutRatio__factory
+        const defiBetsPayoutRatio = await DefiBetsPayoutRatio.deploy(managerContract.address,moduloDays,targetPayoutRatio)
+
+        await managerContract.setAddresses(liquidityPool.address,defiBetsPayoutRatio.address);
 
         await managerContract.addUnderlyingToken("BTC", priceFeed.address, defiBets.address, vault.address);
         const underlyingHash = await managerContract.getUnderlyingByte("BTC");
