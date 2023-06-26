@@ -24,8 +24,8 @@ const MILLION = 1000000;
 const maxWinMultiplier = 40; // maximum win of user can be this * amount
 const maxLossPerTime = 50000;
 const startPayoutFactor = 90;
-const moduloDays = 7
-const targetPayoutRatio = 90
+const moduloDays = 7;
+const targetPayoutRatio = 90;
 
 describe("DefiBetsManager unit test", () => {
     async function deployDefiBetsManagerFixture() {
@@ -70,10 +70,16 @@ describe("DefiBetsManager unit test", () => {
         const PriceFeed = (await ethers.getContractFactory("MockV3Aggregator")) as MockV3Aggregator__factory;
         const priceFeed = await PriceFeed.deploy(8, priceAnswer);
 
-        const DefiBetsPayoutRatio = (await ethers.getContractFactory('DefiBetsPayoutRatio')) as DefiBetsPayoutRatio__factory
-        const defiBetsPayoutRatio = await DefiBetsPayoutRatio.deploy(managerContract.address,moduloDays,targetPayoutRatio)
+        const DefiBetsPayoutRatio = (await ethers.getContractFactory(
+            "DefiBetsPayoutRatio",
+        )) as DefiBetsPayoutRatio__factory;
+        const defiBetsPayoutRatio = await DefiBetsPayoutRatio.deploy(
+            managerContract.address,
+            moduloDays,
+            targetPayoutRatio,
+        );
 
-        await managerContract.setAddresses(liquidityPool.address,defiBetsPayoutRatio.address);
+        await managerContract.setAddresses(liquidityPool.address, defiBetsPayoutRatio.address);
 
         await managerContract.addUnderlyingToken("BTC", priceFeed.address, defiBets.address, vault.address);
         const underlyingHash = await managerContract.getUnderlyingByte("BTC");
