@@ -31,4 +31,5 @@ interface IDefiBets {
     function lastActiveExpTime() external returns(uint256);
 
     function initializeData(uint256 _startExpTime,uint256 _maxLossPerExpTime,uint256 _minBetDuration,uint256 _maxBetDuration,uint256 _slot, uint256 _maxWinMultiplier) external;
+
 }
