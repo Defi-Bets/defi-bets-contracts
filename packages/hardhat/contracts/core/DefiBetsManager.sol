@@ -240,6 +240,20 @@ contract DefiBetsManager is Pausable,Ownable,IDefiBetsManager {
     }
 
 
+    function setDefiBetsParameter(uint256 _maxLossPerExpTime, uint256 _minBetDuration,uint256 _maxBetDuration,uint256 _slot, uint256 _maxWinMultiplier,uint256 _timeDelta,uint256 _dependentTimeStamp,bytes32 _hash) external onlyOwner {
+        _isValidUnderlying(_hash);
+
+        address _defiBetsAddress = defiBetsContracts[_hash];
+
+        IDefiBets(_defiBetsAddress).setBetParamater(_maxLossPerExpTime,_maxBetDuration,_minBetDuration,_slot,_maxWinMultiplier,_timeDelta,_dependentTimeStamp);
+
+
+    }
+
+    function updateMaxLPLoss(uint256 _newMaxLoss) external onlyOwner{
+        ILiquidityPool(liquidityPool).updateMaxLoss(_newMaxLoss);
+    }
+
     /* ====== Internal Functions ====== */
 
     function _isValidUnderlying(bytes32 _hash) internal view {

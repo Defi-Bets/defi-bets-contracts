@@ -36,6 +36,7 @@ contract LiquidityPool is ERC20, ILiquidityPool {
     event Deposit(address indexed account,uint256 amount,uint256 shares,uint256 totalTokens,uint256 totalSupply);
     event Redeem(address indexed account, uint256 shares,uint256 amount,uint256 totalTokens, uint256 totalSupply);
     event LockedSupplyUpdated(uint256 lockedTokenSupply,uint256 expTime,uint256 lockedPerExpTime);
+    event MaxLossPerTimeUpdated(uint256 newMaxLoss);
 
     /* ====== Modifier ====== */
 
@@ -131,6 +132,15 @@ contract LiquidityPool is ERC20, ILiquidityPool {
         emit LockedSupplyUpdated(lockedTokenSupply,_expTime,lockedPerExpTime[_expTime]);
     }
 
+    function updateMaxLoss(uint256 _newMaxLoss) external{
+        _isManagerContract();
+
+        maxLostPerTimeInPercent = _newMaxLoss;
+
+
+        emit MaxLossPerTimeUpdated(_newMaxLoss);
+    }
+
     
 
 
@@ -204,8 +214,6 @@ contract LiquidityPool is ERC20, ILiquidityPool {
     }
 
     function maxLPLost() public view returns(uint256){
-
-        
 
         return maxLostPerTimeInPercent;
     }
