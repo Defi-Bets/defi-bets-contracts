@@ -4,21 +4,44 @@ interface INetworkConfig {
     [key: number]: any;
 }
 export const networkConfig: INetworkConfig = {
-    80001: {
-        name: "polygonMumbai",
-        minDuration: 3600,
-        maxDuration: 2592000,
-        slot: ethers.utils.parseEther("200"),
-    },
     31337: {
         name: "localhost",
         minDuration: 3600,
         maxDuration: 2592000,
         slot: ethers.utils.parseEther("200"),
+        fee: 0,
+        payoutRatio: 90,
+        decimalsIV: 4,
+        initialAnswerIV: 2000,
+        periodIV: 30 * 60 * 60 * 24,
+        decimalsPriceFeed: 18,
+        initialAnswerPrice: ethers.utils.parseEther("25918"),
+        targetPayoutRatio: 90,
+        moduloDays: 7,
+        maxLossPerTime: 50000,
+    },
+    1133: {
+        name: "dmcTestnet",
+        minDuration: 259200,
+        maxDuration: 604800,
+        fee: 0,
+        payoutRatio: 90,
+        priceFeed: "0x",
+        volatilityFeed: "0x",
+        timeDelta: 43200,
+        slot: ethers.utils.parseEther("50"),
+        decimalsIV: 4,
+        initialAnswerIV: 2000,
+        periodIV: 30 * 60 * 60 * 24,
+        decimalsPriceFeed: 18,
+        initialAnswerPrice: ethers.utils.parseEther("25918"),
+        targetPayoutRatio: 90,
+        moduloDays: 7,
+        maxLossPerTime: 50000,
     },
 };
 
-export const developmentChains = ["hardhat", "localhost"];
+export const developmentChains = ["hardhat", "localhost", "dmcTestnet"];
 export const testNetworks = ["polygonMumbai"];
 
 export const deploymentFilesLocation = "./deployments";

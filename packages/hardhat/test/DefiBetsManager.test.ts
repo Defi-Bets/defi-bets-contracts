@@ -3,9 +3,13 @@ import { loadFixture, time } from "@nomicfoundation/hardhat-network-helpers";
 import { ethers } from "hardhat";
 import {
     DefiBetsManager__factory,
+    DefiBetsPayoutRatio__factory,
     DefiBetsVault__factory,
     DefiBets__factory,
+    ImpliedVolatilityOracle__factory,
     LiquidityPool__factory,
+    MathLibraryDefibets__factory,
+    MockV3Aggregator,
     MockV3Aggregator__factory,
 } from "../typechain-types";
 
@@ -18,19 +22,36 @@ const priceAnswer = ethers.utils.parseEther("20000");
 const feePpm = 20000; // 2% Fee
 const MILLION = 1000000;
 const maxWinMultiplier = 40; // maximum win of user can be this * amount
+const maxLossPerTime = 50000;
+const startPayoutFactor = 90;
+const moduloDays = 7;
+const targetPayoutRatio = 90;
 
 describe("DefiBetsManager unit test", () => {
     async function deployDefiBetsManagerFixture() {
         const [deployer, user, lpStaker] = await ethers.getSigners();
 
-        const DefiBetsManager = (await ethers.getContractFactory("DefiBetsManager")) as DefiBetsManager__factory;
-        const managerContract = await DefiBetsManager.deploy();
+        const ImpliedVolatilityOracle = (await ethers.getContractFactory(
+            "ImpliedVolatilityOracle",
+        )) as ImpliedVolatilityOracle__factory;
+
+        const ivOracle = await ImpliedVolatilityOracle.deploy(18, "IV Oracle", 1, "BTC", 30 * 60 * 60 * 24);
+        await ivOracle.updateAnswer(2000);
+
+        const MathLibraryDefiBets = (await ethers.getContractFactory(
+            "MathLibraryDefibets",
+        )) as MathLibraryDefibets__factory;
+        const mathLibraryDefiBets = MathLibraryDefiBets.deploy();
+
+        const DefiBetsManager = (await ethers.getContractFactory("DefiBetsManager", {
+            libraries: {
+                MathLibraryDefibets: (await mathLibraryDefiBets).address,
+            },
+        })) as DefiBetsManager__factory;
+        const managerContract = await DefiBetsManager.deploy(feePpm, startPayoutFactor);
 
         const MockDUSD = await ethers.getContractFactory("MockDUSD");
         const mockDUSD = await MockDUSD.deploy();
-
-        const MockMath = await ethers.getContractFactory("MockMath");
-        const mockMath = await MockMath.deploy();
 
         const DefiBets = (await ethers.getContractFactory("DefiBets")) as DefiBets__factory;
         const defiBets = await DefiBets.deploy("BTC", managerContract.address);
@@ -38,26 +59,31 @@ describe("DefiBetsManager unit test", () => {
         const DefiBetsVault = (await ethers.getContractFactory("DefiBetsVault")) as DefiBetsVault__factory;
         const vault = await DefiBetsVault.deploy(managerContract.address, mockDUSD.address);
 
-        const transactionCount = await deployer.getTransactionCount();
-        const redeemVaultAddress = ethers.utils.getContractAddress({
-            from: deployer.address,
-            nonce: transactionCount + 1,
-        });
-
         const LiquidityPool = (await ethers.getContractFactory("LiquidityPool")) as LiquidityPool__factory;
         const liquidityPool = await LiquidityPool.deploy(
             managerContract.address,
             mockDUSD.address,
             vault.address,
-            redeemVaultAddress,
+            maxLossPerTime,
         );
 
         const PriceFeed = (await ethers.getContractFactory("MockV3Aggregator")) as MockV3Aggregator__factory;
         const priceFeed = await PriceFeed.deploy(8, priceAnswer);
 
-        await managerContract.setAddresses(liquidityPool.address, mockMath.address);
+        const DefiBetsPayoutRatio = (await ethers.getContractFactory(
+            "DefiBetsPayoutRatio",
+        )) as DefiBetsPayoutRatio__factory;
+        const defiBetsPayoutRatio = await DefiBetsPayoutRatio.deploy(
+            managerContract.address,
+            moduloDays,
+            targetPayoutRatio,
+        );
+
+        await managerContract.setAddresses(liquidityPool.address, defiBetsPayoutRatio.address);
 
         await managerContract.addUnderlyingToken("BTC", priceFeed.address, defiBets.address, vault.address);
+        const underlyingHash = await managerContract.getUnderlyingByte("BTC");
+        await managerContract.updateIVFeed(underlyingHash, ivOracle.address, 30 * 60 * 60 * 24);
 
         await managerContract.setFeesPpm(feePpm);
 
@@ -144,14 +170,14 @@ describe("DefiBetsManager unit test", () => {
                 deployDefiBetsManagerFixture,
             );
 
-            const startTime = await defiBets.getStartExpTime();
-            const deltaTime = await defiBets.EXP_TIME_DELTA();
+            const startTime = await defiBets.getDependentExpTime();
+            const deltaTime = await defiBets.timeDelta();
 
             const expTime = startTime.add(deltaTime.mul(15));
 
             const betSize = ethers.utils.parseEther("100");
-            const minPrice = ethers.utils.parseEther("20000");
-            const maxPrice = ethers.utils.parseEther("25000");
+            const minPrice = ethers.utils.parseEther("19000");
+            const maxPrice = ethers.utils.parseEther("21000");
             const expectedFeeAmount = betSize.mul(feePpm).div(MILLION);
 
             await mockDUSD.connect(user).mint(user.address, betSize);
@@ -166,8 +192,8 @@ describe("DefiBetsManager unit test", () => {
                 deployDefiBetsManagerFixture,
             );
 
-            const startTime = await defiBets.getStartExpTime();
-            const deltaTime = await defiBets.EXP_TIME_DELTA();
+            const startTime = await defiBets.getDependentExpTime();
+            const deltaTime = await defiBets.timeDelta();
 
             const expTime = startTime.add(deltaTime.mul(15));
 
@@ -188,13 +214,20 @@ describe("DefiBetsManager unit test", () => {
         it("Should execute the expiration after passing the timestamp", async () => {
             const { managerContract, defiBets } = await loadFixture(deployDefiBetsManagerFixture);
 
-            const firstExpTime = await defiBets.getStartExpTime();
+            const lastActiveExpTime = await defiBets.lastActiveExpTime();
+
+            const underlyingByte = await managerContract.getUnderlyingByte("BTC");
+            const _priceFeedAddress = await managerContract.underlyingPriceFeeds(underlyingByte);
+
+            const priceFeed = (await ethers.getContractAt("MockV3Aggregator", _priceFeedAddress)) as MockV3Aggregator;
+
+            const answer = await priceFeed.latestRoundData();
 
             //increase the time and pass the first exp time
+            await time.increaseTo(lastActiveExpTime.add(1));
+            await managerContract.executeExpiration(lastActiveExpTime, "BTC", answer.roundId);
 
-            await managerContract.executeExpiration(firstExpTime, "BTC");
-
-            expect((await defiBets.expTimeInfos(startExpTime)).finished).to.be.equal(true);
+            expect((await defiBets.expTimeInfos(lastActiveExpTime)).finished).to.be.equal(true);
         });
     });
 
@@ -206,7 +239,7 @@ describe("DefiBetsManager unit test", () => {
 
             const maxDuration = await defiBets.maxBetDuration();
 
-            const delta = await defiBets.EXP_TIME_DELTA();
+            const delta = await defiBets.timeDelta();
 
             const blockNo = await ethers.provider.getBlockNumber();
             const block = await ethers.provider.getBlock(blockNo);
@@ -235,8 +268,9 @@ describe("DefiBetsManager unit test", () => {
             await mockDUSD.connect(user).approve(vault.address, betSize);
 
             const minBoundary = ethers.utils.parseEther("20000");
-            const maxBoundary = ethers.utils.parseEther("25000");
+            const maxBoundary = ethers.utils.parseEther("35000");
             const lastActiveExpTime = await defiBets.lastActiveExpTime();
+            console.log(lastActiveExpTime.toString());
 
             await managerContract.connect(user).setBet(betSize, minBoundary, maxBoundary, lastActiveExpTime, "BTC");
 
@@ -245,7 +279,11 @@ describe("DefiBetsManager unit test", () => {
             const expProfit = (await defiBets.getBetTokenData(1)).profit;
 
             await time.increaseTo(lastActiveExpTime.add(1));
-            await managerContract.executeExpiration(lastActiveExpTime, "BTC");
+
+            const answer = await priceFeed.latestRoundData();
+            console.log(answer.updatedAt.toString());
+
+            await managerContract.executeExpiration(lastActiveExpTime, "BTC", answer.roundId);
 
             const hash = await managerContract.getUnderlyingByte("BTC");
             await managerContract.connect(user).claimWinnings(1, hash);

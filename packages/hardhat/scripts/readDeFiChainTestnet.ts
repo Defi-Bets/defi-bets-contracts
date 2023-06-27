@@ -11,6 +11,9 @@ async function main() {
     const network = await ethers.provider.getNetwork();
 
     console.log(`⛓️ chain ID: ${network.chainId}`);
+
+    const block = await ethers.provider.getBlock(blockNumber);
+    console.log(block);
 }
 
 main().catch(error => {
