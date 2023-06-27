@@ -10,8 +10,8 @@ export const dmcTestnet = {
     symbol: "DFI",
   },
   rpcUrls: {
-    public: { http: ["https://testnet-dmc.mydefichain.com:20551/"] },
-    default: { http: ["https://testnet-dmc.mydefichain.com:20551/"] },
+    public: { http: [" http://35.187.53.161:20551/"] },
+    default: { http: ["http://35.187.53.161:20551/"] },
   },
   blockExplorers: {
     etherscan: { name: "MyDefiChain", url: "https://testnet-dmc.mydefichain.com:8444/" },

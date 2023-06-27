@@ -1,3 +1,4 @@
+import { ethers } from "ethers";
 import { useDefiBetsContracts } from "./useDefiBetsContracts";
 import { useContract, useContractRead, useSigner } from "wagmi";
 
@@ -31,5 +32,24 @@ export function useManagerContract(underlying: string) {
     enabled: Boolean(underlyingHash),
   });
 
-  return { managerContract, underlyingAddress: _underlyingAddress as string };
+  const { data: priceOracleAddress } = useContractRead({
+    ...contractConfig,
+    functionName: "underlyingPriceFeeds",
+    args: [underlyingHash],
+    enabled: Boolean(underlyingHash),
+  });
+
+  const { data: priceData } = useContractRead({
+    abi: contractAbis["BTCPriceOracle"],
+    address: "0xF62E4eA5E6c0d3aD7f8069Ac78715556752F262e",
+    functionName: "latestRoundData",
+    enabled: Boolean(priceOracleAddress),
+  });
+
+  return {
+    managerContract,
+    underlyingAddress: _underlyingAddress as string,
+    underlyingPrice: priceData,
+    priceOracleAddress,
+  };
 }

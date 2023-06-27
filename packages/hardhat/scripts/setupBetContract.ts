@@ -23,10 +23,15 @@ async function main() {
         const startExpTime = Math.floor(new Date(dateString).getTime() / 1000);
 
         const hash = await manager.getUnderlyingByte("BTC");
-        const tx = await manager.connect(owner).initializeBets(hash, startExpTime, minDuration, maxDuration, slot, 2);
-        await tx.wait();
+        console.log(hash);
+        if (hash) {
+            const tx = await manager
+                .connect(owner)
+                .initializeBets(hash, startExpTime, minDuration, maxDuration, slot, 2);
+            await tx.wait();
 
-        console.log("🎟️  finished. you can start betting.");
+            console.log("🎟️  finished. you can start betting.");
+        }
     } else {
         console.log("🛑  You don't have setup the parameters in the config for this chain!");
         console.log("You can set the paramaters in [helper-hardhat-config.ts]");

@@ -24,7 +24,7 @@ export const BettingModal: React.FC<BettingModalProps> = ({ expTime, underlying,
   const { contractAddresses } = useDefiBetsContracts();
 
   const { approve, setValue, allowance, isLoading, userAmount } = useStableToken(
-    contractAddresses["MockDUSD"],
+    contractAddresses["FakeDUSD"],
     contractAddresses["DefiBetsVault"],
   );
 

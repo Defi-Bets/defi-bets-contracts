@@ -78,12 +78,21 @@ export const useDefiBetsContracts = () => {
 
     const deployedDefiBets = contracts?.[chainId]?.[0]?.contracts?.["DefiBets"] as Contract<"DefiBets">;
 
-    const deployedMockUSD = contracts?.[chainId]?.[0]?.contracts?.["MockDUSD"] as Contract<"MockDUSD">;
+    const deployedFakeDUSD = contracts?.[chainId]?.[0]?.contracts?.["FakeDUSD"] as Contract<"FakeDUSD">;
 
     const deployeBetVault = contracts?.[chainId]?.[0]?.contracts?.["DefiBetsVault"] as Contract<"DefiBetsVault">;
 
-    if (deployedMockUSD) {
-      _contractAddresses["MockDUSD"] = deployedMockUSD.address;
+    const deployedBTCOracle = contracts?.[chainId]?.[0]?.contracts?.["BTCPriceOracle"] as Contract<"BTCPriceOracle">;
+
+    if (deployedBTCOracle) {
+      _contractAddresses["BTCPriceOracle"] = deployedBTCOracle.address;
+      _contractAbis["BTCPriceOracle"] = deployedBTCOracle.abi;
+    } else {
+      deployed = false;
+    }
+
+    if (deployedFakeDUSD) {
+      _contractAddresses["FakeDUSD"] = deployedFakeDUSD.address;
     } else {
       deployed = false;
     }

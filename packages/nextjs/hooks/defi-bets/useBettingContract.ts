@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useDefiBetsContracts } from "./useDefiBetsContracts";
 import { BigNumber, ethers } from "ethers";
-import { useContract, useContractEvent, useContractRead, useSigner } from "wagmi";
+import { useContract, useContractEvent, useContractRead, useSigner, useProvider } from "wagmi";
 
 export type BetData = { betSize: number; expDate: number; minPrice: number; maxPrice: number; profit: number };
 
@@ -16,6 +16,8 @@ export const useBettingContract = (underlyingAddress: string, expTime?: number, 
     abi: abi,
     address: underlyingAddress,
   };
+
+  const provider = useProvider();
 
   const { data: signer } = useSigner();
 
@@ -60,40 +62,52 @@ export const useBettingContract = (underlyingAddress: string, expTime?: number, 
 
   useEffect(() => {
     const fetchExpTimesFromUnderlying = async () => {
-      const expTimesEvents = await defiBetsContract?.queryFilter("EpxirationTimeCreated");
+      if (defiBetsContract) {
+        const eventName = "EpxirationTimeCreated"; // Replace with the name of your event
 
-      const _expTimes: number[] = [];
-      expTimesEvents?.forEach(event => {
-        if (event.args) {
-          _expTimes?.push(event.args.expTime);
-        }
-      });
+        // Create a filter to retrieve all events
 
-      setExpTimes(_expTimes);
+        const logs = await provider.getLogs(defiBetsContract.filters.EpxirationTimeCreated());
+        console.log(logs);
+
+        const expTimesEvents = await defiBetsContract.queryFilter("EpxirationTimeCreated");
+
+        const _expTimes: number[] = [];
+        expTimesEvents?.forEach(event => {
+          if (event.args) {
+            _expTimes?.push(event.args.expTime);
+          }
+        });
+
+        setExpTimes(_expTimes);
+      }
     };
 
     const fetchBettingsFromExpTime = async () => {
-      const bettingEvents = await defiBetsContract?.queryFilter("BetPlaced");
+      if (defiBetsContract?.address !== ethers.constants.AddressZero) {
+        console.log(defiBetsContract);
 
-      // bettingEvents?.filter(event => event?.args?.expDate.toNumber() === expTime);
-      const _bets: BetData[] = [];
-      bettingEvents?.map(event => {
-        if (event.args) {
-          _bets.push({
-            betSize: parseFloat(ethers.utils.formatUnits(event.args.betSize)),
-            expDate: parseInt(event.args.expDate),
-            minPrice: parseFloat(ethers.utils.formatUnits(event.args.minPrice)),
-            maxPrice: parseFloat(ethers.utils.formatUnits(event.args.maxPrice)),
-            profit: parseFloat(ethers.utils.formatUnits(event.args.profit)),
-          });
-        }
-      });
+        // bettingEvents?.filter(event => event?.args?.expDate.toNumber() === expTime);
+        // const _bets: BetData[] = [];
+        // bettingEvents?.map(event => {
+        //   if (event.args) {
+        //     _bets.push({
+        //       betSize: parseFloat(ethers.utils.formatUnits(event.args.betSize)),
+        //       expDate: parseInt(event.args.expDate),
+        //       minPrice: parseFloat(ethers.utils.formatUnits(event.args.minPrice)),
+        //       maxPrice: parseFloat(ethers.utils.formatUnits(event.args.maxPrice)),
+        //       profit: parseFloat(ethers.utils.formatUnits(event.args.profit)),
+        //     });
+        //   }
+        // });
 
-      setBets(_bets);
+        // setBets(_bets);
+      }
     };
-
-    fetchBettingsFromExpTime();
-    fetchExpTimesFromUnderlying();
+    if (underlyingAddress) {
+      // fetchBettingsFromExpTime();
+      // fetchExpTimesFromUnderlying();
+    }
   }, [defiBetsContract, expTimeInfo]);
 
   return { totalBets, tokenData, expTimes, bets, maxLossLimit, maxUserWinning };

@@ -13,13 +13,9 @@ const DefiBets: NextPage = () => {
   const [open, setOpen] = useState(false);
   const handleToggle = () => setOpen(prev => !prev);
 
-  const { underlyingAddress } = useManagerContract("BTC");
+  const { underlyingAddress, underlyingPrice } = useManagerContract("BTC");
 
   const { expTimes, totalBets, maxLossLimit, maxUserWinning } = useBettingContract(underlyingAddress, activeExpTime);
-
-  useEffect(() => {
-    console.log(totalBets?.toString());
-  }, [activeExpTime, totalBets]);
 
   function formatNumberWithSuffix(valueBig: BigNumber): string {
     const suffixes = [" ", " K", " M"];
@@ -32,7 +28,7 @@ const DefiBets: NextPage = () => {
       suffixIndex++;
     }
 
-    return value.toFixed(1) + suffixes[suffixIndex];
+    return value.toFixed(2) + suffixes[suffixIndex];
   }
 
   return (
@@ -57,7 +53,7 @@ const DefiBets: NextPage = () => {
                 </div>
               </div>
             </div>
-            <div className="stat-value">25.60 K $</div>
+            <div className="stat-value">{underlyingPrice ? formatNumberWithSuffix(underlyingPrice[1]) : "0.00"} $</div>
             <div className="stat-title">Price</div>
           </div>
           <div className="stat">
