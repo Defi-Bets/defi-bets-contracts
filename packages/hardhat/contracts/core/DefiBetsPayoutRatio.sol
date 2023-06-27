@@ -9,7 +9,7 @@ import "../interface/core/IDefiBetsManager.sol";
 import "hardhat/console.sol";
 
 
-//error DefiBetsVault__Forbidden();
+error DefiBetsPayoutRatio__AccessForbidden();
 
 contract DefiBetsPayoutRatio is IDefiBetsPayoutRatio, Ownable{
 
@@ -40,13 +40,14 @@ contract DefiBetsPayoutRatio is IDefiBetsPayoutRatio, Ownable{
 
     /* ====== Mutation Functions ====== */
 
-    function setTargetPayoutRatio(uint256 _targetPayoutRatio) external
+    function setTargetPayoutRatio(uint256 _targetPayoutRatio) external onlyOwner
     {
         targetPayoutRatio = _targetPayoutRatio;
     }
 
     function updateLpWins(uint256 amount) external
-    {
+    {   
+        _isManagerContract();
         // loop through all modulo days
         uint256 dayCounter;
         for(dayCounter = 0; dayCounter < moduloDays; dayCounter++)
@@ -57,7 +58,8 @@ contract DefiBetsPayoutRatio is IDefiBetsPayoutRatio, Ownable{
 
      /* call max once per day! */
     function updatePlayerWins(uint256 _currentPayoutFactor, uint256 amount) external
-    {
+    {   
+        _isManagerContract();
         // loop through all modulo days
         uint256 dayCounter;
         for(dayCounter = 0; dayCounter < moduloDays; dayCounter++)
@@ -121,5 +123,11 @@ contract DefiBetsPayoutRatio is IDefiBetsPayoutRatio, Ownable{
 
         // perfect ratio and factor, do nothing
         return _currentPayoutFactor;
+    }
+
+    function _isManagerContract() internal view {
+        if(msg.sender != managerContract){
+            revert DefiBetsPayoutRatio__AccessForbidden();
+        }
     }
 }
