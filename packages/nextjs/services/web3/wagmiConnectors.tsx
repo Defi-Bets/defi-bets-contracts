@@ -13,6 +13,7 @@ import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
 import scaffoldConfig from "~~/scaffold.config";
 import { burnerWalletConfig } from "~~/services/web3/wagmi-burner/burnerWalletConfig";
+import { dmcTestnet } from "~~/utils/defi-bets/defiMetaChainTest";
 import { getTargetNetwork } from "~~/utils/scaffold-eth";
 
 const configuredNetwork = getTargetNetwork();
@@ -20,7 +21,9 @@ const burnerConfig = scaffoldConfig.burnerWallet;
 
 // We always want to have mainnet enabled (ENS resolution, ETH price, etc). But only once.
 const enabledChains =
-  (configuredNetwork.id as number) === 1 ? [configuredNetwork] : [configuredNetwork, chains.mainnet];
+  (configuredNetwork.id as number) === 1
+    ? [configuredNetwork, dmcTestnet]
+    : [configuredNetwork, chains.mainnet, dmcTestnet];
 
 /**
  * Chains for the app

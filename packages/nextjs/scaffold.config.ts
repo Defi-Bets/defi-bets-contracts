@@ -1,3 +1,4 @@
+import { dmcTestnet } from "./utils/defi-bets/defiMetaChainTest";
 import * as chains from "wagmi/chains";
 
 export type ScaffoldConfig = {
@@ -13,7 +14,7 @@ export type ScaffoldConfig = {
 
 const scaffoldConfig = {
   // The network where your DApp lives in
-  targetNetwork: chains.hardhat,
+  targetNetwork: dmcTestnet,
 
   // The interval at which your front-end polls the RPC servers for new data
   // it has no effect on the local network
@@ -28,7 +29,7 @@ const scaffoldConfig = {
   // Burner Wallet configuration
   burnerWallet: {
     // Set it to false to completely remove burner wallet from all networks
-    enabled: true,
+    enabled: false,
     // Only show the Burner Wallet when running on hardhat network
     onlyLocal: true,
   },
