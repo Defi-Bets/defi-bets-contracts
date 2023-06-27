@@ -1,31 +1,43 @@
 import { DeployFunction } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { DefiBetsManager } from "../../typechain-types";
+import { networkConfig, getNetworkIdFromName } from "../../helper-hardhat-config";
 
 const deployLiquidityPoolContract: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     const { deployer } = await hre.getNamedAccounts();
-    const { deploy, get } = hre.deployments;
+    const { deploy, get, getOrNull } = hre.deployments;
 
     const managerContractAddress = (await get("DefiBetsManager")).address;
     const betVault = (await get("DefiBetsVault")).address;
 
-    const token = (await hre.ethers.getContract("MockDUSD")).address;
+    const tokenContract = await getOrNull("FakeDUSD");
 
-    const maxLossPerTime = 50000;
+    if (tokenContract) {
+        const tokenAddress = tokenContract.address;
 
-    await deploy("LiquidityPool", {
-        from: deployer,
-        log: true,
-        args: [managerContractAddress, token, betVault, maxLossPerTime],
-        autoMine: true,
-    });
+        const network = hre.network.name;
 
-    const managerContract: DefiBetsManager = await hre.ethers.getContract("DefiBetsManager");
+        const chainId = await getNetworkIdFromName(network);
 
-    const defiBetsAddress = (await get("DefiBets")).address;
+        if (chainId) {
+            const maxLossPerTime = networkConfig[chainId].maxLossPerTime;
 
-    const feedAddress = (await get("MockV3Aggregator")).address;
-    await managerContract.addUnderlyingToken("BTC", feedAddress, defiBetsAddress, betVault);
+            await deploy("LiquidityPool", {
+                from: deployer,
+                log: true,
+                args: [managerContractAddress, tokenAddress, betVault, maxLossPerTime],
+                autoMine: true,
+            });
+        }
+    } else {
+        console.log("No Stable Token exist!! Please deploy stable token!");
+    }
+
+    // const managerContract: DefiBetsManager = await hre.ethers.getContract("DefiBetsManager");
+
+    // const defiBetsAddress = (await get("DefiBets")).address;
+
+    // const feedAddress = (await get("MockV3Aggregator")).address;
+    // await managerContract.addUnderlyingToken("BTC", feedAddress, defiBetsAddress, betVault);
 };
 
 deployLiquidityPoolContract.tags = ["core"];

@@ -18,6 +18,7 @@ export const networkConfig: INetworkConfig = {
         initialAnswerPrice: ethers.utils.parseEther("25918"),
         targetPayoutRatio: 90,
         moduloDays: 7,
+        maxLossPerTime: 50000,
     },
     1133: {
         name: "dmcTestnet",
@@ -36,6 +37,7 @@ export const networkConfig: INetworkConfig = {
         initialAnswerPrice: ethers.utils.parseEther("25918"),
         targetPayoutRatio: 90,
         moduloDays: 7,
+        maxLossPerTime: 50000,
     },
 };
 
