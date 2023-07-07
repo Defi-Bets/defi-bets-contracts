@@ -1,12 +1,13 @@
 import { ethers } from "hardhat";
-import { DefiBets } from "../../typechain-types";
+import { DefiBets, DefiBetsManager } from "../../typechain-types";
 import { BigNumber } from "ethers";
 
 async function main() {
     const defiBetsContract = (await ethers.getContract("DefiBets")) as DefiBets;
+    const managerContract = (await ethers.getContract("DefiBetsManager")) as DefiBetsManager;
 
-    // const filter = defiBetsContract.filters.EpxirationTimeCreated();
-    // console.log(filter);
+    const filter = defiBetsContract.filters.EpxirationTimeCreated();
+    console.log(filter);
 
     const dependentTimeStamp: BigNumber = await defiBetsContract.getDependentExpTime();
     const delta: BigNumber = await defiBetsContract.timeDelta();
@@ -46,14 +47,14 @@ async function main() {
     }
 
     //activate all possible exp times
-    // const hash = await managerContract.getUnderlyingByte("BTC");
-    // try {
-    //     const tx = await managerContract.createNewExpTime(hash);
-    //     await tx.wait(1);
-    //     console.log("new exp time created!");
-    // } catch (e) {
-    //     console.log(e);
-    // }
+    const hash = await managerContract.getUnderlyingByte("BTC");
+    try {
+        const tx = await managerContract.createNewExpTime(hash);
+        await tx.wait(1);
+        console.log("new exp time created!");
+    } catch (e) {
+        console.log(e);
+    }
 }
 
 main().catch(error => {
