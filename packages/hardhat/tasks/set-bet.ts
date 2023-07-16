@@ -4,11 +4,13 @@ import { DefiBets, DefiBetsManager, FakeDUSD } from "../typechain-types";
 
 task("set-bet", "Description of my task")
     .addParam("amount", "Bet amount in Dollar")
-    .addParam("expTime", "Expiration timestamp ")
-    .addParam("minRange", "Minimum range in 50$ steps")
-    .addParam("maxRange", "Maximum range in 50$ steps")
+    .addParam("exptime", "Expiration timestamp ")
+    .addParam("minrange", "Minimum range in 50$ steps")
+    .addParam("maxrange", "Maximum range in 50$ steps")
     .setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
         const { ethers } = hre;
+
+        console.log(taskArgs);
 
         const managerContract = (await ethers.getContract("DefiBetsManager")) as DefiBetsManager;
         const fDUSD = (await ethers.getContract("FakeDUSD")) as FakeDUSD;
@@ -17,9 +19,9 @@ task("set-bet", "Description of my task")
         const underlyingHash = await managerContract.getUnderlyingByte("BTC");
 
         const _amount = ethers.utils.parseEther(taskArgs.amount);
-        const _expTime = parseInt(taskArgs.expTime);
-        const _minRange = ethers.utils.parseEther(taskArgs.minRange);
-        const _maxRange = ethers.utils.parseEther(taskArgs.maxRange);
+        const _expTime = parseInt(taskArgs.exptime);
+        const _minRange = ethers.utils.parseEther(taskArgs.minrange);
+        const _maxRange = ethers.utils.parseEther(taskArgs.maxrange);
 
         const expTimeInfo = await defiBets.expTimeInfos(_expTime);
 

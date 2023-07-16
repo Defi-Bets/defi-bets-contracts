@@ -9,6 +9,9 @@ async function main() {
     const filter = defiBetsContract.filters.EpxirationTimeCreated();
     console.log(filter);
 
+    // const logs = await ethers.provider.getLogs(filter);
+    // console.log(logs);
+
     const dependentTimeStamp: BigNumber = await defiBetsContract.getDependentExpTime();
     const delta: BigNumber = await defiBetsContract.timeDelta();
     console.log(`Time Delta: ${delta.toNumber() / 24 / 60 / 60} days`);
