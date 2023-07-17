@@ -17,17 +17,14 @@ async function main() {
         const manager = (await ethers.getContract("DefiBetsManager")) as DefiBetsManager;
 
         const hash = await manager.getUnderlyingByte("BTC");
-        const valid = await manager.validUnderlying(hash);
 
-        if (valid === false) {
-            const priceFeed = (await ethers.getContract("BTCPriceOracle")).address;
-            const defiBets = (await ethers.getContract("DefiBets")).address;
-            const volaFeed = (await ethers.getContract("ImpliedVolatilityOracle")).address;
-            const vault = (await ethers.getContract("DefiBetsVault")).address;
+        const priceFeed = (await ethers.getContract("BTCPriceOracle")).address;
+        const defiBets = (await ethers.getContract("DefiBets")).address;
+        const volaFeed = (await ethers.getContract("ImpliedVolatilityOracle")).address;
+        const vault = (await ethers.getContract("DefiBetsVault")).address;
 
-            await manager.addUnderlyingToken("BTC", priceFeed, defiBets, vault);
-            await manager.updateIVFeed(hash, volaFeed, 30 * 60 * 60);
-        }
+        await manager.addUnderlyingToken("BTC", priceFeed, defiBets, vault);
+        await manager.updateIVFeed(hash, volaFeed, 30 * 60 * 60);
 
         console.log("🎛️  Setup the defi-bets contract...");
         const owner = (await ethers.getSigners())[0];
