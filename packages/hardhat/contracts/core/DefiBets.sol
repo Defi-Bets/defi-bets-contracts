@@ -54,7 +54,7 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
     uint256 private constant MULTIPLIER = 1000000;
 
     /* ====== State Variables ====== */
-    Counters.Counter private tokenIds;
+    Counters.Counter public tokenIds;
     string public underlying;
     bool private initialized;
     uint256 public minBetDuration;

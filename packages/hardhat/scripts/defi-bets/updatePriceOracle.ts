@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from "axios";
 import { ethers } from "hardhat";
-import { BTCPriceOracle } from "../typechain-types";
+import { BTCPriceOracle } from "../../typechain-types";
 
 const BASE_URL = "https://pro-api.coinmarketcap.com";
 

@@ -35,8 +35,8 @@ describe("DefiBetsManager unit test", () => {
             "ImpliedVolatilityOracle",
         )) as ImpliedVolatilityOracle__factory;
 
-        const ivOracle = await ImpliedVolatilityOracle.deploy(18, "IV Oracle", 1, "BTC", 30 * 60 * 60 * 24);
-        await ivOracle.updateAnswer(2000);
+        const ivOracle = await ImpliedVolatilityOracle.deploy(4, "IV Oracle", 1, "BTC", 30 * 60 * 60 * 24);
+        await ivOracle.updateAnswer(4601);
 
         const MathLibraryDefiBets = (await ethers.getContractFactory(
             "MathLibraryDefibets",
@@ -289,6 +289,41 @@ describe("DefiBetsManager unit test", () => {
             await managerContract.connect(user).claimWinnings(1, hash);
 
             expect(await mockDUSD.balanceOf(user.address)).to.be.equal(expProfit);
+        });
+    });
+
+    describe("#calculateWinning", () => {
+        it("should calculate the correct winning if the range is above the current price", async () => {
+            const { managerContract, defiBets } = await loadFixture(deployDefiBetsManagerFixture);
+
+            const hash = await managerContract.getUnderlyingByte("BTC");
+
+            const _betSize = ethers.utils.parseEther("5");
+            const _minPrice = ethers.utils.parseEther("21000");
+            const _maxPrice = ethers.utils.parseEther("24000");
+            const lastActiveExpTime = await defiBets.lastActiveExpTime();
+
+            const now = Math.ceil(Date.now() / 1000);
+            const _delta = lastActiveExpTime.sub(now);
+            console.log(_delta.toNumber());
+
+            const implVol = await managerContract.getImplVol(hash);
+            console.log(`Impl. Vol.: ${implVol.toNumber()}`);
+
+            const payoutFactor = await managerContract.payoutFactor();
+            console.log(`Payout Factor: ${payoutFactor.toNumber()}`);
+
+            const winning = await managerContract.calculateWinning(
+                priceAnswer,
+                _betSize,
+                0,
+                _minPrice,
+                _maxPrice,
+                lastActiveExpTime,
+                hash,
+            );
+
+            console.log(`Winning: ${ethers.utils.formatEther(winning)}`);
         });
     });
 });
