@@ -134,7 +134,7 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
         
         emit BetPlaced(_account,_betSize,_winning,_expTime,_minPrice,_maxPrice);
 
-        return _maxLPLossBefore > _maxLPLoss ? (_maxLPLoss.sub(_maxLPLossBefore),false) : (_maxLPLoss.sub(_maxLPLossBefore),true);
+        return _maxLPLossBefore > _maxLPLoss ? (_maxLPLossBefore.sub(_maxLPLoss),false) : (_maxLPLoss.sub(_maxLPLossBefore),true);
 
     }
 

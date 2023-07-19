@@ -13,7 +13,7 @@ import {
     MockV3Aggregator__factory,
 } from "../typechain-types";
 
-const slot = ethers.utils.parseEther("200");
+const slot = ethers.utils.parseEther("50");
 const minBetDuration = 60 * 60 * 24 * 4;
 const maxBetDuration = 60 * 60 * 24 * 30;
 const dateString = Date.now();
@@ -41,11 +41,11 @@ describe("DefiBetsManager unit test", () => {
         const MathLibraryDefiBets = (await ethers.getContractFactory(
             "MathLibraryDefibets",
         )) as MathLibraryDefibets__factory;
-        const mathLibraryDefiBets = MathLibraryDefiBets.deploy();
+        const mathLibraryDefiBets = await MathLibraryDefiBets.deploy();
 
         const DefiBetsManager = (await ethers.getContractFactory("DefiBetsManager", {
             libraries: {
-                MathLibraryDefibets: (await mathLibraryDefiBets).address,
+                MathLibraryDefibets: mathLibraryDefiBets.address,
             },
         })) as DefiBetsManager__factory;
         const managerContract = await DefiBetsManager.deploy(feePpm, startPayoutFactor);
@@ -97,7 +97,19 @@ describe("DefiBetsManager unit test", () => {
             .connect(deployer)
             .initializeBets(hash, startExpTime, minBetDuration, maxBetDuration, slot, maxWinMultiplier);
 
-        return { deployer, user, lpStaker, managerContract, defiBets, mockDUSD, vault, liquidityPool, priceFeed };
+        return {
+            deployer,
+            user,
+            lpStaker,
+            managerContract,
+            defiBets,
+            mockDUSD,
+            vault,
+            liquidityPool,
+            priceFeed,
+            ivOracle,
+            mathLibraryDefiBets,
+        };
     }
 
     describe("#setFeesPpm", () => {
@@ -208,6 +220,67 @@ describe("DefiBetsManager unit test", () => {
             expect(
                 managerContract.connect(user).setBet(betSize, minPrice, maxPrice, expTime, "BTC"),
             ).to.be.revertedWith("DefiBets__NoValidPrice");
+        });
+
+        it("it should set a bet error #1", async () => {
+            const { managerContract, defiBets, ivOracle, priceFeed, mathLibraryDefiBets, user, mockDUSD, vault } =
+                await loadFixture(deployDefiBetsManagerFixture);
+
+            //set bet before
+            const minRangeB = ethers.utils.parseEther("25000");
+            const maxRangeB = ethers.utils.parseEther("25600");
+            const betSizeB = ethers.utils.parseEther("19.5");
+
+            await mockDUSD.connect(user).mint(user.address, betSizeB);
+            await mockDUSD.connect(user).approve(vault.address, betSizeB);
+
+            const vola = 4493;
+            const minRange = ethers.utils.parseEther("27800");
+            const maxRange = ethers.utils.parseEther("29700");
+            const betSize = ethers.utils.parseEther("20");
+            const price = ethers.utils.parseEther("30007");
+
+            await mockDUSD.connect(user).mint(user.address, betSize);
+            await mockDUSD.connect(user).approve(vault.address, betSize.add(betSizeB));
+
+            const blockTime = (await ethers.provider.getBlock("latest")).timestamp;
+            const date = blockTime + 60 * 60 * 24 * 7;
+
+            const dependentTimestamp = await defiBets.getDependentExpTime();
+
+            const days = Math.ceil((date - dependentTimestamp.toNumber()) / (60 * 60 * 24));
+
+            const expTime = dependentTimestamp.toNumber() + days * 60 * 60 * 24;
+
+            await priceFeed.updateAnswer(price);
+            await ivOracle.updateAnswer(vola);
+            console.log(expTime);
+
+            const prob = await mathLibraryDefiBets.calculateProbabilityRange(
+                minRange,
+                maxRange,
+                price,
+                vola,
+                30 * 60 * 60 * 24,
+                expTime - blockTime,
+            );
+            console.log(prob.toNumber());
+
+            const hash = await managerContract.getUnderlyingByte("BTC");
+            const winning = await managerContract.calculateWinning(
+                price,
+                betSize,
+                0,
+                minRange,
+                maxRange,
+                expTime,
+                hash,
+            );
+            console.log(winning);
+
+            await managerContract.connect(user).setBet(betSizeB, minRangeB, maxRangeB, expTime, "BTC");
+
+            await managerContract.connect(user).setBet(betSize, minRange, maxRange, expTime, "BTC");
         });
     });
     describe("#executeExpiration", () => {
