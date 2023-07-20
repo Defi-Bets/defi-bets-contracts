@@ -34,7 +34,7 @@ contract DefiBetsVault is IDefiBetsVault,Ownable{
 
         _isManager();
 
-        bool _success = IERC20(token).transferFrom(_from,address(this),_amount);
+        bool _success = IERC20(token).transferFrom(_from,address(this),_amount.add(_fees));
 
         require(_success);
 
@@ -42,14 +42,14 @@ contract DefiBetsVault is IDefiBetsVault,Ownable{
         uint256 _totalFees = totalFees;
         
         uint256 _supply = expTimeSupply[_expTime];
-        expTimeSupply[_expTime] = _supply.add(_amount).sub(_fees);
+        expTimeSupply[_expTime] = _supply.add(_amount);
         
         totalFees = _totalFees.add(_fees);
 
         emit Deposit(_expTime,_amount,expTimeSupply[_expTime],totalFees);
     }
 
-    function withdraw(address _to,uint256 _amount,uint256 _expTime) external {
+    function withdraw(address _to,uint256 _amount,uint256 _expTime) external  {
 
         _isManager();
 
@@ -75,6 +75,18 @@ contract DefiBetsVault is IDefiBetsVault,Ownable{
         _updateSupply(_expTime,_amount);
     }
 
+
+    function withdrawFees() external onlyOwner(){
+        uint256 _totalFees = totalFees;
+
+        bool _success = IERC20(token).transfer(owner(), _totalFees);
+
+        if(_success){
+            totalFees = 0;
+        }
+
+        emit FessWithdrawd(_totalFees);
+    }
     
 
 

@@ -190,14 +190,15 @@ describe("DefiBetsManager unit test", () => {
             const betSize = ethers.utils.parseEther("100");
             const minPrice = ethers.utils.parseEther("19000");
             const maxPrice = ethers.utils.parseEther("21000");
-            const expectedFeeAmount = betSize.mul(feePpm).div(MILLION);
 
-            await mockDUSD.connect(user).mint(user.address, betSize);
-            await mockDUSD.connect(user).approve(vault.address, betSize);
+            const _fees = await managerContract.calculateFee(betSize);
+
+            await mockDUSD.connect(user).mint(user.address, betSize.add(_fees));
+            await mockDUSD.connect(user).approve(vault.address, betSize.add(_fees));
 
             await managerContract.connect(user).setBet(betSize, minPrice, maxPrice, expTime, "BTC");
 
-            expect((await defiBets.getBetTokenData(1)).betSize).to.be.equal(betSize.sub(expectedFeeAmount));
+            expect((await defiBets.getBetTokenData(1)).betSize).to.be.equal(betSize);
         });
         it("Should fail because min bigger than max price", async () => {
             const { managerContract, user, defiBets, mockDUSD, vault } = await loadFixture(
@@ -212,10 +213,10 @@ describe("DefiBetsManager unit test", () => {
             const betSize = ethers.utils.parseEther("100");
             const minPrice = ethers.utils.parseEther("25000");
             const maxPrice = ethers.utils.parseEther("20000");
-            //const expectedFeeAmount = betSize.mul(feePpm).div(MILLION);
+            const expectedFeeAmount = betSize.mul(feePpm).div(MILLION);
 
-            await mockDUSD.connect(user).mint(user.address, betSize);
-            await mockDUSD.connect(user).approve(vault.address, betSize);
+            await mockDUSD.connect(user).mint(user.address, betSize.add(expectedFeeAmount));
+            await mockDUSD.connect(user).approve(vault.address, betSize.add(expectedFeeAmount));
 
             expect(
                 managerContract.connect(user).setBet(betSize, minPrice, maxPrice, expTime, "BTC"),
@@ -231,17 +232,16 @@ describe("DefiBetsManager unit test", () => {
             const maxRangeB = ethers.utils.parseEther("25600");
             const betSizeB = ethers.utils.parseEther("19.5");
 
-            await mockDUSD.connect(user).mint(user.address, betSizeB);
-            await mockDUSD.connect(user).approve(vault.address, betSizeB);
-
             const vola = 4493;
             const minRange = ethers.utils.parseEther("27800");
             const maxRange = ethers.utils.parseEther("29700");
             const betSize = ethers.utils.parseEther("20");
             const price = ethers.utils.parseEther("30007");
 
-            await mockDUSD.connect(user).mint(user.address, betSize);
-            await mockDUSD.connect(user).approve(vault.address, betSize.add(betSizeB));
+            const _fees = await managerContract.calculateFee(betSizeB.add(betSize));
+
+            await mockDUSD.connect(user).mint(user.address, betSize.add(betSizeB).add(_fees));
+            await mockDUSD.connect(user).approve(vault.address, betSize.add(betSizeB).add(_fees));
 
             const blockTime = (await ethers.provider.getBlock("latest")).timestamp;
             const date = blockTime + 60 * 60 * 24 * 7;
@@ -336,9 +336,10 @@ describe("DefiBetsManager unit test", () => {
 
             // First set a new bet for the last exp time
             const betSize = ethers.utils.parseEther("100");
+            const _fees = await managerContract.calculateFee(betSize);
 
-            await mockDUSD.mint(user.address, betSize);
-            await mockDUSD.connect(user).approve(vault.address, betSize);
+            await mockDUSD.mint(user.address, betSize.add(_fees));
+            await mockDUSD.connect(user).approve(vault.address, betSize.add(_fees));
 
             const minBoundary = ethers.utils.parseEther("20000");
             const maxBoundary = ethers.utils.parseEther("35000");

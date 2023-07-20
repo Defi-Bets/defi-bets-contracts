@@ -13,6 +13,8 @@ async function main() {
         const minDuration = networkConfig[chainId].minDuration;
         const maxDuration = networkConfig[chainId].maxDuration;
         const slot = networkConfig[chainId].slot;
+        const periodVola = networkConfig[chainId].periodIV;
+        const fee = networkConfig[chainId].fee;
 
         const manager = (await ethers.getContract("DefiBetsManager")) as DefiBetsManager;
 
@@ -24,7 +26,7 @@ async function main() {
         const vault = (await ethers.getContract("DefiBetsVault")).address;
 
         await manager.addUnderlyingToken("BTC", priceFeed, defiBets, vault);
-        await manager.updateIVFeed(hash, volaFeed, 30 * 60 * 60);
+        await manager.updateIVFeed(hash, volaFeed, periodVola);
 
         console.log("🎛️  Setup the defi-bets contract...");
         const owner = (await ethers.getSigners())[0];
@@ -34,6 +36,8 @@ async function main() {
 
         const tx = await manager.connect(owner).initializeBets(hash, startExpTime, minDuration, maxDuration, slot, 2);
         await tx.wait();
+
+        await manager.connect(owner).setFeesPpm(fee);
 
         console.log("🎟️  finished. you can start betting.");
     } else {

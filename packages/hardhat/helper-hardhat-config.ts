@@ -22,9 +22,9 @@ export const networkConfig: INetworkConfig = {
     },
     1133: {
         name: "dmcTestnet",
-        minDuration: 259200,
+        minDuration: 86400,
         maxDuration: 604800,
-        fee: 0,
+        fee: 20000,
         payoutRatio: 90,
         priceFeed: "0x",
         volatilityFeed: "0x",
