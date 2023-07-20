@@ -108,9 +108,9 @@ contract DefiBetsManager is Pausable,Ownable,IDefiBetsManager {
         address _defiBets = defiBetsContracts[_hash];
         address _vault = vaults[_hash];
         
-        _executeBetForAccount(_defiBets,_betSize.sub(_fee),_minPrice,_maxPrice,_expTime,_winning);
+        _executeBetForAccount(_defiBets,_betSize,_minPrice,_maxPrice,_expTime,_winning);
 
-        IDefiBetsPayoutRatio(payoutRatioContract).updateLpWins(_betSize.sub(_fee));
+        IDefiBetsPayoutRatio(payoutRatioContract).updateLpWins(_betSize);
 
         IDefiBetsVault(_vault).deposit(msg.sender,_betSize,_expTime,_fee);
     }
