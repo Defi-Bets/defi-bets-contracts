@@ -103,7 +103,7 @@ contract DefiBetsManager is Pausable,Ownable,IDefiBetsManager {
      
         uint256 _price = getCurrPrice(_hash);
 
-        uint256 _winning = calculateWinning(_price,_betSize,_fee,_minPrice,_maxPrice,_expTime,_hash);
+        uint256 _winning = calculateWinning(_price,_betSize,_minPrice,_maxPrice,_expTime,_hash);
 
         address _defiBets = defiBetsContracts[_hash];
         address _vault = vaults[_hash];
@@ -380,7 +380,7 @@ contract DefiBetsManager is Pausable,Ownable,IDefiBetsManager {
         return _feeAmount;
     }
 
-    function calculateWinning(uint256 _price,uint256 _betSize,uint256 _fee,uint256 _minPrice,uint256 _maxPrice,uint256 _expTime,bytes32 _hash) public view returns (uint256){
+    function calculateWinning(uint256 _price,uint256 _betSize,uint256 _minPrice,uint256 _maxPrice,uint256 _expTime,bytes32 _hash) public view returns (uint256){
 
         //Probabiliy per 10000
         uint256 probability = MathLibraryDefibets.calculateProbabilityRange(
@@ -391,7 +391,7 @@ contract DefiBetsManager is Pausable,Ownable,IDefiBetsManager {
         underlyingIVFeeds[_hash].period,      
         (_expTime.sub(block.timestamp)));     /* days untill expiry * 10000 */
 
-        return _calculateWinnings(_betSize.sub(_fee),probability);
+        return _calculateWinnings(_betSize,probability);
     }
 
     function _isNotNull(uint256 param) internal pure {

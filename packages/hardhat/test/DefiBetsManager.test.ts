@@ -267,15 +267,7 @@ describe("DefiBetsManager unit test", () => {
             console.log(prob.toNumber());
 
             const hash = await managerContract.getUnderlyingByte("BTC");
-            const winning = await managerContract.calculateWinning(
-                price,
-                betSize,
-                0,
-                minRange,
-                maxRange,
-                expTime,
-                hash,
-            );
+            const winning = await managerContract.calculateWinning(price, betSize, minRange, maxRange, expTime, hash);
             console.log(winning);
 
             await managerContract.connect(user).setBet(betSizeB, minRangeB, maxRangeB, expTime, "BTC");
@@ -390,7 +382,6 @@ describe("DefiBetsManager unit test", () => {
             const winning = await managerContract.calculateWinning(
                 priceAnswer,
                 _betSize,
-                0,
                 _minPrice,
                 _maxPrice,
                 lastActiveExpTime,

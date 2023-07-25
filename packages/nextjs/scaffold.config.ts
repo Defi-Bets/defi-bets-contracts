@@ -1,3 +1,4 @@
+import { dmcTestnet } from "./services/web3/dmcTestnet";
 import * as chains from "wagmi/chains";
 
 export type ScaffoldConfig = {
@@ -13,7 +14,7 @@ export type ScaffoldConfig = {
 
 const scaffoldConfig = {
   // The network where your DApp lives in
-  targetNetwork: chains.hardhat,
+  targetNetwork: dmcTestnet,
 
   // The interval at which your front-end polls the RPC servers for new data
   // it has no effect on the local network
