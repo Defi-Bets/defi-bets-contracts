@@ -23,6 +23,7 @@ error DefiBets__NotExecutableTime();
 error DefiBets__NotTheTokenOwner();
 error DefiBets__NotEpxired();
 error DefiBets__NotActive();
+error DefiBets__AlreadyClaimed();
 
 contract DefiBets is ERC721, Ownable, IDefiBets {
 
@@ -49,6 +50,7 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
         uint256 profit;
         uint256 minPrice;
         uint256 maxPrice;
+        bool claimed;
     }
 
     uint256 private constant MULTIPLIER = 1000000;
@@ -86,6 +88,7 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
     event EpxirationTimeCreated(uint256 expTime,uint256 maxLpLoss);
     event ExpiryTimeBetInfoUpdated(uint256 expirationDate,uint256 totalBets,uint256 maxUserWinnings);
     event BetPlaced(address indexed account,uint256 betSize,uint256 profit,uint256 expDate,uint256 minPrice,uint256 maxPrice);
+    event Claimed(address indexed account,uint256 tokenId,bool profit);
     event Expiration(uint256 expTime,bool profit, uint256 delta);
     event BetParameterUpdated(uint256 minBetDuration,uint256 maxBetDuration,uint256 slot);
 
@@ -140,6 +143,7 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
 
     function claimForAccount(address _account,uint256 _tokenId) external returns(uint256,uint256,bool) {
         _isDefiBetManager();
+        _isClaimed(_tokenId);
 
         Bet memory _betTokenInfo = getBetTokenData(_tokenId);
         ExpTimeInfo memory _expInfo = expTimeInfos[_betTokenInfo.expTime];
@@ -162,7 +166,9 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
             _profits = true;
         }
         
-        _burn(_tokenId);
+        bets[_tokenId].claimed = true;
+
+        emit Claimed(_account, _tokenId, _profits);
 
         return (_tokensForClaim,_betTokenInfo.expTime,_profits);
     }
@@ -213,9 +219,7 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
     function initializeData(uint256 _dependentTimeStamp, uint256 _maxLossPerExpTime, uint256 _minBetDuration, uint256 _maxBetDuration, uint256 _slot, uint256 _maxWinMultiplier) external   {
         _isDefiBetManager();
 
-        if(initialized){
-            revert DefiBets__AlreadyInitialized();
-        }
+        _isNotIntialized();
         
         setBetParamater(_maxLossPerExpTime,_minBetDuration,_maxBetDuration,_slot, _maxWinMultiplier,60*60*24,_dependentTimeStamp);
 
@@ -391,6 +395,12 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
         }
 
 
+    }
+
+    function _isClaimed(uint256 _tokenId) internal view {
+        if(bets[_tokenId].claimed){
+            revert DefiBets__AlreadyClaimed();
+        }
     }
 
     function _isMaxLossValid(uint256 _maxLossBefore,uint256 _maxLoss,uint256 _allowedLossPercent) internal view returns(bool){

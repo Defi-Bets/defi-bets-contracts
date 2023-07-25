@@ -11,6 +11,7 @@ import "./tasks/provide-lp";
 import "./tasks/claim-winning";
 import "./tasks/show-bet-info";
 import "./tasks/mintFDUSD";
+import "./tasks/verify-manager";
 
 // If not set, it uses ours Alchemy's default API key.
 // You can get your own at https://dashboard.alchemyapi.io
@@ -80,6 +81,21 @@ const config: HardhatUserConfig = {
     },
     mocha: {
         timeout: 100000,
+    },
+    etherscan: {
+        apiKey: {
+            dmcTestnet: " ",
+        },
+        customChains: [
+            {
+                network: "dmcTestnet",
+                chainId: 1133,
+                urls: {
+                    apiURL: "https://testnet-dmc.mydefichain.com:8444/api",
+                    browserURL: "https://testnet-dmc.mydefichain.com:8444/",
+                },
+            },
+        ],
     },
 };
 

@@ -29,4 +29,8 @@ contract MockManager is IDefiBetsManager{
     function performExpiration(address defiBets,uint256 expTime,uint256 expPrice) external {
         IDefiBets(defiBets).performExpiration(expTime,expPrice);
     }
+
+    function claimForAccount(address defiBets,address _account,uint256 _tokenId) external {
+        IDefiBets(defiBets).claimForAccount(_account, _tokenId);
+    }
 }

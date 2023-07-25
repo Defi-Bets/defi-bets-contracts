@@ -336,7 +336,6 @@ describe("DefiBetsManager unit test", () => {
             const minBoundary = ethers.utils.parseEther("20000");
             const maxBoundary = ethers.utils.parseEther("35000");
             const lastActiveExpTime = await defiBets.lastActiveExpTime();
-            console.log(lastActiveExpTime.toString());
 
             await managerContract.connect(user).setBet(betSize, minBoundary, maxBoundary, lastActiveExpTime, "BTC");
 
@@ -347,7 +346,6 @@ describe("DefiBetsManager unit test", () => {
             await time.increaseTo(lastActiveExpTime.add(1));
 
             const answer = await priceFeed.latestRoundData();
-            console.log(answer.updatedAt.toString());
 
             await managerContract.executeExpiration(lastActiveExpTime, "BTC", answer.roundId);
 
@@ -355,6 +353,31 @@ describe("DefiBetsManager unit test", () => {
             await managerContract.connect(user).claimWinnings(1, hash);
 
             expect(await mockDUSD.balanceOf(user.address)).to.be.equal(expProfit);
+        });
+
+        it("should fail, if the exp time is not finished", async () => {
+            const { managerContract, user, mockDUSD, vault, defiBets } = await loadFixture(
+                deployDefiBetsManagerFixture,
+            );
+
+            const betSize = ethers.utils.parseEther("100");
+            const _fees = await managerContract.calculateFee(betSize);
+
+            const minBoundary = ethers.utils.parseEther("20000");
+            const maxBoundary = ethers.utils.parseEther("35000");
+            const lastActiveExpTime = await defiBets.lastActiveExpTime();
+
+            await mockDUSD.mint(user.address, betSize.add(_fees));
+            await mockDUSD.connect(user).approve(vault.address, betSize.add(_fees));
+
+            await managerContract.connect(user).setBet(betSize, minBoundary, maxBoundary, lastActiveExpTime, "BTC");
+
+            await time.increaseTo(lastActiveExpTime.add(1));
+
+            const hash = await managerContract.getUnderlyingByte("BTC");
+            await expect(managerContract.connect(user).claimWinnings(1, hash)).to.be.revertedWith(
+                "DefiBets__NotEpxired()",
+            );
         });
     });
 
