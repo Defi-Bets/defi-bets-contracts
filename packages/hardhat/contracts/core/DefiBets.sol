@@ -206,11 +206,11 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
 
         uint256 _expTime = dependentTimeStamp > lastActiveExpTime ? dependentTimeStamp.add(timeDelta) : lastActiveExpTime.add(timeDelta) ;
 
-        if(expTimeInfos[_expTime].init == false){
+        
         _initExpTime(_expTime,_maxLpLoss);
         
         lastActiveExpTime = _expTime;
-        }
+        
     }
 
     /* ====== Setup Function ====== */

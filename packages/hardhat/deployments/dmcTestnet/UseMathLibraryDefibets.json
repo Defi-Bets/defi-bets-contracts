@@ -1,0 +1,62 @@
+{
+  "address": "0xeE5c0F71A21524089115FDB47180850aA0bAAc49",
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "calculateProbabilityRange",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0xe759d1fa0e674d6d991312bd73bca2e2ea9765dfd9569a3acf0bb9f9b804d688",
+  "receipt": {
+    "to": null,
+    "from": "0x36375828fd821935cFf3E8AB6322cAb54BBfaDeC",
+    "contractAddress": "0xeE5c0F71A21524089115FDB47180850aA0bAAc49",
+    "transactionIndex": 4,
+    "gasUsed": "128245",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x8eecdae2fbc1beb5b4835de7e13b5584f2b6b7261957096273e2df8fb66ca86b",
+    "transactionHash": "0xe759d1fa0e674d6d991312bd73bca2e2ea9765dfd9569a3acf0bb9f9b804d688",
+    "logs": [],
+    "blockNumber": 88308,
+    "cumulativeGasUsed": "611047",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "280edd8d406b66b0b16c07225c6ff6d2",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.17+commit.8df45f5f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"calculateProbabilityRange\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/test/UseMathLibraryDefibets.sol\":\"UseMathLibraryDefibets\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":800},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts/utils/math/Math.sol\":{\"keccak256\":\"0xa1e8e83cd0087785df04ac79fb395d9f3684caeaf973d9e2c71caef723a3a5d6\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://33bbf48cc069be677705037ba7520c22b1b622c23b33e1a71495f2d36549d40b\",\"dweb:/ipfs/Qmct36zWXv3j7LZB83uwbg7TXwnZSN1fqHNDZ93GG98bGz\"]},\"@openzeppelin/contracts/utils/math/SafeMath.sol\":{\"keccak256\":\"0x0f633a0223d9a1dcccfcf38a64c9de0874dfcbfac0c6941ccf074d63a2ce0e1e\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://864a40efcffdf408044c332a5aa38ec5618ed7b4eecb8f65faf45671bd6cdc65\",\"dweb:/ipfs/QmQJquTMtc6fgm5JQzGdsGpA2fqBe3MHWEdt2qzaLySMdN\"]},\"contracts/lib/MathLibraryDefibets.sol\":{\"keccak256\":\"0xa4cbc47abf750151dd080dc157483fa212b29ebb2bfac9d79e12012d8e8413a8\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://e9b1e37254a81b5181794a1c9df2c67ec101be208d935d90444fa2e4084d7612\",\"dweb:/ipfs/QmenTxu7AnsALeRw3iXoQnmVKKfKo1sbHUceATvRfNVAXo\"]},\"contracts/test/UseMathLibraryDefibets.sol\":{\"keccak256\":\"0x9273f632e955e2422559aeffa6a6f565a16ee64697dd8ac23afde4f8891c0025\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://8dab4fcde08b07f36287e422e75cefa07229d41bec5cc9e9f61f8632a22eb411\",\"dweb:/ipfs/QmX6ME7fDHvZgHjUNQmVcd25t4ZLgi8Z72QKyDKe8wpr4h\"]},\"hardhat/console.sol\":{\"keccak256\":\"0x60b0215121bf25612a6739fb2f1ec35f31ee82e4a8216c032c8243d904ab3aa9\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://6e29880d33dd479bb046ba306993d26ccb779a4b1d94a046cb3567f22948bb4d\",\"dweb:/ipfs/QmfTY1qzPt5C63Wc7y6JqfZr5899NRvXYdCpyLzR5FXQic\"]}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b5061015b806100206000396000f3fe608060405234801561001057600080fd5b506004361061002b5760003560e01c8063088eead014610030575b600080fd5b61003861004a565b60405190815260200160405180910390f35b60405163ea75fe3b60e01b8152690405fdf7e5af85e0000060048201526905150ae84a8cdf000000602482015269043c33c193756480000060448201526107d0606482015262278d0060848201526213c68060a48201526000908190731a1E229b33FAa5f22B27d21CE632D483C4A9bEe69063ea75fe3b9060c401602060405180830381865af41580156100e2573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610106919061010c565b92915050565b60006020828403121561011e57600080fd5b505191905056fea26469706673582212201a550051584e62073bd3d0a880aa0af1f5e3a146bc1054bd74d9a7e134a5c3e664736f6c63430008110033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b506004361061002b5760003560e01c8063088eead014610030575b600080fd5b61003861004a565b60405190815260200160405180910390f35b60405163ea75fe3b60e01b8152690405fdf7e5af85e0000060048201526905150ae84a8cdf000000602482015269043c33c193756480000060448201526107d0606482015262278d0060848201526213c68060a4820152600090819073__$7ac33160e126b1ac4f1e7b569b9216a78d$__9063ea75fe3b9060c401602060405180830381865af41580156100e2573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610106919061010c565b92915050565b60006020828403121561011e57600080fd5b505191905056fea26469706673582212201a550051584e62073bd3d0a880aa0af1f5e3a146bc1054bd74d9a7e134a5c3e664736f6c63430008110033",
+  "libraries": {
+    "MathLibraryDefibets": "0x1a1E229b33FAa5f22B27d21CE632D483C4A9bEe6"
+  },
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [],
+    "types": null
+  }
+}

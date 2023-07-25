@@ -33,4 +33,8 @@ contract MockManager is IDefiBetsManager{
     function claimForAccount(address defiBets,address _account,uint256 _tokenId) external {
         IDefiBets(defiBets).claimForAccount(_account, _tokenId);
     }
+
+    function setBetParameter(address defiBets,uint256 _maxLossPerExpTime, uint256 _minBetDuration,uint256 _maxBetDuration,uint256 _slot, uint256 _maxWinMultiplier,uint256 _timeDelta,uint256 _dependentTimeStamp) external {
+        IDefiBets(defiBets).setBetParamater(_maxLossPerExpTime, _minBetDuration, _maxBetDuration, _slot, _maxWinMultiplier, _timeDelta, _dependentTimeStamp);
+    }
 }

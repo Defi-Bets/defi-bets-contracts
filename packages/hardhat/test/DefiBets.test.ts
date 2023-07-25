@@ -62,6 +62,12 @@ describe("DefiBets Unit test", () => {
         });
     });
 
+    describe("#setBetParameter", () => {
+        it("should fail when the duration boundries not valid", async () => {
+            const { managerContract } = await loadFixture(deployDefiBetsFixture);
+        });
+    });
+
     describe("#stop", () => {
         it("should stop the contract", async () => {
             const { defiBets, deployer } = await loadFixture(deployDefiBetsFixture);
@@ -71,7 +77,11 @@ describe("DefiBets Unit test", () => {
             expect(await defiBets.isActive()).to.be.equal(false);
         });
 
-        it("should fail when the caller is not the owner");
+        it("should fail when the caller is not the owner", async () => {
+            const { defiBets, badActor } = await loadFixture(deployDefiBetsFixture);
+
+            await expect(defiBets.connect(badActor).stop()).to.be.revertedWith("Ownable: caller is not the owner");
+        });
     });
 
     describe("#setBetForAccount", () => {
@@ -165,6 +175,43 @@ describe("DefiBets Unit test", () => {
                     winning,
                 ),
             ).to.be.revertedWithCustomError(defiBets, "DefiBets__NoValidWinningPrice");
+        });
+
+        it("should fail when the exp date is not valid", async () => {
+            const { defiBets, managerContract, user } = await loadFixture(deployDefiBetsFixture);
+
+            await managerContract.initialize(
+                defiBets.address,
+                startExpTime,
+                maxLossPerDay,
+                minBetDuration,
+                maxBetDuration,
+                slot,
+                maxWinMultiplier,
+            );
+
+            const betSize = ethers.utils.parseEther("100");
+            const minPrice = ethers.utils.parseEther("20000");
+            const maxPrice = ethers.utils.parseEther("25000");
+
+            const startTime = await defiBets.getDependentExpTime();
+            const deltaTime = await defiBets.timeDelta();
+
+            const expTime = startTime.add(deltaTime.mul(10)).sub(1);
+
+            const winning = betSize.mul(2);
+
+            await expect(
+                managerContract.setBetForAccount(
+                    defiBets.address,
+                    user.address,
+                    betSize,
+                    minPrice,
+                    maxPrice,
+                    expTime,
+                    winning,
+                ),
+            ).to.be.revertedWith("DefiBets__NoValidExpTime()");
         });
     });
 
