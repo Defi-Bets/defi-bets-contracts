@@ -13,7 +13,7 @@ import {
     MockV3Aggregator__factory,
 } from "../typechain-types";
 
-const slot = ethers.utils.parseEther("50");
+const slot = ethers.utils.parseEther("200");
 const minBetDuration = 60 * 60 * 24 * 4;
 const maxBetDuration = 60 * 60 * 24 * 30;
 const dateString = Date.now();

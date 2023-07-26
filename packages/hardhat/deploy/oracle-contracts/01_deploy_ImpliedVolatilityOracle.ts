@@ -26,11 +26,13 @@ const deployImpliedVolatilityOracle: DeployFunction = async (hre: HardhatRuntime
             args: [decimals, description, version, underlying, period],
             log: true,
             autoMine: true,
+            waitConfirmations: 1,
         });
 
         const oracleContract = (await hre.ethers.getContract("ImpliedVolatilityOracle")) as ImpliedVolatilityOracle;
         console.log("Updating the initial answer...");
-        await oracleContract.updateAnswer(initialAnswerIV);
+        const trx = await oracleContract.updateAnswer(initialAnswerIV);
+        await trx.wait(1);
         console.log("finished!");
     } else {
         console.log("Missing parameters in hardhat helper config...");

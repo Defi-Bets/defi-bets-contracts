@@ -64,7 +64,7 @@ describe("DefiBets Unit test", () => {
 
     describe("#setBetParameter", () => {
         it("should fail when the duration boundries not valid", async () => {
-            const { managerContract } = await loadFixture(deployDefiBetsFixture);
+            // const { managerContract } = await loadFixture(deployDefiBetsFixture);
         });
     });
 

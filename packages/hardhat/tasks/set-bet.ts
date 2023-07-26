@@ -32,7 +32,9 @@ task("set-bet", "Description of my task")
 
         const vault = await managerContract.vaults(underlyingHash);
 
-        let tx = await fDUSD.approve(vault, _amount);
+        const fee = await managerContract.calculateFee(_amount);
+
+        let tx = await fDUSD.approve(vault, _amount.add(fee));
         await tx.wait(1);
         console.log("Aprroval finished!");
 

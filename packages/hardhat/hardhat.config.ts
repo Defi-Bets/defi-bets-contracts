@@ -11,7 +11,7 @@ import "./tasks/provide-lp";
 import "./tasks/claim-winning";
 import "./tasks/show-bet-info";
 import "./tasks/mintFDUSD";
-import "./tasks/verify-manager";
+import "./tasks/verify-contracts";
 
 // If not set, it uses ours Alchemy's default API key.
 // You can get your own at https://dashboard.alchemyapi.io
@@ -67,6 +67,16 @@ const config: HardhatUserConfig = {
             chainId: 1133,
             gas: 30_000_000,
         },
+        mumbai: {
+            url: `https://polygon-mumbai.g.alchemy.com/v2/${process.env.MUMBAI_ALCHEMY_URL}`,
+            accounts: [deployerPrivateKey],
+            chainId: 80001,
+        },
+        sepolia: {
+            url: `https://eth-sepolia.g.alchemy.com/v2/${process.env.SEPOLIA_ALCHEMY_URL}`,
+            accounts: [deployerPrivateKey],
+            chainId: 11155111,
+        },
     },
     verify: {
         etherscan: {
@@ -85,6 +95,7 @@ const config: HardhatUserConfig = {
     etherscan: {
         apiKey: {
             dmcTestnet: " ",
+            polygonMumbai: `${etherscanApiKey}`,
         },
         customChains: [
             {
