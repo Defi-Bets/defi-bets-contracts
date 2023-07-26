@@ -1,6 +1,6 @@
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { BTCPriceOracle } from "../typechain-types";
+import { BTCPriceOracle, ImpliedVolatilityOracle } from "../typechain-types";
 import { getNetworkIdFromName, networkConfig } from "../helper-hardhat-config";
 
 task("verify-contracts", "try to verify the contracts at the blockexplorer").setAction(
@@ -18,6 +18,7 @@ task("verify-contracts", "try to verify the contracts at the blockexplorer").set
         const chainId = await getNetworkIdFromName(networkName);
 
         const priceOracle = (await ethers.getContract("BTCPriceOracle")) as BTCPriceOracle;
+        const implVolOracle = (await ethers.getContract("ImpliedVolatilityOracle")) as ImpliedVolatilityOracle;
 
         const version = 1;
         const underlying = "BTC";
@@ -28,9 +29,29 @@ task("verify-contracts", "try to verify the contracts at the blockexplorer").set
 
             const args = [decimals, description, version, underlying];
 
+            try {
+                await hre.run("verify:verify", {
+                    address: priceOracle.address,
+                    constructorArguments: args,
+                });
+            } catch (e) {
+                console.log(e);
+            }
+
+            //deploy implied vol oracle
+            const versionIV = 1;
+            const underlyingIV = "BTC";
+            const descriptionIV = "Implied Volatility 30days";
+
+            const decimalsIV = networkConfig[chainId].decimalsIV;
+
+            const periodIV = networkConfig[chainId].periodIV;
+
+            const implVolArgs = [decimalsIV, descriptionIV, versionIV, underlyingIV, periodIV];
+
             await hre.run("verify:verify", {
-                address: priceOracle.address,
-                constructorArguments: args,
+                address: implVolOracle.address,
+                constructorArguments: implVolArgs,
             });
         }
     },
