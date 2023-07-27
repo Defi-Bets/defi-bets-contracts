@@ -48,11 +48,39 @@ task("verify-contracts", "try to verify the contracts at the blockexplorer").set
             const periodIV = networkConfig[chainId].periodIV;
 
             const implVolArgs = [decimalsIV, descriptionIV, versionIV, underlyingIV, periodIV];
+            try {
+                await hre.run("verify:verify", {
+                    address: implVolOracle.address,
+                    constructorArguments: implVolArgs,
+                });
+            } catch (e) {
+                console.log(e);
+            }
 
-            await hre.run("verify:verify", {
-                address: implVolOracle.address,
-                constructorArguments: implVolArgs,
-            });
+            const fee = networkConfig[chainId].fee;
+            const payoutRatio = networkConfig[chainId].payoutRatio;
+            const mathLibrary = (await ethers.getContract("MathLibraryDefibets")).address;
+            const manager = (await ethers.getContract("DefiBetsManager")).address;
+
+            try {
+                await hre.run("verify:verify", {
+                    address: mathLibrary,
+                });
+            } catch (e) {
+                console.log(e);
+            }
+
+            try {
+                await hre.run("verify:verify", {
+                    address: manager,
+                    constructorArguments: [fee, payoutRatio],
+                    libraries: {
+                        MathLibraryDefibets: mathLibrary,
+                    },
+                });
+            } catch (e) {
+                console.log(e);
+            }
         }
     },
 );
