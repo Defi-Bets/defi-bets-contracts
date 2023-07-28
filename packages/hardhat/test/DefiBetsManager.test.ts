@@ -234,7 +234,7 @@ describe("DefiBetsManager unit test", () => {
 
             const vola = 4493;
             const minRange = ethers.utils.parseEther("27800");
-            const maxRange = ethers.utils.parseEther("29700");
+            const maxRange = ethers.utils.parseEther("29600");
             const betSize = ethers.utils.parseEther("20");
             const price = ethers.utils.parseEther("30007");
 

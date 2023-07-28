@@ -60,7 +60,6 @@ task("verify-contracts", "try to verify the contracts at the blockexplorer").set
             const fee = networkConfig[chainId].fee;
             const payoutRatio = networkConfig[chainId].payoutRatio;
             const mathLibrary = (await ethers.getContract("MathLibraryDefibets")).address;
-            const manager = (await ethers.getContract("DefiBetsManager")).address;
 
             try {
                 await hre.run("verify:verify", {
@@ -69,6 +68,7 @@ task("verify-contracts", "try to verify the contracts at the blockexplorer").set
             } catch (e) {
                 console.log(e);
             }
+            const manager = (await ethers.getContract("DefiBetsManager")).address;
 
             try {
                 await hre.run("verify:verify", {
