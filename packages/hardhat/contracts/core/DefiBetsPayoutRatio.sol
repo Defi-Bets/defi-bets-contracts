@@ -6,9 +6,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "../interface/core/IDefiBetsPayoutRatio.sol";
 import "../interface/core/IDefiBetsManager.sol";
 
-import "hardhat/console.sol";
-
 error DefiBetsPayoutRatio__AccessForbidden();
+error DefiBetsPayoutRatio__NoValidExpTime();
 
 contract DefiBetsPayoutRatio is IDefiBetsPayoutRatio, Ownable {
     using SafeMath for uint256;
@@ -71,6 +70,8 @@ contract DefiBetsPayoutRatio is IDefiBetsPayoutRatio, Ownable {
 
     function updateLPProfit(uint256 _amount, uint256 _expTime) external {
         _isManagerContract();
+        _isValidExpTime(_expTime);
+
         // loop through all modulo days
         uint256 _adjTimestamp = calulateAdjustedTimestamp(_expTime);
         uint256 _profit = totalProfitLP[_adjTimestamp];
@@ -84,7 +85,7 @@ contract DefiBetsPayoutRatio is IDefiBetsPayoutRatio, Ownable {
         _isManagerContract();
 
         uint256 _adjTimestamp = calulateAdjustedTimestamp(block.timestamp);
-        console.log(_adjTimestamp);
+
         totalProfitPlayer[_adjTimestamp] += _amount;
 
         _updatePeriodProfits(_adjTimestamp);
@@ -94,13 +95,13 @@ contract DefiBetsPayoutRatio is IDefiBetsPayoutRatio, Ownable {
 
         // set new Payout Factor
 
-        IDefiBetsManager(managerContract).setNewPayoutFactor(newPayoutFactor);
+        IDefiBetsManager(managerContract).setNewPayoutFactor(newPayoutFactor > 100 ? 100 : newPayoutFactor);
     }
 
     /* ====== Internal Functions ====== */
 
     function _getNewPayoutFactor(uint256 _currentPayoutFactor) internal view returns (uint256) {
-        uint256 _newPayoutRatio = (currProfitsPeriodPlayer * 100) / currProfitsPeriodLP; // currentRatio = Gplayer / Glp
+        uint256 _newPayoutRatio = currProfitsPeriodLP == 0 ? 0 : (currProfitsPeriodPlayer * 100) / currProfitsPeriodLP; // currentRatio = Gplayer / Glp
 
         if (_newPayoutRatio > targetPayoutRatio) {
             // too much for player, decrease payout factor
@@ -118,6 +119,7 @@ contract DefiBetsPayoutRatio is IDefiBetsPayoutRatio, Ownable {
         // targetPayoutRatio == currPayoutRatio
 
         // perfect ratio and factor, do nothing
+
         return _currentPayoutFactor;
     }
 
@@ -133,26 +135,31 @@ contract DefiBetsPayoutRatio is IDefiBetsPayoutRatio, Ownable {
         return _indexSteps;
     }
 
+    function _isValidExpTime(uint256 _expTime) internal view {
+        if (_expTime < block.timestamp) {
+            revert DefiBetsPayoutRatio__NoValidExpTime();
+        }
+    }
+
     function _updatePeriodProfits(uint256 _adjTimestamp) internal {
         uint256 _newStartIndex = (_adjTimestamp.sub(period.mul(delta)));
-        uint256 _indexSteps = _calculateIndexSteps(startIndex, _newStartIndex);
 
-        console.log(_indexSteps);
+        uint256 _indexSteps = _calculateIndexSteps(endIndex, _adjTimestamp);
+
+        for (uint256 i = 1; i <= _indexSteps; i++) {
+            uint256 _index = endIndex.add(i.mul(delta));
+
+            currProfitsPeriodLP += totalProfitLP[_index];
+            currProfitsPeriodPlayer += totalProfitPlayer[_index];
+        }
+
+        _indexSteps = _calculateIndexSteps(startIndex, _newStartIndex);
 
         for (uint256 i = 0; i < _indexSteps; i++) {
             uint256 _index = startIndex.add(i.mul(delta));
 
             currProfitsPeriodLP -= totalProfitLP[_index];
             currProfitsPeriodPlayer -= totalProfitPlayer[_index];
-        }
-
-        _indexSteps = _calculateIndexSteps(endIndex, _adjTimestamp);
-        console.log(_indexSteps);
-        for (uint256 i = 0; i < _indexSteps; i++) {
-            uint256 _index = endIndex.add(i.mul(delta));
-
-            currProfitsPeriodLP += totalProfitLP[_index];
-            currProfitsPeriodPlayer += totalProfitPlayer[_index];
         }
 
         startIndex = _newStartIndex > startIndex ? _newStartIndex : startIndex;

@@ -36,7 +36,7 @@ export const networkConfig: INetworkConfig = {
         decimalsPriceFeed: 18,
         initialAnswerPrice: ethers.utils.parseEther("25918"),
         targetPayoutRatio: 90,
-        moduloDays: 7,
+        moduloDays: 30,
         maxLossPerTime: 50000,
     },
     80001: {
@@ -55,7 +55,7 @@ export const networkConfig: INetworkConfig = {
         decimalsPriceFeed: 18,
         initialAnswerPrice: ethers.utils.parseEther("25918"),
         targetPayoutRatio: 90,
-        moduloDays: 7,
+        moduloDays: 30,
         maxLossPerTime: 50000,
     },
     11155111: {

@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { DefiBetsPayoutRatio__factory, MockManager__factory } from "../typechain-types";
 import { loadFixture, time } from "@nomicfoundation/hardhat-network-helpers";
 
-const moduloDays = 7;
+const moduloDays = 30;
 const targetPayout = 90;
 
 describe("DefiBetsPayoutRatio Unit test", () => {
