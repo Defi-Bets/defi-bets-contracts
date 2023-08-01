@@ -1,3 +1,4 @@
+import { dmcTestnet } from "./dmcTestnet";
 import { connectorsForWallets } from "@rainbow-me/rainbowkit";
 import {
   braveWallet,
@@ -20,7 +21,9 @@ const burnerConfig = scaffoldConfig.burnerWallet;
 
 // We always want to have mainnet enabled (ENS resolution, ETH price, etc). But only once.
 const enabledChains =
-  (configuredNetwork.id as number) === 1 ? [configuredNetwork] : [configuredNetwork, chains.mainnet];
+  (configuredNetwork.id as number) === 1
+    ? [configuredNetwork, chains.polygonMumbai, dmcTestnet]
+    : [configuredNetwork, chains.polygonMumbai, chains.mainnet, dmcTestnet];
 
 /**
  * Chains for the app

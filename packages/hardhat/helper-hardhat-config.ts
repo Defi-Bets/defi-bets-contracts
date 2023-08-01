@@ -1,4 +1,4 @@
-import { ethers } from "hardhat";
+import { ethers } from "ethers";
 
 interface INetworkConfig {
     [key: number]: any;
@@ -22,6 +22,44 @@ export const networkConfig: INetworkConfig = {
     },
     1133: {
         name: "dmcTestnet",
+        minDuration: 86400,
+        maxDuration: 604800,
+        fee: 20000,
+        payoutRatio: 90,
+        priceFeed: "0x",
+        volatilityFeed: "0x",
+        timeDelta: 43200,
+        slot: ethers.utils.parseEther("50"),
+        decimalsIV: 4,
+        initialAnswerIV: 2000,
+        periodIV: 30 * 60 * 60 * 24,
+        decimalsPriceFeed: 18,
+        initialAnswerPrice: ethers.utils.parseEther("25918"),
+        targetPayoutRatio: 90,
+        moduloDays: 30,
+        maxLossPerTime: 50000,
+    },
+    80001: {
+        name: "mumbai",
+        minDuration: 86400,
+        maxDuration: 604800,
+        fee: 20000,
+        payoutRatio: 90,
+        priceFeed: "0x",
+        volatilityFeed: "0x",
+        timeDelta: 43200,
+        slot: ethers.utils.parseEther("100"),
+        decimalsIV: 4,
+        initialAnswerIV: 2000,
+        periodIV: 30 * 60 * 60 * 24,
+        decimalsPriceFeed: 18,
+        initialAnswerPrice: ethers.utils.parseEther("25918"),
+        targetPayoutRatio: 90,
+        moduloDays: 30,
+        maxLossPerTime: 50000,
+    },
+    11155111: {
+        name: "sepolia",
         minDuration: 86400,
         maxDuration: 604800,
         fee: 20000,

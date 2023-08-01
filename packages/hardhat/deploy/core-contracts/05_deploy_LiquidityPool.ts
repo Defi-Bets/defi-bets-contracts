@@ -26,6 +26,7 @@ const deployLiquidityPoolContract: DeployFunction = async (hre: HardhatRuntimeEn
                 log: true,
                 args: [managerContractAddress, tokenAddress, betVault, maxLossPerTime],
                 autoMine: true,
+                waitConfirmations: 1,
             });
         }
     } else {

@@ -13,7 +13,7 @@ import {
     MockV3Aggregator__factory,
 } from "../typechain-types";
 
-const slot = ethers.utils.parseEther("50");
+const slot = ethers.utils.parseEther("200");
 const minBetDuration = 60 * 60 * 24 * 4;
 const maxBetDuration = 60 * 60 * 24 * 30;
 const dateString = Date.now();
@@ -234,7 +234,7 @@ describe("DefiBetsManager unit test", () => {
 
             const vola = 4493;
             const minRange = ethers.utils.parseEther("27800");
-            const maxRange = ethers.utils.parseEther("29700");
+            const maxRange = ethers.utils.parseEther("29600");
             const betSize = ethers.utils.parseEther("20");
             const price = ethers.utils.parseEther("30007");
 
@@ -267,15 +267,7 @@ describe("DefiBetsManager unit test", () => {
             console.log(prob.toNumber());
 
             const hash = await managerContract.getUnderlyingByte("BTC");
-            const winning = await managerContract.calculateWinning(
-                price,
-                betSize,
-                0,
-                minRange,
-                maxRange,
-                expTime,
-                hash,
-            );
+            const winning = await managerContract.calculateWinning(price, betSize, minRange, maxRange, expTime, hash);
             console.log(winning);
 
             await managerContract.connect(user).setBet(betSizeB, minRangeB, maxRangeB, expTime, "BTC");
@@ -344,7 +336,6 @@ describe("DefiBetsManager unit test", () => {
             const minBoundary = ethers.utils.parseEther("20000");
             const maxBoundary = ethers.utils.parseEther("35000");
             const lastActiveExpTime = await defiBets.lastActiveExpTime();
-            console.log(lastActiveExpTime.toString());
 
             await managerContract.connect(user).setBet(betSize, minBoundary, maxBoundary, lastActiveExpTime, "BTC");
 
@@ -355,7 +346,6 @@ describe("DefiBetsManager unit test", () => {
             await time.increaseTo(lastActiveExpTime.add(1));
 
             const answer = await priceFeed.latestRoundData();
-            console.log(answer.updatedAt.toString());
 
             await managerContract.executeExpiration(lastActiveExpTime, "BTC", answer.roundId);
 
@@ -363,6 +353,31 @@ describe("DefiBetsManager unit test", () => {
             await managerContract.connect(user).claimWinnings(1, hash);
 
             expect(await mockDUSD.balanceOf(user.address)).to.be.equal(expProfit);
+        });
+
+        it("should fail, if the exp time is not finished", async () => {
+            const { managerContract, user, mockDUSD, vault, defiBets } = await loadFixture(
+                deployDefiBetsManagerFixture,
+            );
+
+            const betSize = ethers.utils.parseEther("100");
+            const _fees = await managerContract.calculateFee(betSize);
+
+            const minBoundary = ethers.utils.parseEther("20000");
+            const maxBoundary = ethers.utils.parseEther("35000");
+            const lastActiveExpTime = await defiBets.lastActiveExpTime();
+
+            await mockDUSD.mint(user.address, betSize.add(_fees));
+            await mockDUSD.connect(user).approve(vault.address, betSize.add(_fees));
+
+            await managerContract.connect(user).setBet(betSize, minBoundary, maxBoundary, lastActiveExpTime, "BTC");
+
+            await time.increaseTo(lastActiveExpTime.add(1));
+
+            const hash = await managerContract.getUnderlyingByte("BTC");
+            await expect(managerContract.connect(user).claimWinnings(1, hash)).to.be.revertedWith(
+                "DefiBets__NotEpxired()",
+            );
         });
     });
 
@@ -390,7 +405,6 @@ describe("DefiBetsManager unit test", () => {
             const winning = await managerContract.calculateWinning(
                 priceAnswer,
                 _betSize,
-                0,
                 _minPrice,
                 _maxPrice,
                 lastActiveExpTime,

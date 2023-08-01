@@ -10,6 +10,9 @@ async function main() {
     const filter = defiBetsContract.filters.EpxirationTimeCreated();
     console.log(filter);
 
+    const events = await defiBetsContract.queryFilter(filter);
+    console.log(events);
+
     // const logs = await ethers.provider.getLogs(filter);
     // console.log(logs);
 
@@ -50,6 +53,7 @@ async function main() {
         console.log(i);
         if (_info.init) {
             console.log(`Expiration time: ${_infoDate.toLocaleDateString()} , ${_expTime} `);
+            console.log(`${_infoDate.toLocaleTimeString()}`);
             console.log(`Total bets ${ethers.utils.formatEther(_info.totalBets)}`);
             console.log(`Max loss Limit: ${_info.maxLossLimit}`);
             console.log(`Finished: ${_info.finished}`);
@@ -69,10 +73,12 @@ async function main() {
         if (_expTime.toNumber() < now && _info.finished === false) {
             let _id = latestRoundId.toNumber();
             let _timeStamp = await priceOracle.getTimestamp(_id);
-            while (_timeStamp > _expTime) {
+            while (_timeStamp >= _expTime) {
                 _id--;
                 _timeStamp = await priceOracle.getTimestamp(_id);
+
                 console.log(`Timestamp: ${new Date(_timeStamp.toNumber() * 1000)}; ID: ${_id}`);
+                console.log(_timeStamp.toNumber());
             }
             console.log(`The round ID for ${new Date(_expTime.toNumber() * 1000)} is ${_id}`);
 

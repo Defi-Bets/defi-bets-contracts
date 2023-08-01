@@ -22,13 +22,14 @@ const deployDefiBetsContract: DeployFunction = async (hre: HardhatRuntimeEnviron
             log: true,
             args: [managerContractAddress, moduloDays, targetPayoutRatio],
             autoMine: true,
+            waitConfirmations: 1,
         });
 
         const lpPoolContract = (await get("LiquidityPool")).address;
 
         const managerContract: DefiBetsManager = await hre.ethers.getContract("DefiBetsManager");
-
-        await managerContract.setAddresses(lpPoolContract, PayoutRatioContract.address);
+        const tx = await managerContract.setAddresses(lpPoolContract, PayoutRatioContract.address);
+        await tx.wait(1);
     }
 };
 

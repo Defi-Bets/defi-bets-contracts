@@ -11,6 +11,7 @@ import "./tasks/provide-lp";
 import "./tasks/claim-winning";
 import "./tasks/show-bet-info";
 import "./tasks/mintFDUSD";
+import "./tasks/verify-contracts";
 
 // If not set, it uses ours Alchemy's default API key.
 // You can get your own at https://dashboard.alchemyapi.io
@@ -18,6 +19,8 @@ const providerApiKey = process.env.ALCHEMY_API_KEY || "oKxs-03sij-U_N0iOlrSsZFr2
 // If not set, it uses the hardhat account 0 private key.
 const deployerPrivateKey =
     process.env.DEPLOYER_PRIVATE_KEY ?? "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+const oracleOwnerPrivateKey =
+    process.env.ORACLE_OWNER ?? "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
 // If not set, it uses ours Etherscan default API key.
 const etherscanApiKey = process.env.ETHERSCAN_API_KEY || "DNXJA8RX2Q3VZ4URQIWP7Z68CJXQZSC6AW";
 
@@ -41,6 +44,9 @@ const config: HardhatUserConfig = {
             // By default, it will take the first Hardhat account as the deployer
             default: 0,
         },
+        oracleOwner: {
+            default: 1,
+        },
     },
     networks: {
         // View the networks that are pre-configured.
@@ -56,10 +62,22 @@ const config: HardhatUserConfig = {
             accounts: [deployerPrivateKey],
         },
         dmcTestnet: {
-            url: "https://testnet-dmc.mydefichain.com:20551/",
-            accounts: [deployerPrivateKey],
+            // url: "http://testnet-dmc.mydefichain.com:20551",
+            // url: "http://35.187.53.161:20551",
+            url: "http://localhost:20551",
+            accounts: [deployerPrivateKey, oracleOwnerPrivateKey],
             chainId: 1133,
             gas: 30_000_000,
+        },
+        mumbai: {
+            url: `https://polygon-mumbai.g.alchemy.com/v2/${process.env.MUMBAI_ALCHEMY_URL}`,
+            accounts: [deployerPrivateKey],
+            chainId: 80001,
+        },
+        sepolia: {
+            url: `https://eth-sepolia.g.alchemy.com/v2/${process.env.SEPOLIA_ALCHEMY_URL}`,
+            accounts: [deployerPrivateKey],
+            chainId: 11155111,
         },
     },
     verify: {
@@ -75,6 +93,22 @@ const config: HardhatUserConfig = {
     },
     mocha: {
         timeout: 100000,
+    },
+    etherscan: {
+        apiKey: {
+            dmcTestnet: " ",
+            polygonMumbai: `${etherscanApiKey}`,
+        },
+        customChains: [
+            {
+                network: "dmcTestnet",
+                chainId: 1133,
+                urls: {
+                    apiURL: "https://testnet-dmc.mydefichain.com:8444/api",
+                    browserURL: "https://testnet-dmc.mydefichain.com:8444/",
+                },
+            },
+        ],
     },
 };
 
