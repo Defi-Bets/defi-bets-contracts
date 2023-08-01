@@ -58,6 +58,7 @@ contract DefiBetsManager is Pausable, Ownable, IDefiBetsManager {
     event PriceFeedUpdated(bytes32 underlying, address priceFeed);
     event FeeUpdated(uint256 feePpm);
     event IVFeedUpdated(bytes32 underlying, address feed, uint256 period);
+    event PayoutFactorUpdated(uint256 payoutFactor);
 
     constructor(uint256 _feePpm, uint8 _startPayoutFactor) {
         feePpm = _feePpm;
@@ -278,6 +279,13 @@ contract DefiBetsManager is Pausable, Ownable, IDefiBetsManager {
         ILiquidityPool(liquidityPool).updateMaxLoss(_newMaxLoss);
     }
 
+    function setNewPayoutFactor(uint256 _payoutFactor) external {
+        _isPayoutRatioContract();
+        payoutFactor = _payoutFactor;
+
+        emit PayoutFactorUpdated(payoutFactor);
+    }
+
     /* ====== Internal Functions ====== */
 
     function _isValidUnderlying(bytes32 _hash) internal view {
@@ -440,10 +448,5 @@ contract DefiBetsManager is Pausable, Ownable, IDefiBetsManager {
         (, int256 answer, , , ) = AggregatorV3Interface(underlyingIVFeeds[_hash].feedAddress).latestRoundData();
 
         return uint256(answer);
-    }
-
-    function setNewPayoutFactor(uint256 _payoutFactor) external {
-        _isPayoutRatioContract();
-        payoutFactor = _payoutFactor;
     }
 }
