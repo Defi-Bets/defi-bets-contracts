@@ -6,6 +6,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "../interface/core/IDefiBetsPayoutRatio.sol";
 import "../interface/core/IDefiBetsManager.sol";
 
+import "hardhat/console.sol";
+
 error DefiBetsPayoutRatio__AccessForbidden();
 error DefiBetsPayoutRatio__NoValidExpTime();
 
@@ -33,7 +35,7 @@ contract DefiBetsPayoutRatio is IDefiBetsPayoutRatio, Ownable {
 
     uint256 public targetPayoutRatio; /* set target ratio you want. (e.g. 90 = 90% payout ratio) */
 
-    uint256 public adjustmentFactor = 5;
+    uint256 public adjustmentFactor = 10;
 
     /* ====== Events ====== */
     event UpdateProfitLP(uint256 currProfit);
@@ -92,7 +94,7 @@ contract DefiBetsPayoutRatio is IDefiBetsPayoutRatio, Ownable {
 
         // // calculate new payoutFactor
         uint256 newPayoutFactor = _getNewPayoutFactor(_currentPayoutFactor);
-
+        console.log(newPayoutFactor);
         // set new Payout Factor
 
         IDefiBetsManager(managerContract).setNewPayoutFactor(newPayoutFactor > 100 ? 100 : newPayoutFactor);
@@ -102,9 +104,10 @@ contract DefiBetsPayoutRatio is IDefiBetsPayoutRatio, Ownable {
 
     function _getNewPayoutFactor(uint256 _currentPayoutFactor) internal view returns (uint256) {
         uint256 _newPayoutRatio = currProfitsPeriodLP == 0 ? 0 : (currProfitsPeriodPlayer * 100) / currProfitsPeriodLP; // currentRatio = Gplayer / Glp
-
+        console.log("new factor: %i", _newPayoutRatio);
         if (_newPayoutRatio > targetPayoutRatio) {
             // too much for player, decrease payout factor
+            console.log("test");
             return
                 _currentPayoutFactor -
                 (_newPayoutRatio - targetPayoutRatio) /
@@ -145,23 +148,26 @@ contract DefiBetsPayoutRatio is IDefiBetsPayoutRatio, Ownable {
         uint256 _newStartIndex = (_adjTimestamp.sub(period.mul(delta)));
 
         uint256 _indexSteps = _calculateIndexSteps(endIndex, _adjTimestamp);
-
+        console.log("Index Step1: %i", _indexSteps);
         for (uint256 i = 1; i <= _indexSteps; i++) {
             uint256 _index = endIndex.add(i.mul(delta));
 
             currProfitsPeriodLP += totalProfitLP[_index];
             currProfitsPeriodPlayer += totalProfitPlayer[_index];
         }
+        console.log("Profit LP: %i", currProfitsPeriodLP);
+        console.log("Profit Player: %i", currProfitsPeriodPlayer);
 
         _indexSteps = _calculateIndexSteps(startIndex, _newStartIndex);
-
+        console.log("Index Step2: %i", _indexSteps);
         for (uint256 i = 0; i < _indexSteps; i++) {
             uint256 _index = startIndex.add(i.mul(delta));
 
             currProfitsPeriodLP -= totalProfitLP[_index];
             currProfitsPeriodPlayer -= totalProfitPlayer[_index];
         }
-
+        console.log("Profit LP: %i", currProfitsPeriodLP);
+        console.log("Profit Player: %i", currProfitsPeriodPlayer);
         startIndex = _newStartIndex > startIndex ? _newStartIndex : startIndex;
         endIndex = _adjTimestamp > endIndex ? _adjTimestamp : endIndex;
 

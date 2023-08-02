@@ -12,6 +12,7 @@ import "./tasks/claim-winning";
 import "./tasks/show-bet-info";
 import "./tasks/mintFDUSD";
 import "./tasks/verify-contracts";
+import "./tasks/set-payout-adj-factor";
 
 // If not set, it uses ours Alchemy's default API key.
 // You can get your own at https://dashboard.alchemyapi.io

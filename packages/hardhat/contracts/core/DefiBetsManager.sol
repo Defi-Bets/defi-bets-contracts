@@ -149,10 +149,9 @@ contract DefiBetsManager is Pausable, Ownable, IDefiBetsManager {
             _expTime,
             _price
         );
+        IDefiBetsPayoutRatio(payoutRatioContract).updatePlayerProfit(payoutFactor, _playerWinnings);
 
         if (_profit == true) {
-            IDefiBetsPayoutRatio(payoutRatioContract).updatePlayerProfit(payoutFactor, _playerWinnings);
-
             IDefiBetsVault(_vault).withdraw(liquidityPool, _delta, _expTime);
         } else {
             ILiquidityPool(liquidityPool).transferTokensToVault(_delta);
