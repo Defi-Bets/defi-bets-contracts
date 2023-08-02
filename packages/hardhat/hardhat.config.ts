@@ -62,9 +62,9 @@ const config: HardhatUserConfig = {
             accounts: [deployerPrivateKey],
         },
         dmcTestnet: {
-            // url: "http://testnet-dmc.mydefichain.com:20551",
+            url: "https://testnet-dmc.mydefichain.com:20551",
             // url: "http://35.187.53.161:20551",
-            url: "http://localhost:20551",
+            // url: "http://127.0.0.1:20551/",
             accounts: [deployerPrivateKey, oracleOwnerPrivateKey],
             chainId: 1133,
             gas: 30_000_000,

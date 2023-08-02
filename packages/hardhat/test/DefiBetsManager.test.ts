@@ -12,6 +12,7 @@ import {
     MockV3Aggregator,
     MockV3Aggregator__factory,
 } from "../typechain-types";
+import { Block } from "@ethersproject/providers";
 
 const slot = ethers.utils.parseEther("200");
 const minBetDuration = 60 * 60 * 24 * 4;
@@ -70,6 +71,7 @@ describe("DefiBetsManager unit test", () => {
         const PriceFeed = (await ethers.getContractFactory("MockV3Aggregator")) as MockV3Aggregator__factory;
         const priceFeed = await PriceFeed.deploy(8, priceAnswer);
 
+        const now = (await ethers.provider.getBlock("latest")) as Block;
         const DefiBetsPayoutRatio = (await ethers.getContractFactory(
             "DefiBetsPayoutRatio",
         )) as DefiBetsPayoutRatio__factory;
@@ -77,6 +79,7 @@ describe("DefiBetsManager unit test", () => {
             managerContract.address,
             moduloDays,
             targetPayoutRatio,
+            now.timestamp,
         );
 
         await managerContract.setAddresses(liquidityPool.address, defiBetsPayoutRatio.address);

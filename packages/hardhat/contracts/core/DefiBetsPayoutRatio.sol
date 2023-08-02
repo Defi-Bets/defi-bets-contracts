@@ -45,11 +45,11 @@ contract DefiBetsPayoutRatio is IDefiBetsPayoutRatio, Ownable {
         uint256 currProfitsPeriodPlayer
     );
 
-    constructor(address _managerContract, uint256 _period, uint256 _targetPayoutRatio) {
+    constructor(address _managerContract, uint256 _period, uint256 _targetPayoutRatio, uint256 _startTimeStamp) {
         managerContract = _managerContract;
         period = _period;
         targetPayoutRatio = _targetPayoutRatio;
-        startTimestamp = block.timestamp;
+        startTimestamp = _startTimeStamp;
         startIndex = startTimestamp;
         endIndex = startTimestamp;
     }

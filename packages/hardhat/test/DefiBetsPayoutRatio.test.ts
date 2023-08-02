@@ -2,6 +2,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { DefiBetsPayoutRatio__factory, MockManager__factory } from "../typechain-types";
 import { loadFixture, time } from "@nomicfoundation/hardhat-network-helpers";
+import { Block } from "@ethersproject/providers";
 
 const moduloDays = 30;
 const targetPayout = 90;
@@ -17,7 +18,10 @@ describe("DefiBetsPayoutRatio Unit test", () => {
         const DefiBetsPayoutRatio = (await ethers.getContractFactory(
             "DefiBetsPayoutRatio",
         )) as DefiBetsPayoutRatio__factory;
-        const payoutRatio = await DefiBetsPayoutRatio.deploy(manager.address, moduloDays, targetPayout);
+
+        const now = (await ethers.provider.getBlock("latest")) as Block;
+
+        const payoutRatio = await DefiBetsPayoutRatio.deploy(manager.address, moduloDays, targetPayout, now.timestamp);
 
         return { deployer, payoutRatio, manager };
     }

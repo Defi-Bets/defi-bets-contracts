@@ -16,11 +16,24 @@ const deployDefiBetsContract: DeployFunction = async (hre: HardhatRuntimeEnviron
     if (chainId) {
         const moduloDays = networkConfig[chainId].moduloDays;
         const targetPayoutRatio = networkConfig[chainId].targetPayoutRatio;
+        console.log(moduloDays, targetPayoutRatio, managerContractAddress);
+
+        const now = Date.now();
+        const nextDate = new Date(now);
+
+        nextDate.setDate(nextDate.getDate() + 1);
+
+        nextDate.setHours(0);
+        nextDate.setMinutes(0);
+        nextDate.setSeconds(0);
+        nextDate.setMilliseconds(0);
+
+        console.log(`${nextDate.toLocaleDateString()} , ${nextDate.toLocaleTimeString()}`);
 
         const PayoutRatioContract = await deploy("DefiBetsPayoutRatio", {
             from: deployer,
             log: true,
-            args: [managerContractAddress, moduloDays, targetPayoutRatio],
+            args: [managerContractAddress, moduloDays, targetPayoutRatio, nextDate.getTime() / 1000],
             autoMine: true,
             waitConfirmations: 1,
         });
