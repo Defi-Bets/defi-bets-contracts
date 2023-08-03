@@ -77,8 +77,13 @@ contract MockManager is IDefiBetsManager {
         );
     }
 
-    function updatePlayerProfit(address payoutRatio, uint256 _currentPayoutFactor, uint256 _amount) external {
-        IDefiBetsPayoutRatio(payoutRatio).updatePlayerProfit(_currentPayoutFactor, _amount);
+    function updatePlayerProfit(
+        address payoutRatio,
+        uint256 _currentPayoutFactor,
+        uint256 _amount,
+        uint256 _exptime
+    ) external {
+        IDefiBetsPayoutRatio(payoutRatio).updatePlayerProfit(_currentPayoutFactor, _amount, _exptime);
     }
 
     function updateLPProfit(address payoutRatio, uint256 _amount, uint256 _expTime) external {

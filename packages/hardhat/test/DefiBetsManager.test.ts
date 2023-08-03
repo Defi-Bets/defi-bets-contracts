@@ -299,7 +299,7 @@ describe("DefiBetsManager unit test", () => {
         });
 
         it("should execute when the lp lost", async () => {
-            const { managerContract, defiBets, deployer, mockDUSD, vault, user } = await loadFixture(
+            const { managerContract, defiBets, deployer, mockDUSD, vault } = await loadFixture(
                 deployDefiBetsManagerFixture,
             );
 

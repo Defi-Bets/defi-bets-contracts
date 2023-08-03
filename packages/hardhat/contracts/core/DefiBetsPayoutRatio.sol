@@ -15,6 +15,7 @@ contract DefiBetsPayoutRatio is IDefiBetsPayoutRatio, Ownable {
     using SafeMath for uint256;
 
     /* ====== State Variables ====== */
+    uint256 public constant MIN_PAYOUT_FACTOR = 10;
 
     uint256 public startTimestamp;
     uint256 public delta = 86400;
@@ -35,7 +36,7 @@ contract DefiBetsPayoutRatio is IDefiBetsPayoutRatio, Ownable {
 
     uint256 public targetPayoutRatio; /* set target ratio you want. (e.g. 90 = 90% payout ratio) */
 
-    uint256 public adjustmentFactor = 10;
+    uint256 public adjustmentFactor = 5;
 
     /* ====== Events ====== */
     event UpdateProfitLP(uint256 currProfit);
@@ -52,7 +53,7 @@ contract DefiBetsPayoutRatio is IDefiBetsPayoutRatio, Ownable {
         period = _period;
         targetPayoutRatio = _targetPayoutRatio;
         startTimestamp = _startTimeStamp;
-        startIndex = startTimestamp;
+        startIndex = startTimestamp.sub(_period.mul(delta));
         endIndex = startTimestamp;
     }
 
@@ -64,10 +65,6 @@ contract DefiBetsPayoutRatio is IDefiBetsPayoutRatio, Ownable {
 
     function setAdjustmentFactor(uint256 _factor) external onlyOwner {
         adjustmentFactor = _factor;
-    }
-
-    function setDelta(uint256 _delta) external onlyOwner {
-        delta = _delta;
     }
 
     function updateLPProfit(uint256 _amount, uint256 _expTime) external {
@@ -83,21 +80,21 @@ contract DefiBetsPayoutRatio is IDefiBetsPayoutRatio, Ownable {
         emit UpdateProfitLP(totalProfitLP[_adjTimestamp]);
     }
 
-    function updatePlayerProfit(uint256 _currentPayoutFactor, uint256 _amount) external {
+    function updatePlayerProfit(uint256 _currentPayoutFactor, uint256 _amount, uint256 _expTime) external {
         _isManagerContract();
 
-        uint256 _adjTimestamp = calulateAdjustedTimestamp(block.timestamp);
+        uint256 _adjTimestamp = calulateAdjustedTimestamp(_expTime);
 
         totalProfitPlayer[_adjTimestamp] += _amount;
 
-        _updatePeriodProfits(_adjTimestamp);
+        _updatePeriodProfits(_adjTimestamp, _amount);
 
         // // calculate new payoutFactor
         uint256 newPayoutFactor = _getNewPayoutFactor(_currentPayoutFactor);
         console.log(newPayoutFactor);
         // set new Payout Factor
 
-        IDefiBetsManager(managerContract).setNewPayoutFactor(newPayoutFactor > 100 ? 100 : newPayoutFactor);
+        IDefiBetsManager(managerContract).setNewPayoutFactor(newPayoutFactor);
     }
 
     /* ====== Internal Functions ====== */
@@ -107,22 +104,19 @@ contract DefiBetsPayoutRatio is IDefiBetsPayoutRatio, Ownable {
         console.log("new factor: %i", _newPayoutRatio);
         if (_newPayoutRatio > targetPayoutRatio) {
             // too much for player, decrease payout factor
-            console.log("test");
-            return
-                _currentPayoutFactor -
-                (_newPayoutRatio - targetPayoutRatio) /
-                adjustmentFactor; /* slow decreasing of player winnings */
+            uint256 factorDiff = _newPayoutRatio - targetPayoutRatio;
+            uint256 adjustment = factorDiff / adjustmentFactor;
+            console.log("adjustment %i", adjustment);
+            console.log("currentPayoutFactor %i", _currentPayoutFactor);
+            return _currentPayoutFactor > adjustment ? _currentPayoutFactor - adjustment : MIN_PAYOUT_FACTOR;
         } else if (_newPayoutRatio < targetPayoutRatio) {
             // too much for LP, increase payout factor
-            return
-                _currentPayoutFactor +
-                (targetPayoutRatio - _newPayoutRatio) /
-                adjustmentFactor; /* slow increasing of player winnings */
+            uint256 factorDiff = targetPayoutRatio - _newPayoutRatio;
+            uint256 adjustment = factorDiff / adjustmentFactor;
+            return _currentPayoutFactor + adjustment;
         }
         // targetPayoutRatio == currPayoutRatio
-
         // perfect ratio and factor, do nothing
-
         return _currentPayoutFactor;
     }
 
@@ -144,37 +138,39 @@ contract DefiBetsPayoutRatio is IDefiBetsPayoutRatio, Ownable {
         }
     }
 
-    function _updatePeriodProfits(uint256 _adjTimestamp) internal {
-        uint256 _newStartIndex = (_adjTimestamp.sub(period.mul(delta)));
+    function _updatePeriodProfits(uint256 _adjTimestamp, uint256 _amount) internal {
+        if (_adjTimestamp > endIndex) {
+            //calculate the profits of lp and player till the new timestamp
+            for (uint256 i = 1; i <= _calculateIndexSteps(endIndex, _adjTimestamp); i++) {
+                uint256 _index = endIndex.add(i.mul(delta));
 
-        uint256 _indexSteps = _calculateIndexSteps(endIndex, _adjTimestamp);
-        console.log("Index Step1: %i", _indexSteps);
-        for (uint256 i = 1; i <= _indexSteps; i++) {
-            uint256 _index = endIndex.add(i.mul(delta));
+                currProfitsPeriodLP += totalProfitLP[_index];
+                currProfitsPeriodPlayer += totalProfitPlayer[_index];
+                console.log("Profit LP: %i", currProfitsPeriodLP);
+                console.log("Profit Player: %i", currProfitsPeriodPlayer);
+            }
 
-            currProfitsPeriodLP += totalProfitLP[_index];
-            currProfitsPeriodPlayer += totalProfitPlayer[_index];
+            for (uint256 i = 1; i <= _calculateIndexSteps(startIndex, _adjTimestamp.sub(period.mul(delta))); i++) {
+                uint256 _index = startIndex.add(i.mul(delta));
+
+                currProfitsPeriodLP -= totalProfitLP[_index];
+                currProfitsPeriodPlayer -= totalProfitPlayer[_index];
+            }
+
+            endIndex = _adjTimestamp;
+            startIndex = _adjTimestamp.sub(period.mul(delta));
+        } else if (_adjTimestamp <= endIndex && _adjTimestamp >= endIndex.sub(period.mul(delta))) {
+            currProfitsPeriodPlayer += _amount;
         }
-        console.log("Profit LP: %i", currProfitsPeriodLP);
-        console.log("Profit Player: %i", currProfitsPeriodPlayer);
-
-        _indexSteps = _calculateIndexSteps(startIndex, _newStartIndex);
-        console.log("Index Step2: %i", _indexSteps);
-        for (uint256 i = 0; i < _indexSteps; i++) {
-            uint256 _index = startIndex.add(i.mul(delta));
-
-            currProfitsPeriodLP -= totalProfitLP[_index];
-            currProfitsPeriodPlayer -= totalProfitPlayer[_index];
-        }
-        console.log("Profit LP: %i", currProfitsPeriodLP);
-        console.log("Profit Player: %i", currProfitsPeriodPlayer);
-        startIndex = _newStartIndex > startIndex ? _newStartIndex : startIndex;
-        endIndex = _adjTimestamp > endIndex ? _adjTimestamp : endIndex;
 
         emit UpdateProfitsPeriod(startIndex, endIndex, currProfitsPeriodLP, currProfitsPeriodPlayer);
     }
 
     function calulateAdjustedTimestamp(uint256 _timestamp) public view returns (uint256) {
+        if (startTimestamp > _timestamp) {
+            return startTimestamp.sub((startTimestamp.sub(_timestamp)).div(delta).mul(delta));
+        }
+
         uint256 _adjTimestamp = (((_timestamp.sub(startTimestamp)).div(delta)).mul(delta)).add(startTimestamp);
 
         return _adjTimestamp;

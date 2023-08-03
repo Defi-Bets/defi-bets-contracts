@@ -57,7 +57,7 @@ describe("DefiBetsPayoutRatio Unit test", () => {
 
             const profitPlayer = ethers.utils.parseEther("100");
             console.log(startTimestamp.toNumber());
-            await manager.updatePlayerProfit(payoutRatio.address, 90, profitPlayer);
+            await manager.updatePlayerProfit(payoutRatio.address, 90, profitPlayer, startTimestamp.add(delta.mul(14)));
 
             expect(await payoutRatio.currProfitsPeriodPlayer()).to.be.equal(profitPlayer);
         });
