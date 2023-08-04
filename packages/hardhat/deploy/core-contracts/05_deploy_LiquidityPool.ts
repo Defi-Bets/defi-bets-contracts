@@ -1,6 +1,7 @@
 import { DeployFunction } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { networkConfig, getNetworkIdFromName } from "../../helper-hardhat-config";
+import { networkConfig, getNetworkIdFromName, developmentChains } from "../../helper-hardhat-config";
+import verify from "../../helper-functions";
 
 const deployLiquidityPoolContract: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     const { deployer } = await hre.getNamedAccounts();
@@ -21,13 +22,19 @@ const deployLiquidityPoolContract: DeployFunction = async (hre: HardhatRuntimeEn
         if (chainId) {
             const maxLossPerTime = networkConfig[chainId].maxLossPerTime;
 
-            await deploy("LiquidityPool", {
+            const args = [managerContractAddress, tokenAddress, betVault, maxLossPerTime];
+
+            const lp = await deploy("LiquidityPool", {
                 from: deployer,
                 log: true,
-                args: [managerContractAddress, tokenAddress, betVault, maxLossPerTime],
+                args: args,
                 autoMine: true,
                 waitConfirmations: 1,
             });
+
+            if (!developmentChains.includes(hre.network.name)) {
+                await verify(lp.address, args);
+            }
         }
     } else {
         console.log("No Stable Token exist!! Please deploy stable token!");

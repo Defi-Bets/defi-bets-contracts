@@ -1,7 +1,8 @@
 import { DeployFunction } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { networkConfig, getNetworkIdFromName } from "../../helper-hardhat-config";
+import { networkConfig, getNetworkIdFromName, developmentChains } from "../../helper-hardhat-config";
 import { ImpliedVolatilityOracle } from "../../typechain-types";
+import verify from "../../helper-functions";
 
 const deployImpliedVolatilityOracle: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     const { deployer } = await hre.getNamedAccounts();
@@ -21,9 +22,11 @@ const deployImpliedVolatilityOracle: DeployFunction = async (hre: HardhatRuntime
         const initialAnswerIV = networkConfig[chainId].initialAnswerIV;
         const period = networkConfig[chainId].periodIV;
 
+        const args = [decimals, description, version, underlying, period];
+
         await deploy("ImpliedVolatilityOracle", {
             from: deployer,
-            args: [decimals, description, version, underlying, period],
+            args: args,
             log: true,
             autoMine: true,
             waitConfirmations: 1,
@@ -34,6 +37,10 @@ const deployImpliedVolatilityOracle: DeployFunction = async (hre: HardhatRuntime
         const trx = await oracleContract.updateAnswer(initialAnswerIV);
         await trx.wait(1);
         console.log("finished!");
+
+        if (!developmentChains.includes(hre.network.name)) {
+            await verify(oracleContract.address, args);
+        }
     } else {
         console.log("Missing parameters in hardhat helper config...");
     }
