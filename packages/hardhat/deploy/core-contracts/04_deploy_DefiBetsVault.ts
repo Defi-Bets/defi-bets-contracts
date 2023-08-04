@@ -1,5 +1,7 @@
 import { DeployFunction } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
+import verify from "../../helper-functions";
+import { developmentChains } from "../../helper-hardhat-config";
 
 const deployDefiBetsVaultContract: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     const { deployer } = await hre.getNamedAccounts();
@@ -11,13 +13,17 @@ const deployDefiBetsVaultContract: DeployFunction = async (hre: HardhatRuntimeEn
 
     if (tokenContract) {
         const tokenAddress = tokenContract.address;
-
-        await deploy("DefiBetsVault", {
+        const args = [managerContractAddress, tokenAddress];
+        const vault = await deploy("DefiBetsVault", {
             from: deployer,
-            args: [managerContractAddress, tokenAddress],
+            args: args,
             log: true,
             autoMine: true,
         });
+
+        if (!developmentChains.includes(hre.network.name)) {
+            await verify(vault.address, args);
+        }
     } else {
         console.log("No Stable Token exist!! Please deploy stable token!");
     }

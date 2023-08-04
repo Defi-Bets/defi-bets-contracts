@@ -1,7 +1,8 @@
 import { DeployFunction } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { networkConfig, getNetworkIdFromName } from "../../helper-hardhat-config";
+import { networkConfig, getNetworkIdFromName, developmentChains } from "../../helper-hardhat-config";
 import { BTCPriceOracle } from "../../typechain-types";
+import verify from "../../helper-functions";
 
 const deployBTCPriceOracle: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     const { deployer } = await hre.getNamedAccounts();
@@ -20,9 +21,11 @@ const deployBTCPriceOracle: DeployFunction = async (hre: HardhatRuntimeEnvironme
         const decimals = networkConfig[chainId].decimalsPriceFeed;
         const initialAnswerPrice = networkConfig[chainId].initialAnswerPrice;
 
+        const args = [decimals, description, version, underlying];
+
         await deploy("BTCPriceOracle", {
             from: deployer,
-            args: [decimals, description, version, underlying],
+            args: args,
             log: true,
             autoMine: true,
         });
@@ -31,6 +34,10 @@ const deployBTCPriceOracle: DeployFunction = async (hre: HardhatRuntimeEnvironme
         console.log("Updating the initial answer...");
         await oracleContract.updateAnswer(initialAnswerPrice);
         console.log("finished!");
+
+        if (!developmentChains.includes(hre.network.name)) {
+            await verify(oracleContract.address, args);
+        }
     } else {
         console.log("Missing parameters in hardhat helper config...");
     }

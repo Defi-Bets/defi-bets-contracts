@@ -14,18 +14,18 @@ import {
 } from "../typechain-types";
 import { Block } from "@ethersproject/providers";
 
-const slot = ethers.utils.parseEther("200");
+const slot = ethers.utils.parseEther("100");
 const minBetDuration = 60 * 60 * 24 * 4;
 const maxBetDuration = 60 * 60 * 24 * 30;
 const dateString = Date.now();
 const startExpTime = Math.floor(new Date(dateString).getTime() / 1000);
-const priceAnswer = ethers.utils.parseEther("20000");
+const priceAnswer = ethers.utils.parseEther("30000");
 const feePpm = 20000; // 2% Fee
 const MILLION = 1000000;
 const maxWinMultiplier = 40; // maximum win of user can be this * amount
 const maxLossPerTime = 50000;
 const startPayoutFactor = 90;
-const moduloDays = 7;
+const moduloDays = 30;
 const targetPayoutRatio = 90;
 
 describe("DefiBetsManager unit test", () => {
@@ -296,6 +296,45 @@ describe("DefiBetsManager unit test", () => {
             await managerContract.executeExpiration(lastActiveExpTime, "BTC", answer.roundId);
 
             expect((await defiBets.expTimeInfos(lastActiveExpTime)).finished).to.be.equal(true);
+        });
+
+        it("should execute when the lp lost", async () => {
+            const { managerContract, defiBets, deployer, mockDUSD, vault } = await loadFixture(
+                deployDefiBetsManagerFixture,
+            );
+
+            const lastActiveExpTime = await defiBets.lastActiveExpTime();
+
+            const underlyingByte = await managerContract.getUnderlyingByte("BTC");
+
+            const _priceFeedAddress = await managerContract.underlyingPriceFeeds(underlyingByte);
+
+            const priceFeed = (await ethers.getContractAt("MockV3Aggregator", _priceFeedAddress)) as MockV3Aggregator;
+
+            const priceRange = [ethers.utils.parseEther("29000"), ethers.utils.parseEther("29600")];
+
+            const betSize = ethers.utils.parseEther("22");
+
+            const fee = await managerContract.calculateFee(betSize);
+
+            await mockDUSD.connect(deployer).mint(deployer.address, ethers.utils.parseEther("100"));
+            await mockDUSD.connect(deployer).approve(vault.address, betSize.add(fee));
+
+            await managerContract
+                .connect(deployer)
+                .setBet(betSize, priceRange[0], priceRange[1], lastActiveExpTime, "BTC");
+
+            const expPrice = ethers.utils.parseEther("29516");
+            await priceFeed.updateAnswer(expPrice);
+            const roundData = await priceFeed.latestRoundData();
+            console.log(ethers.utils.formatEther(roundData.answer));
+
+            await time.increaseTo(lastActiveExpTime.add(1));
+
+            await managerContract.executeExpiration(lastActiveExpTime, "BTC", roundData.roundId);
+
+            const payoutFactor = await managerContract.payoutFactor();
+            console.log(payoutFactor.toNumber());
         });
     });
 

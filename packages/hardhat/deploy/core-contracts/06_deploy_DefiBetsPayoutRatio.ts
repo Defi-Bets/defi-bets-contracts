@@ -1,7 +1,8 @@
 import { DeployFunction } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DefiBetsManager } from "../../typechain-types";
-import { networkConfig, getNetworkIdFromName } from "../../helper-hardhat-config";
+import { networkConfig, getNetworkIdFromName, developmentChains } from "../../helper-hardhat-config";
+import verify from "../../helper-functions";
 
 const deployDefiBetsContract: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     const { deployer } = await hre.getNamedAccounts();
@@ -43,6 +44,15 @@ const deployDefiBetsContract: DeployFunction = async (hre: HardhatRuntimeEnviron
         const managerContract: DefiBetsManager = await hre.ethers.getContract("DefiBetsManager");
         const tx = await managerContract.setAddresses(lpPoolContract, PayoutRatioContract.address);
         await tx.wait(1);
+
+        if (!developmentChains.includes(hre.network.name)) {
+            await verify(PayoutRatioContract.address, [
+                managerContractAddress,
+                moduloDays,
+                targetPayoutRatio,
+                nextDate.getTime() / 1000,
+            ]);
+        }
     }
 };
 

@@ -24,8 +24,9 @@ async function main() {
         const defiBets = (await ethers.getContract("DefiBets")).address;
         const volaFeed = (await ethers.getContract("ImpliedVolatilityOracle")).address;
         const vault = (await ethers.getContract("DefiBetsVault")).address;
-
+        console.log("Add Underlying Token");
         await manager.addUnderlyingToken("BTC", priceFeed, defiBets, vault);
+        console.log("Update IV Feed");
         await manager.updateIVFeed(hash, volaFeed, periodVola);
 
         console.log("🎛️  Setup the defi-bets contract...");

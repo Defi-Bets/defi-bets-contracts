@@ -1,6 +1,7 @@
 import { DeployFunction } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { networkConfig, getNetworkIdFromName } from "../../helper-hardhat-config";
+import { networkConfig, getNetworkIdFromName, developmentChains } from "../../helper-hardhat-config";
+import verify from "../../helper-functions";
 
 const deployDefiBetsManagerContract: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     const { deployer } = await hre.getNamedAccounts();
@@ -16,16 +17,21 @@ const deployDefiBetsManagerContract: DeployFunction = async (hre: HardhatRuntime
     if (chainId) {
         const fee = networkConfig[chainId].fee;
         const payoutRatio = networkConfig[chainId].payoutRatio;
+        const args = [fee, payoutRatio];
 
-        await deploy("DefiBetsManager", {
+        const manager = await deploy("DefiBetsManager", {
             from: deployer,
-            args: [fee, payoutRatio],
+            args: args,
             log: true,
             autoMine: true,
             libraries: {
                 MathLibraryDefibets: mathLibrary,
             },
         });
+
+        if (!developmentChains.includes(hre.network.name)) {
+            await verify(manager.address, args);
+        }
     } else {
         console.log("Missing parameters in hardhat helper config...");
     }

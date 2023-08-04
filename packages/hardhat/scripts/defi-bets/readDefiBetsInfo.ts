@@ -1,11 +1,13 @@
 import { ethers } from "hardhat";
-import { BTCPriceOracle, DefiBets, DefiBetsManager } from "../../typechain-types";
+import { BTCPriceOracle, DefiBets, DefiBetsManager, FakeDUSD, LiquidityPool } from "../../typechain-types";
 import { BigNumber } from "ethers";
 
 async function main() {
     const defiBetsContract = (await ethers.getContract("DefiBets")) as DefiBets;
     const managerContract = (await ethers.getContract("DefiBetsManager")) as DefiBetsManager;
     const priceOracle = (await ethers.getContract("BTCPriceOracle")) as BTCPriceOracle;
+    const lp = (await ethers.getContract("LiquidityPool")) as LiquidityPool;
+    const token = (await ethers.getContract("FakeDUSD")) as FakeDUSD;
 
     const filter = defiBetsContract.filters.EpxirationTimeCreated();
     console.log(filter);
@@ -80,7 +82,23 @@ async function main() {
                 console.log(`Timestamp: ${new Date(_timeStamp.toNumber() * 1000)}; ID: ${_id}`);
                 console.log(_timeStamp.toNumber());
             }
+            const price = (await priceOracle.getRoundData(_id)).answer;
+            console.log(ethers.utils.formatEther(price));
+
+            const winning = await defiBetsContract.betsWinningSlots(_expTime, ethers.utils.parseEther("29500"));
+            console.log(ethers.utils.formatEther(winning));
             console.log(`The round ID for ${new Date(_expTime.toNumber() * 1000)} is ${_id}`);
+
+            const _price = await managerContract.getPrice(hash, _expTime, _id);
+            console.log(ethers.utils.formatEther(_price));
+
+            const tokenBalance = await token.balanceOf(lp.address);
+            console.log(`balance lp ${ethers.utils.formatEther(tokenBalance)}`);
+
+            const vault = await lp.betVault();
+            console.log(vault);
+            const vaultManager = await managerContract.vaults(hash);
+            console.log(vaultManager);
 
             console.log("Execute exp time ...");
             await managerContract.executeExpiration(_expTime, "BTC", _id);

@@ -16,6 +16,7 @@
         "lint": "eslint --config ./.eslintrc.json --ignore-path ./.eslintignore ./*.ts ./deploy/**/*.ts ./scripts/**/*.ts ./test/**/*.ts",
         "lint-staged": "eslint --config ./.eslintrc.json --ignore-path ./.eslintignore",
         "test": "REPORT_GAS=true hardhat test --network hardhat",
+        "test-staging": "hardhat deploy --export-all ./temp/hardhat_contracts.json --tags token --network localhost \"$@\" && hardhat deploy --export-all ./temp/hardhat_contracts.json --network localhost \"$@\" && hardhat run scripts/generateTsAbis.ts --network localhost \"$@\" && hardhat test --grep \"DefiBets Protocol Staging Test\"  --network localhost",
         "verify": "hardhat etherscan-verify",
         "protocol-info": "hardhat run scripts/defi-bets/readDefiBetsInfo.ts ",
         "show-bets": "hardhat run scripts/defi-bets/showAllBets.ts "
