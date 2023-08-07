@@ -95,8 +95,6 @@ async function main() {
             const tokenBalance = await token.balanceOf(lp.address);
             console.log(`balance lp ${ethers.utils.formatEther(tokenBalance)}`);
 
-            const vault = await lp.betVault();
-            console.log(vault);
             const vaultManager = await managerContract.vaults(hash);
             console.log(vaultManager);
 

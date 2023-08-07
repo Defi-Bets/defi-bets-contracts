@@ -154,7 +154,7 @@ contract DefiBetsManager is Pausable, Ownable, IDefiBetsManager {
         if (_profit == true) {
             IDefiBetsVault(_vault).withdraw(liquidityPool, _delta, _expTime);
         } else {
-            ILiquidityPool(liquidityPool).transferTokensToVault(_delta);
+            ILiquidityPool(liquidityPool).transferTokensToVault(_vault, _delta);
 
             IDefiBetsVault(_vault).depositFromLP(_expTime, _delta);
         }

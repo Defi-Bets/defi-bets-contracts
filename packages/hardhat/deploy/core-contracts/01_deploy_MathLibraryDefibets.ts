@@ -13,6 +13,7 @@ const deployMathLibraryDefibets: DeployFunction = async (hre: HardhatRuntimeEnvi
         args: [],
         log: true,
         autoMine: true,
+        waitConfirmations: 6,
     });
 
     if (!developmentChains.includes(hre.network.name)) {

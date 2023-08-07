@@ -36,7 +36,7 @@ const deployDefiBetsContract: DeployFunction = async (hre: HardhatRuntimeEnviron
             log: true,
             args: [managerContractAddress, moduloDays, targetPayoutRatio, nextDate.getTime() / 1000],
             autoMine: true,
-            waitConfirmations: 1,
+            waitConfirmations: 6,
         });
 
         const lpPoolContract = (await get("LiquidityPool")).address;

@@ -15,6 +15,7 @@ const deployDefiBetsContract: DeployFunction = async (hre: HardhatRuntimeEnviron
         log: true,
         args: args,
         autoMine: true,
+        waitConfirmations: 6,
     });
 
     if (!developmentChains.includes(hre.network.name)) {

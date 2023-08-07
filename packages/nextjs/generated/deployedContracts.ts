@@ -3995,19 +3995,6 @@ const contracts = {
               type: "function",
             },
             {
-              inputs: [],
-              name: "betVault",
-              outputs: [
-                {
-                  internalType: "address",
-                  name: "",
-                  type: "address",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
               inputs: [
                 {
                   internalType: "uint256",
@@ -4347,6 +4334,11 @@ const contracts = {
             {
               inputs: [
                 {
+                  internalType: "address",
+                  name: "_vault",
+                  type: "address",
+                },
+                {
                   internalType: "uint256",
                   name: "_amount",
                   type: "uint256",
@@ -4396,6 +4388,11 @@ const contracts = {
             {
               inputs: [
                 {
+                  internalType: "address",
+                  name: "_vault",
+                  type: "address",
+                },
+                {
                   internalType: "uint256",
                   name: "_amount",
                   type: "uint256",
@@ -4409,6 +4406,25 @@ const contracts = {
               name: "updateTokenSupply",
               outputs: [],
               stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "",
+                  type: "address",
+                },
+              ],
+              name: "validVaults",
+              outputs: [
+                {
+                  internalType: "bool",
+                  name: "",
+                  type: "bool",
+                },
+              ],
+              stateMutability: "view",
               type: "function",
             },
           ],
@@ -4801,1674 +4817,8 @@ const contracts = {
             },
           ],
         },
-        FakeDUSD: {
-          address: "0xEAaDaE282b1131E80621Bba7AA4F754978C74962",
-          abi: [
-            {
-              inputs: [],
-              stateMutability: "nonpayable",
-              type: "constructor",
-            },
-            {
-              anonymous: false,
-              inputs: [
-                {
-                  indexed: true,
-                  internalType: "address",
-                  name: "owner",
-                  type: "address",
-                },
-                {
-                  indexed: true,
-                  internalType: "address",
-                  name: "spender",
-                  type: "address",
-                },
-                {
-                  indexed: false,
-                  internalType: "uint256",
-                  name: "value",
-                  type: "uint256",
-                },
-              ],
-              name: "Approval",
-              type: "event",
-            },
-            {
-              anonymous: false,
-              inputs: [
-                {
-                  indexed: true,
-                  internalType: "address",
-                  name: "previousOwner",
-                  type: "address",
-                },
-                {
-                  indexed: true,
-                  internalType: "address",
-                  name: "newOwner",
-                  type: "address",
-                },
-              ],
-              name: "OwnershipTransferred",
-              type: "event",
-            },
-            {
-              anonymous: false,
-              inputs: [
-                {
-                  indexed: true,
-                  internalType: "address",
-                  name: "from",
-                  type: "address",
-                },
-                {
-                  indexed: true,
-                  internalType: "address",
-                  name: "to",
-                  type: "address",
-                },
-                {
-                  indexed: false,
-                  internalType: "uint256",
-                  name: "value",
-                  type: "uint256",
-                },
-              ],
-              name: "Transfer",
-              type: "event",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "address",
-                  name: "owner",
-                  type: "address",
-                },
-                {
-                  internalType: "address",
-                  name: "spender",
-                  type: "address",
-                },
-              ],
-              name: "allowance",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "address",
-                  name: "spender",
-                  type: "address",
-                },
-                {
-                  internalType: "uint256",
-                  name: "amount",
-                  type: "uint256",
-                },
-              ],
-              name: "approve",
-              outputs: [
-                {
-                  internalType: "bool",
-                  name: "",
-                  type: "bool",
-                },
-              ],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "address",
-                  name: "account",
-                  type: "address",
-                },
-              ],
-              name: "balanceOf",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "decimals",
-              outputs: [
-                {
-                  internalType: "uint8",
-                  name: "",
-                  type: "uint8",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "address",
-                  name: "spender",
-                  type: "address",
-                },
-                {
-                  internalType: "uint256",
-                  name: "subtractedValue",
-                  type: "uint256",
-                },
-              ],
-              name: "decreaseAllowance",
-              outputs: [
-                {
-                  internalType: "bool",
-                  name: "",
-                  type: "bool",
-                },
-              ],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "address",
-                  name: "spender",
-                  type: "address",
-                },
-                {
-                  internalType: "uint256",
-                  name: "addedValue",
-                  type: "uint256",
-                },
-              ],
-              name: "increaseAllowance",
-              outputs: [
-                {
-                  internalType: "bool",
-                  name: "",
-                  type: "bool",
-                },
-              ],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "address",
-                  name: "_to",
-                  type: "address",
-                },
-                {
-                  internalType: "uint256",
-                  name: "_amount",
-                  type: "uint256",
-                },
-              ],
-              name: "mint",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "name",
-              outputs: [
-                {
-                  internalType: "string",
-                  name: "",
-                  type: "string",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "owner",
-              outputs: [
-                {
-                  internalType: "address",
-                  name: "",
-                  type: "address",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "renounceOwnership",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "symbol",
-              outputs: [
-                {
-                  internalType: "string",
-                  name: "",
-                  type: "string",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "totalSupply",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "address",
-                  name: "to",
-                  type: "address",
-                },
-                {
-                  internalType: "uint256",
-                  name: "amount",
-                  type: "uint256",
-                },
-              ],
-              name: "transfer",
-              outputs: [
-                {
-                  internalType: "bool",
-                  name: "",
-                  type: "bool",
-                },
-              ],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "address",
-                  name: "from",
-                  type: "address",
-                },
-                {
-                  internalType: "address",
-                  name: "to",
-                  type: "address",
-                },
-                {
-                  internalType: "uint256",
-                  name: "amount",
-                  type: "uint256",
-                },
-              ],
-              name: "transferFrom",
-              outputs: [
-                {
-                  internalType: "bool",
-                  name: "",
-                  type: "bool",
-                },
-              ],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "address",
-                  name: "newOwner",
-                  type: "address",
-                },
-              ],
-              name: "transferOwnership",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-          ],
-        },
-        ImpliedVolatilityOracle: {
-          address: "0x5B88Af642e17F350D2AA4eCb183340A9B40cD7aC",
-          abi: [
-            {
-              inputs: [
-                {
-                  internalType: "uint8",
-                  name: "_decimals",
-                  type: "uint8",
-                },
-                {
-                  internalType: "string",
-                  name: "_description",
-                  type: "string",
-                },
-                {
-                  internalType: "uint256",
-                  name: "_version",
-                  type: "uint256",
-                },
-                {
-                  internalType: "string",
-                  name: "_underlying",
-                  type: "string",
-                },
-                {
-                  internalType: "uint256",
-                  name: "_period",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "nonpayable",
-              type: "constructor",
-            },
-            {
-              anonymous: false,
-              inputs: [
-                {
-                  indexed: true,
-                  internalType: "address",
-                  name: "previousOwner",
-                  type: "address",
-                },
-                {
-                  indexed: true,
-                  internalType: "address",
-                  name: "newOwner",
-                  type: "address",
-                },
-              ],
-              name: "OwnershipTransferred",
-              type: "event",
-            },
-            {
-              inputs: [],
-              name: "decimals",
-              outputs: [
-                {
-                  internalType: "uint8",
-                  name: "",
-                  type: "uint8",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "description",
-              outputs: [
-                {
-                  internalType: "string",
-                  name: "",
-                  type: "string",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "uint80",
-                  name: "",
-                  type: "uint80",
-                },
-              ],
-              name: "getAnswer",
-              outputs: [
-                {
-                  internalType: "int256",
-                  name: "",
-                  type: "int256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "uint80",
-                  name: "_roundId",
-                  type: "uint80",
-                },
-              ],
-              name: "getRoundData",
-              outputs: [
-                {
-                  internalType: "uint80",
-                  name: "roundId",
-                  type: "uint80",
-                },
-                {
-                  internalType: "int256",
-                  name: "answer",
-                  type: "int256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "startedAt",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "updatedAt",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint80",
-                  name: "answeredInRound",
-                  type: "uint80",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "uint80",
-                  name: "",
-                  type: "uint80",
-                },
-              ],
-              name: "getStartedAt",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "uint80",
-                  name: "",
-                  type: "uint80",
-                },
-              ],
-              name: "getTimestamp",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "latestRoundData",
-              outputs: [
-                {
-                  internalType: "uint80",
-                  name: "roundId",
-                  type: "uint80",
-                },
-                {
-                  internalType: "int256",
-                  name: "answer",
-                  type: "int256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "startedAt",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "updatedAt",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint80",
-                  name: "answeredInRound",
-                  type: "uint80",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "owner",
-              outputs: [
-                {
-                  internalType: "address",
-                  name: "",
-                  type: "address",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "period",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "renounceOwnership",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "address",
-                  name: "newOwner",
-                  type: "address",
-                },
-              ],
-              name: "transferOwnership",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "underlying",
-              outputs: [
-                {
-                  internalType: "string",
-                  name: "",
-                  type: "string",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "int256",
-                  name: "_answer",
-                  type: "int256",
-                },
-              ],
-              name: "updateAnswer",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "version",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-          ],
-        },
-        MathLibraryDefibets: {
-          address: "0x1a1E229b33FAa5f22B27d21CE632D483C4A9bEe6",
-          abi: [
-            {
-              inputs: [],
-              name: "MathLibraryDefibets__WrongParameter",
-              type: "error",
-            },
-            {
-              inputs: [],
-              name: "BILLION",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "Z_TABLE_MAX",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "uint256",
-                  name: "lowerPrice",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "upperPrice",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "currPrice",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "impliedVolatility",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "impliedVolatilityTime",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "timeUntilEpxiry",
-                  type: "uint256",
-                },
-              ],
-              name: "calculateProbabilityRange",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-          ],
-        },
-        UseMathLibraryDefibets: {
-          address: "0xa3C89E96305c25B7c31D801F9c990c1A20d7f55F",
-          abi: [
-            {
-              inputs: [],
-              stateMutability: "nonpayable",
-              type: "constructor",
-            },
-            {
-              inputs: [],
-              name: "calculateProbabilityRange",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-          ],
-        },
-        DefiBetsManager: {
-          address: "0x38c39779Db5A8EbA2347ABf2189c3D05b628b25e",
-          abi: [
-            {
-              inputs: [
-                {
-                  internalType: "uint256",
-                  name: "_feePpm",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint8",
-                  name: "_startPayoutFactor",
-                  type: "uint8",
-                },
-              ],
-              stateMutability: "nonpayable",
-              type: "constructor",
-            },
-            {
-              inputs: [],
-              name: "DefiBetsManager__AccessForbidden",
-              type: "error",
-            },
-            {
-              inputs: [],
-              name: "DefiBetsManager__FeeNotAllowed",
-              type: "error",
-            },
-            {
-              inputs: [],
-              name: "DefiBetsManager__FeeWouldBeTooSmall",
-              type: "error",
-            },
-            {
-              inputs: [],
-              name: "DefiBetsManager__NoLiquidity",
-              type: "error",
-            },
-            {
-              inputs: [],
-              name: "DefiBetsManager__NoValidUnderlying",
-              type: "error",
-            },
-            {
-              inputs: [],
-              name: "DefiBetsManager__NotValidRoundId",
-              type: "error",
-            },
-            {
-              inputs: [],
-              name: "DefiBetsManager__ParamNull",
-              type: "error",
-            },
-            {
-              anonymous: false,
-              inputs: [
-                {
-                  indexed: false,
-                  internalType: "uint256",
-                  name: "feePpm",
-                  type: "uint256",
-                },
-              ],
-              name: "FeeUpdated",
-              type: "event",
-            },
-            {
-              anonymous: false,
-              inputs: [
-                {
-                  indexed: false,
-                  internalType: "bytes32",
-                  name: "underlying",
-                  type: "bytes32",
-                },
-                {
-                  indexed: false,
-                  internalType: "address",
-                  name: "feed",
-                  type: "address",
-                },
-                {
-                  indexed: false,
-                  internalType: "uint256",
-                  name: "period",
-                  type: "uint256",
-                },
-              ],
-              name: "IVFeedUpdated",
-              type: "event",
-            },
-            {
-              anonymous: false,
-              inputs: [
-                {
-                  indexed: true,
-                  internalType: "address",
-                  name: "previousOwner",
-                  type: "address",
-                },
-                {
-                  indexed: true,
-                  internalType: "address",
-                  name: "newOwner",
-                  type: "address",
-                },
-              ],
-              name: "OwnershipTransferred",
-              type: "event",
-            },
-            {
-              anonymous: false,
-              inputs: [
-                {
-                  indexed: false,
-                  internalType: "address",
-                  name: "account",
-                  type: "address",
-                },
-              ],
-              name: "Paused",
-              type: "event",
-            },
-            {
-              anonymous: false,
-              inputs: [
-                {
-                  indexed: false,
-                  internalType: "uint256",
-                  name: "payoutFactor",
-                  type: "uint256",
-                },
-              ],
-              name: "PayoutFactorUpdated",
-              type: "event",
-            },
-            {
-              anonymous: false,
-              inputs: [
-                {
-                  indexed: false,
-                  internalType: "bytes32",
-                  name: "underlying",
-                  type: "bytes32",
-                },
-                {
-                  indexed: false,
-                  internalType: "address",
-                  name: "priceFeed",
-                  type: "address",
-                },
-              ],
-              name: "PriceFeedUpdated",
-              type: "event",
-            },
-            {
-              anonymous: false,
-              inputs: [
-                {
-                  indexed: false,
-                  internalType: "string",
-                  name: "underlying",
-                  type: "string",
-                },
-                {
-                  indexed: false,
-                  internalType: "bytes32",
-                  name: "underlyingHash",
-                  type: "bytes32",
-                },
-                {
-                  indexed: false,
-                  internalType: "address",
-                  name: "defiBets",
-                  type: "address",
-                },
-                {
-                  indexed: false,
-                  internalType: "address",
-                  name: "vault",
-                  type: "address",
-                },
-              ],
-              name: "UnderlyingAdded",
-              type: "event",
-            },
-            {
-              anonymous: false,
-              inputs: [
-                {
-                  indexed: false,
-                  internalType: "address",
-                  name: "account",
-                  type: "address",
-                },
-              ],
-              name: "Unpaused",
-              type: "event",
-            },
-            {
-              inputs: [],
-              name: "MAX_FEE_PPM",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "MILLION",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "string",
-                  name: "_underlying",
-                  type: "string",
-                },
-                {
-                  internalType: "address",
-                  name: "_feed",
-                  type: "address",
-                },
-                {
-                  internalType: "address",
-                  name: "_defiBets",
-                  type: "address",
-                },
-                {
-                  internalType: "address",
-                  name: "_vault",
-                  type: "address",
-                },
-              ],
-              name: "addUnderlyingToken",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "uint256",
-                  name: "_amount",
-                  type: "uint256",
-                },
-              ],
-              name: "calculateFee",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "uint256",
-                  name: "_price",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "_betSize",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "_minPrice",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "_maxPrice",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "_expTime",
-                  type: "uint256",
-                },
-                {
-                  internalType: "bytes32",
-                  name: "_hash",
-                  type: "bytes32",
-                },
-              ],
-              name: "calculateWinning",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "uint256",
-                  name: "_tokenId",
-                  type: "uint256",
-                },
-                {
-                  internalType: "bytes32",
-                  name: "_hash",
-                  type: "bytes32",
-                },
-              ],
-              name: "claimWinnings",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "bytes32",
-                  name: "_tokenHash",
-                  type: "bytes32",
-                },
-              ],
-              name: "createNewExpTime",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "bytes32",
-                  name: "",
-                  type: "bytes32",
-                },
-              ],
-              name: "defiBetsContracts",
-              outputs: [
-                {
-                  internalType: "address",
-                  name: "",
-                  type: "address",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "uint256",
-                  name: "_expTime",
-                  type: "uint256",
-                },
-                {
-                  internalType: "string",
-                  name: "_underlying",
-                  type: "string",
-                },
-                {
-                  internalType: "uint80",
-                  name: "_roundId",
-                  type: "uint80",
-                },
-              ],
-              name: "executeExpiration",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "feePpm",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "bytes32",
-                  name: "_hash",
-                  type: "bytes32",
-                },
-              ],
-              name: "getCurrPrice",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "bytes32",
-                  name: "_hash",
-                  type: "bytes32",
-                },
-              ],
-              name: "getImplVol",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "getLPTokenSupplies",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "bytes32",
-                  name: "_hash",
-                  type: "bytes32",
-                },
-                {
-                  internalType: "uint256",
-                  name: "_expTime",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint80",
-                  name: "_roundId",
-                  type: "uint80",
-                },
-              ],
-              name: "getPrice",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "string",
-                  name: "_token",
-                  type: "string",
-                },
-              ],
-              name: "getUnderlyingByte",
-              outputs: [
-                {
-                  internalType: "bytes32",
-                  name: "",
-                  type: "bytes32",
-                },
-              ],
-              stateMutability: "pure",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "bytes32",
-                  name: "_hash",
-                  type: "bytes32",
-                },
-                {
-                  internalType: "uint256",
-                  name: "_startExpTime",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "_minBetDuration",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "_maxBetDuration",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "_slot",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "_maxWinMultiplier",
-                  type: "uint256",
-                },
-              ],
-              name: "initializeBets",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "liquidityPool",
-              outputs: [
-                {
-                  internalType: "address",
-                  name: "",
-                  type: "address",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "owner",
-              outputs: [
-                {
-                  internalType: "address",
-                  name: "",
-                  type: "address",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "paused",
-              outputs: [
-                {
-                  internalType: "bool",
-                  name: "",
-                  type: "bool",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "payoutFactor",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "payoutRatioContract",
-              outputs: [
-                {
-                  internalType: "address",
-                  name: "",
-                  type: "address",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "uint256",
-                  name: "_amount",
-                  type: "uint256",
-                },
-              ],
-              name: "provideLP",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "uint256",
-                  name: "_amount",
-                  type: "uint256",
-                },
-              ],
-              name: "redeemLPTokens",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "renounceOwnership",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "address",
-                  name: "_liquidityPool",
-                  type: "address",
-                },
-                {
-                  internalType: "address",
-                  name: "_payoutRatioContract",
-                  type: "address",
-                },
-              ],
-              name: "setAddresses",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "uint256",
-                  name: "_betSize",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "_minPrice",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "_maxPrice",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "_expTime",
-                  type: "uint256",
-                },
-                {
-                  internalType: "string",
-                  name: "_underlying",
-                  type: "string",
-                },
-              ],
-              name: "setBet",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "uint256",
-                  name: "_maxLossPerExpTime",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "_minBetDuration",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "_maxBetDuration",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "_slot",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "_maxWinMultiplier",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "_timeDelta",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "_dependentTimeStamp",
-                  type: "uint256",
-                },
-                {
-                  internalType: "bytes32",
-                  name: "_hash",
-                  type: "bytes32",
-                },
-              ],
-              name: "setDefiBetsParameter",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "uint256",
-                  name: "_newFee",
-                  type: "uint256",
-                },
-              ],
-              name: "setFeesPpm",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "uint256",
-                  name: "_payoutFactor",
-                  type: "uint256",
-                },
-              ],
-              name: "setNewPayoutFactor",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "address",
-                  name: "newOwner",
-                  type: "address",
-                },
-              ],
-              name: "transferOwnership",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "bytes32",
-                  name: "",
-                  type: "bytes32",
-                },
-              ],
-              name: "underlyingIVFeeds",
-              outputs: [
-                {
-                  internalType: "address",
-                  name: "feedAddress",
-                  type: "address",
-                },
-                {
-                  internalType: "uint256",
-                  name: "period",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "bytes32",
-                  name: "",
-                  type: "bytes32",
-                },
-              ],
-              name: "underlyingPriceFeeds",
-              outputs: [
-                {
-                  internalType: "address",
-                  name: "",
-                  type: "address",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "bytes32",
-                  name: "_hash",
-                  type: "bytes32",
-                },
-                {
-                  internalType: "address",
-                  name: "_feed",
-                  type: "address",
-                },
-                {
-                  internalType: "uint256",
-                  name: "_period",
-                  type: "uint256",
-                },
-              ],
-              name: "updateIVFeed",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "uint256",
-                  name: "_newMaxLoss",
-                  type: "uint256",
-                },
-              ],
-              name: "updateMaxLPLoss",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "bytes32",
-                  name: "_hash",
-                  type: "bytes32",
-                },
-                {
-                  internalType: "address",
-                  name: "_feed",
-                  type: "address",
-                },
-              ],
-              name: "updatePriceFeed",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "bytes32",
-                  name: "",
-                  type: "bytes32",
-                },
-              ],
-              name: "validUnderlying",
-              outputs: [
-                {
-                  internalType: "bool",
-                  name: "",
-                  type: "bool",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "bytes32",
-                  name: "",
-                  type: "bytes32",
-                },
-              ],
-              name: "vaults",
-              outputs: [
-                {
-                  internalType: "address",
-                  name: "",
-                  type: "address",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-          ],
-        },
         DefiBets: {
-          address: "0xC719eCb404723F9dD995C3B3F30C5a22166d7F30",
+          address: "0xabe231fb5215974801FC5b498b3c4584c03B2aeb",
           abi: [
             {
               inputs: [
@@ -7661,20 +6011,20 @@ const contracts = {
             },
           ],
         },
-        DefiBetsVault: {
-          address: "0x929683703569343Fc307298A7a4940d208F0c2a4",
+        DefiBetsManager: {
+          address: "0xb5AF355C2bfB59E2FE3D7a8CE69051598976f3f6",
           abi: [
             {
               inputs: [
                 {
-                  internalType: "address",
-                  name: "_defibetsManager",
-                  type: "address",
+                  internalType: "uint256",
+                  name: "_feePpm",
+                  type: "uint256",
                 },
                 {
-                  internalType: "address",
-                  name: "_token",
-                  type: "address",
+                  internalType: "uint8",
+                  name: "_startPayoutFactor",
+                  type: "uint8",
                 },
               ],
               stateMutability: "nonpayable",
@@ -7682,12 +6032,37 @@ const contracts = {
             },
             {
               inputs: [],
-              name: "DefiBetsVault__Forbidden",
+              name: "DefiBetsManager__AccessForbidden",
               type: "error",
             },
             {
               inputs: [],
-              name: "DefiBetsVault__NotEnoughFunds",
+              name: "DefiBetsManager__FeeNotAllowed",
+              type: "error",
+            },
+            {
+              inputs: [],
+              name: "DefiBetsManager__FeeWouldBeTooSmall",
+              type: "error",
+            },
+            {
+              inputs: [],
+              name: "DefiBetsManager__NoLiquidity",
+              type: "error",
+            },
+            {
+              inputs: [],
+              name: "DefiBetsManager__NoValidUnderlying",
+              type: "error",
+            },
+            {
+              inputs: [],
+              name: "DefiBetsManager__NotValidRoundId",
+              type: "error",
+            },
+            {
+              inputs: [],
+              name: "DefiBetsManager__ParamNull",
               type: "error",
             },
             {
@@ -7696,29 +6071,11 @@ const contracts = {
                 {
                   indexed: false,
                   internalType: "uint256",
-                  name: "expTime",
-                  type: "uint256",
-                },
-                {
-                  indexed: false,
-                  internalType: "uint256",
-                  name: "amount",
-                  type: "uint256",
-                },
-                {
-                  indexed: false,
-                  internalType: "uint256",
-                  name: "supply",
-                  type: "uint256",
-                },
-                {
-                  indexed: false,
-                  internalType: "uint256",
-                  name: "totalFees",
+                  name: "feePpm",
                   type: "uint256",
                 },
               ],
-              name: "Deposit",
+              name: "FeeUpdated",
               type: "event",
             },
             {
@@ -7726,12 +6083,24 @@ const contracts = {
               inputs: [
                 {
                   indexed: false,
+                  internalType: "bytes32",
+                  name: "underlying",
+                  type: "bytes32",
+                },
+                {
+                  indexed: false,
+                  internalType: "address",
+                  name: "feed",
+                  type: "address",
+                },
+                {
+                  indexed: false,
                   internalType: "uint256",
-                  name: "amount",
+                  name: "period",
                   type: "uint256",
                 },
               ],
-              name: "FessWithdrawd",
+              name: "IVFeedUpdated",
               type: "event",
             },
             {
@@ -7757,36 +6126,248 @@ const contracts = {
               anonymous: false,
               inputs: [
                 {
-                  indexed: true,
+                  indexed: false,
                   internalType: "address",
-                  name: "to",
+                  name: "account",
+                  type: "address",
+                },
+              ],
+              name: "Paused",
+              type: "event",
+            },
+            {
+              anonymous: false,
+              inputs: [
+                {
+                  indexed: false,
+                  internalType: "uint256",
+                  name: "payoutFactor",
+                  type: "uint256",
+                },
+              ],
+              name: "PayoutFactorUpdated",
+              type: "event",
+            },
+            {
+              anonymous: false,
+              inputs: [
+                {
+                  indexed: false,
+                  internalType: "bytes32",
+                  name: "underlying",
+                  type: "bytes32",
+                },
+                {
+                  indexed: false,
+                  internalType: "address",
+                  name: "priceFeed",
+                  type: "address",
+                },
+              ],
+              name: "PriceFeedUpdated",
+              type: "event",
+            },
+            {
+              anonymous: false,
+              inputs: [
+                {
+                  indexed: false,
+                  internalType: "string",
+                  name: "underlying",
+                  type: "string",
+                },
+                {
+                  indexed: false,
+                  internalType: "bytes32",
+                  name: "underlyingHash",
+                  type: "bytes32",
+                },
+                {
+                  indexed: false,
+                  internalType: "address",
+                  name: "defiBets",
                   type: "address",
                 },
                 {
                   indexed: false,
-                  internalType: "uint256",
-                  name: "amount",
-                  type: "uint256",
-                },
-                {
-                  indexed: false,
-                  internalType: "uint256",
-                  name: "expTime",
-                  type: "uint256",
-                },
-                {
-                  indexed: false,
-                  internalType: "uint256",
-                  name: "newSupply",
-                  type: "uint256",
+                  internalType: "address",
+                  name: "vault",
+                  type: "address",
                 },
               ],
-              name: "Withdraw",
+              name: "UnderlyingAdded",
+              type: "event",
+            },
+            {
+              anonymous: false,
+              inputs: [
+                {
+                  indexed: false,
+                  internalType: "address",
+                  name: "account",
+                  type: "address",
+                },
+              ],
+              name: "Unpaused",
               type: "event",
             },
             {
               inputs: [],
-              name: "defiBetsManager",
+              name: "MAX_FEE_PPM",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "MILLION",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "string",
+                  name: "_underlying",
+                  type: "string",
+                },
+                {
+                  internalType: "address",
+                  name: "_feed",
+                  type: "address",
+                },
+                {
+                  internalType: "address",
+                  name: "_defiBets",
+                  type: "address",
+                },
+                {
+                  internalType: "address",
+                  name: "_vault",
+                  type: "address",
+                },
+              ],
+              name: "addUnderlyingToken",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "uint256",
+                  name: "_amount",
+                  type: "uint256",
+                },
+              ],
+              name: "calculateFee",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "uint256",
+                  name: "_price",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "_betSize",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "_minPrice",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "_maxPrice",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "_expTime",
+                  type: "uint256",
+                },
+                {
+                  internalType: "bytes32",
+                  name: "_hash",
+                  type: "bytes32",
+                },
+              ],
+              name: "calculateWinning",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "uint256",
+                  name: "_tokenId",
+                  type: "uint256",
+                },
+                {
+                  internalType: "bytes32",
+                  name: "_hash",
+                  type: "bytes32",
+                },
+              ],
+              name: "claimWinnings",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "bytes32",
+                  name: "_tokenHash",
+                  type: "bytes32",
+                },
+              ],
+              name: "createNewExpTime",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "bytes32",
+                  name: "",
+                  type: "bytes32",
+                },
+              ],
+              name: "defiBetsContracts",
               outputs: [
                 {
                   internalType: "address",
@@ -7800,63 +6381,189 @@ const contracts = {
             {
               inputs: [
                 {
-                  internalType: "address",
-                  name: "_from",
-                  type: "address",
-                },
-                {
-                  internalType: "uint256",
-                  name: "_amount",
-                  type: "uint256",
-                },
-                {
                   internalType: "uint256",
                   name: "_expTime",
                   type: "uint256",
                 },
                 {
-                  internalType: "uint256",
-                  name: "_fees",
-                  type: "uint256",
+                  internalType: "string",
+                  name: "_underlying",
+                  type: "string",
+                },
+                {
+                  internalType: "uint80",
+                  name: "_roundId",
+                  type: "uint80",
                 },
               ],
-              name: "deposit",
+              name: "executeExpiration",
               outputs: [],
               stateMutability: "nonpayable",
               type: "function",
             },
             {
-              inputs: [
-                {
-                  internalType: "uint256",
-                  name: "_expTime",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "_amount",
-                  type: "uint256",
-                },
-              ],
-              name: "depositFromLP",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              name: "expTimeSupply",
+              inputs: [],
+              name: "feePpm",
               outputs: [
                 {
                   internalType: "uint256",
                   name: "",
                   type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "bytes32",
+                  name: "_hash",
+                  type: "bytes32",
+                },
+              ],
+              name: "getCurrPrice",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "bytes32",
+                  name: "_hash",
+                  type: "bytes32",
+                },
+              ],
+              name: "getImplVol",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "getLPTokenSupplies",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "bytes32",
+                  name: "_hash",
+                  type: "bytes32",
+                },
+                {
+                  internalType: "uint256",
+                  name: "_expTime",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint80",
+                  name: "_roundId",
+                  type: "uint80",
+                },
+              ],
+              name: "getPrice",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "string",
+                  name: "_token",
+                  type: "string",
+                },
+              ],
+              name: "getUnderlyingByte",
+              outputs: [
+                {
+                  internalType: "bytes32",
+                  name: "",
+                  type: "bytes32",
+                },
+              ],
+              stateMutability: "pure",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "bytes32",
+                  name: "_hash",
+                  type: "bytes32",
+                },
+                {
+                  internalType: "uint256",
+                  name: "_startExpTime",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "_minBetDuration",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "_maxBetDuration",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "_slot",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "_maxWinMultiplier",
+                  type: "uint256",
+                },
+              ],
+              name: "initializeBets",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "liquidityPool",
+              outputs: [
+                {
+                  internalType: "address",
+                  name: "",
+                  type: "address",
                 },
               ],
               stateMutability: "view",
@@ -7877,14 +6584,33 @@ const contracts = {
             },
             {
               inputs: [],
-              name: "renounceOwnership",
-              outputs: [],
-              stateMutability: "nonpayable",
+              name: "paused",
+              outputs: [
+                {
+                  internalType: "bool",
+                  name: "",
+                  type: "bool",
+                },
+              ],
+              stateMutability: "view",
               type: "function",
             },
             {
               inputs: [],
-              name: "token",
+              name: "payoutFactor",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "payoutRatioContract",
               outputs: [
                 {
                   internalType: "address",
@@ -7896,16 +6622,161 @@ const contracts = {
               type: "function",
             },
             {
-              inputs: [],
-              name: "totalFees",
-              outputs: [
+              inputs: [
                 {
                   internalType: "uint256",
-                  name: "",
+                  name: "_amount",
                   type: "uint256",
                 },
               ],
-              stateMutability: "view",
+              name: "provideLP",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "uint256",
+                  name: "_amount",
+                  type: "uint256",
+                },
+              ],
+              name: "redeemLPTokens",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "renounceOwnership",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "_liquidityPool",
+                  type: "address",
+                },
+                {
+                  internalType: "address",
+                  name: "_payoutRatioContract",
+                  type: "address",
+                },
+              ],
+              name: "setAddresses",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "uint256",
+                  name: "_betSize",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "_minPrice",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "_maxPrice",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "_expTime",
+                  type: "uint256",
+                },
+                {
+                  internalType: "string",
+                  name: "_underlying",
+                  type: "string",
+                },
+              ],
+              name: "setBet",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "uint256",
+                  name: "_maxLossPerExpTime",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "_minBetDuration",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "_maxBetDuration",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "_slot",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "_maxWinMultiplier",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "_timeDelta",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "_dependentTimeStamp",
+                  type: "uint256",
+                },
+                {
+                  internalType: "bytes32",
+                  name: "_hash",
+                  type: "bytes32",
+                },
+              ],
+              name: "setDefiBetsParameter",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "uint256",
+                  name: "_newFee",
+                  type: "uint256",
+                },
+              ],
+              name: "setFeesPpm",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "uint256",
+                  name: "_payoutFactor",
+                  type: "uint256",
+                },
+              ],
+              name: "setNewPayoutFactor",
+              outputs: [],
+              stateMutability: "nonpayable",
               type: "function",
             },
             {
@@ -7924,259 +6795,21 @@ const contracts = {
             {
               inputs: [
                 {
-                  internalType: "address",
-                  name: "_to",
-                  type: "address",
-                },
-                {
-                  internalType: "uint256",
-                  name: "_amount",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "_expTime",
-                  type: "uint256",
+                  internalType: "bytes32",
+                  name: "",
+                  type: "bytes32",
                 },
               ],
-              name: "withdraw",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "withdrawFees",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-          ],
-        },
-        LiquidityPool: {
-          address: "0xEa10D15A74279C5a80B61d6B1240c0d3f1cB64bE",
-          abi: [
-            {
-              inputs: [
-                {
-                  internalType: "address",
-                  name: "_managerContract",
-                  type: "address",
-                },
-                {
-                  internalType: "address",
-                  name: "_token",
-                  type: "address",
-                },
-                {
-                  internalType: "address",
-                  name: "_betVault",
-                  type: "address",
-                },
-                {
-                  internalType: "uint256",
-                  name: "_maxLossPerTimePercent",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "nonpayable",
-              type: "constructor",
-            },
-            {
-              inputs: [],
-              name: "LiquidityPool__AccessForbidden",
-              type: "error",
-            },
-            {
-              inputs: [],
-              name: "LiquidityPool__NotAllowedAmount",
-              type: "error",
-            },
-            {
-              inputs: [],
-              name: "LiquidityPool__NotEnoughFreeSuppy",
-              type: "error",
-            },
-            {
-              anonymous: false,
-              inputs: [
-                {
-                  indexed: true,
-                  internalType: "address",
-                  name: "owner",
-                  type: "address",
-                },
-                {
-                  indexed: true,
-                  internalType: "address",
-                  name: "spender",
-                  type: "address",
-                },
-                {
-                  indexed: false,
-                  internalType: "uint256",
-                  name: "value",
-                  type: "uint256",
-                },
-              ],
-              name: "Approval",
-              type: "event",
-            },
-            {
-              anonymous: false,
-              inputs: [
-                {
-                  indexed: true,
-                  internalType: "address",
-                  name: "account",
-                  type: "address",
-                },
-                {
-                  indexed: false,
-                  internalType: "uint256",
-                  name: "amount",
-                  type: "uint256",
-                },
-                {
-                  indexed: false,
-                  internalType: "uint256",
-                  name: "shares",
-                  type: "uint256",
-                },
-                {
-                  indexed: false,
-                  internalType: "uint256",
-                  name: "totalTokens",
-                  type: "uint256",
-                },
-                {
-                  indexed: false,
-                  internalType: "uint256",
-                  name: "totalSupply",
-                  type: "uint256",
-                },
-              ],
-              name: "Deposit",
-              type: "event",
-            },
-            {
-              anonymous: false,
-              inputs: [
-                {
-                  indexed: false,
-                  internalType: "uint256",
-                  name: "lockedTokenSupply",
-                  type: "uint256",
-                },
-                {
-                  indexed: false,
-                  internalType: "uint256",
-                  name: "expTime",
-                  type: "uint256",
-                },
-                {
-                  indexed: false,
-                  internalType: "uint256",
-                  name: "lockedPerExpTime",
-                  type: "uint256",
-                },
-              ],
-              name: "LockedSupplyUpdated",
-              type: "event",
-            },
-            {
-              anonymous: false,
-              inputs: [
-                {
-                  indexed: false,
-                  internalType: "uint256",
-                  name: "newMaxLoss",
-                  type: "uint256",
-                },
-              ],
-              name: "MaxLossPerTimeUpdated",
-              type: "event",
-            },
-            {
-              anonymous: false,
-              inputs: [
-                {
-                  indexed: true,
-                  internalType: "address",
-                  name: "account",
-                  type: "address",
-                },
-                {
-                  indexed: false,
-                  internalType: "uint256",
-                  name: "shares",
-                  type: "uint256",
-                },
-                {
-                  indexed: false,
-                  internalType: "uint256",
-                  name: "amount",
-                  type: "uint256",
-                },
-                {
-                  indexed: false,
-                  internalType: "uint256",
-                  name: "totalTokens",
-                  type: "uint256",
-                },
-                {
-                  indexed: false,
-                  internalType: "uint256",
-                  name: "totalSupply",
-                  type: "uint256",
-                },
-              ],
-              name: "Redeem",
-              type: "event",
-            },
-            {
-              anonymous: false,
-              inputs: [
-                {
-                  indexed: true,
-                  internalType: "address",
-                  name: "from",
-                  type: "address",
-                },
-                {
-                  indexed: true,
-                  internalType: "address",
-                  name: "to",
-                  type: "address",
-                },
-                {
-                  indexed: false,
-                  internalType: "uint256",
-                  name: "value",
-                  type: "uint256",
-                },
-              ],
-              name: "Transfer",
-              type: "event",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "address",
-                  name: "owner",
-                  type: "address",
-                },
-                {
-                  internalType: "address",
-                  name: "spender",
-                  type: "address",
-                },
-              ],
-              name: "allowance",
+              name: "underlyingIVFeeds",
               outputs: [
                 {
+                  internalType: "address",
+                  name: "feedAddress",
+                  type: "address",
+                },
+                {
                   internalType: "uint256",
-                  name: "",
+                  name: "period",
                   type: "uint256",
                 },
               ],
@@ -8186,62 +6819,12 @@ const contracts = {
             {
               inputs: [
                 {
-                  internalType: "address",
-                  name: "spender",
-                  type: "address",
-                },
-                {
-                  internalType: "uint256",
-                  name: "amount",
-                  type: "uint256",
-                },
-              ],
-              name: "approve",
-              outputs: [
-                {
-                  internalType: "bool",
+                  internalType: "bytes32",
                   name: "",
-                  type: "bool",
+                  type: "bytes32",
                 },
               ],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "address",
-                  name: "account",
-                  type: "address",
-                },
-              ],
-              name: "balanceOf",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "balanceTokens",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "betVault",
+              name: "underlyingPriceFeeds",
               outputs: [
                 {
                   internalType: "address",
@@ -8255,372 +6838,22 @@ const contracts = {
             {
               inputs: [
                 {
-                  internalType: "uint256",
-                  name: "_amount",
-                  type: "uint256",
+                  internalType: "bytes32",
+                  name: "_hash",
+                  type: "bytes32",
                 },
-              ],
-              name: "calcSharesToMint",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "uint256",
-                  name: "_shares",
-                  type: "uint256",
-                },
-              ],
-              name: "calcTokensToWithdraw",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "decimals",
-              outputs: [
-                {
-                  internalType: "uint8",
-                  name: "",
-                  type: "uint8",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [
                 {
                   internalType: "address",
-                  name: "spender",
+                  name: "_feed",
                   type: "address",
                 },
                 {
                   internalType: "uint256",
-                  name: "subtractedValue",
+                  name: "_period",
                   type: "uint256",
                 },
               ],
-              name: "decreaseAllowance",
-              outputs: [
-                {
-                  internalType: "bool",
-                  name: "",
-                  type: "bool",
-                },
-              ],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "address",
-                  name: "_account",
-                  type: "address",
-                },
-                {
-                  internalType: "uint256",
-                  name: "_amount",
-                  type: "uint256",
-                },
-              ],
-              name: "depositForAccount",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "address",
-                  name: "spender",
-                  type: "address",
-                },
-                {
-                  internalType: "uint256",
-                  name: "addedValue",
-                  type: "uint256",
-                },
-              ],
-              name: "increaseAllowance",
-              outputs: [
-                {
-                  internalType: "bool",
-                  name: "",
-                  type: "bool",
-                },
-              ],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              name: "lockedPerExpTime",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "lockedTokenSupply",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "managerContract",
-              outputs: [
-                {
-                  internalType: "address",
-                  name: "",
-                  type: "address",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "maxLPLost",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "maxLostPerTimeInPercent",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "name",
-              outputs: [
-                {
-                  internalType: "string",
-                  name: "",
-                  type: "string",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "address",
-                  name: "_account",
-                  type: "address",
-                },
-                {
-                  internalType: "uint256",
-                  name: "_shares",
-                  type: "uint256",
-                },
-              ],
-              name: "redeemSharesForAccount",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "uint256",
-                  name: "_expTime",
-                  type: "uint256",
-                },
-              ],
-              name: "resetLockedTokens",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "symbol",
-              outputs: [
-                {
-                  internalType: "string",
-                  name: "",
-                  type: "string",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "token",
-              outputs: [
-                {
-                  internalType: "address",
-                  name: "",
-                  type: "address",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "totalSupply",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "totalTokenSupply",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "address",
-                  name: "to",
-                  type: "address",
-                },
-                {
-                  internalType: "uint256",
-                  name: "amount",
-                  type: "uint256",
-                },
-              ],
-              name: "transfer",
-              outputs: [
-                {
-                  internalType: "bool",
-                  name: "",
-                  type: "bool",
-                },
-              ],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "address",
-                  name: "from",
-                  type: "address",
-                },
-                {
-                  internalType: "address",
-                  name: "to",
-                  type: "address",
-                },
-                {
-                  internalType: "uint256",
-                  name: "amount",
-                  type: "uint256",
-                },
-              ],
-              name: "transferFrom",
-              outputs: [
-                {
-                  internalType: "bool",
-                  name: "",
-                  type: "bool",
-                },
-              ],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "uint256",
-                  name: "_amount",
-                  type: "uint256",
-                },
-              ],
-              name: "transferTokensToVault",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "uint256",
-                  name: "_delta",
-                  type: "uint256",
-                },
-                {
-                  internalType: "bool",
-                  name: "_increase",
-                  type: "bool",
-                },
-                {
-                  internalType: "uint256",
-                  name: "_expTime",
-                  type: "uint256",
-                },
-              ],
-              name: "updateLockedTokenSupply",
+              name: "updateIVFeed",
               outputs: [],
               stateMutability: "nonpayable",
               type: "function",
@@ -8633,7 +6866,7 @@ const contracts = {
                   type: "uint256",
                 },
               ],
-              name: "updateMaxLoss",
+              name: "updateMaxLPLoss",
               outputs: [],
               stateMutability: "nonpayable",
               type: "function",
@@ -8641,25 +6874,63 @@ const contracts = {
             {
               inputs: [
                 {
-                  internalType: "uint256",
-                  name: "_amount",
-                  type: "uint256",
+                  internalType: "bytes32",
+                  name: "_hash",
+                  type: "bytes32",
                 },
                 {
+                  internalType: "address",
+                  name: "_feed",
+                  type: "address",
+                },
+              ],
+              name: "updatePriceFeed",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "bytes32",
+                  name: "",
+                  type: "bytes32",
+                },
+              ],
+              name: "validUnderlying",
+              outputs: [
+                {
                   internalType: "bool",
-                  name: "_profit",
+                  name: "",
                   type: "bool",
                 },
               ],
-              name: "updateTokenSupply",
-              outputs: [],
-              stateMutability: "nonpayable",
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "bytes32",
+                  name: "",
+                  type: "bytes32",
+                },
+              ],
+              name: "vaults",
+              outputs: [
+                {
+                  internalType: "address",
+                  name: "",
+                  type: "address",
+                },
+              ],
+              stateMutability: "view",
               type: "function",
             },
           ],
         },
         DefiBetsPayoutRatio: {
-          address: "0x743c8A71D62D03d554C7DDE4d9ABa8EdB4f668f3",
+          address: "0x5E6972Ce355899F72A5e14F3702B9b5dC48124Cf",
           abi: [
             {
               inputs: [
@@ -9032,6 +7303,1772 @@ const contracts = {
               name: "updatePlayerProfit",
               outputs: [],
               stateMutability: "nonpayable",
+              type: "function",
+            },
+          ],
+        },
+        DefiBetsVault: {
+          address: "0xa21a4E7B8fBdafFb08600294c9d79103703B2E4f",
+          abi: [
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "_defibetsManager",
+                  type: "address",
+                },
+                {
+                  internalType: "address",
+                  name: "_token",
+                  type: "address",
+                },
+              ],
+              stateMutability: "nonpayable",
+              type: "constructor",
+            },
+            {
+              inputs: [],
+              name: "DefiBetsVault__Forbidden",
+              type: "error",
+            },
+            {
+              inputs: [],
+              name: "DefiBetsVault__NotEnoughFunds",
+              type: "error",
+            },
+            {
+              anonymous: false,
+              inputs: [
+                {
+                  indexed: false,
+                  internalType: "uint256",
+                  name: "expTime",
+                  type: "uint256",
+                },
+                {
+                  indexed: false,
+                  internalType: "uint256",
+                  name: "amount",
+                  type: "uint256",
+                },
+                {
+                  indexed: false,
+                  internalType: "uint256",
+                  name: "supply",
+                  type: "uint256",
+                },
+                {
+                  indexed: false,
+                  internalType: "uint256",
+                  name: "totalFees",
+                  type: "uint256",
+                },
+              ],
+              name: "Deposit",
+              type: "event",
+            },
+            {
+              anonymous: false,
+              inputs: [
+                {
+                  indexed: false,
+                  internalType: "uint256",
+                  name: "amount",
+                  type: "uint256",
+                },
+              ],
+              name: "FessWithdrawd",
+              type: "event",
+            },
+            {
+              anonymous: false,
+              inputs: [
+                {
+                  indexed: true,
+                  internalType: "address",
+                  name: "previousOwner",
+                  type: "address",
+                },
+                {
+                  indexed: true,
+                  internalType: "address",
+                  name: "newOwner",
+                  type: "address",
+                },
+              ],
+              name: "OwnershipTransferred",
+              type: "event",
+            },
+            {
+              anonymous: false,
+              inputs: [
+                {
+                  indexed: true,
+                  internalType: "address",
+                  name: "to",
+                  type: "address",
+                },
+                {
+                  indexed: false,
+                  internalType: "uint256",
+                  name: "amount",
+                  type: "uint256",
+                },
+                {
+                  indexed: false,
+                  internalType: "uint256",
+                  name: "expTime",
+                  type: "uint256",
+                },
+                {
+                  indexed: false,
+                  internalType: "uint256",
+                  name: "newSupply",
+                  type: "uint256",
+                },
+              ],
+              name: "Withdraw",
+              type: "event",
+            },
+            {
+              inputs: [],
+              name: "defiBetsManager",
+              outputs: [
+                {
+                  internalType: "address",
+                  name: "",
+                  type: "address",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "_from",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "_amount",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "_expTime",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "_fees",
+                  type: "uint256",
+                },
+              ],
+              name: "deposit",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "uint256",
+                  name: "_expTime",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "_amount",
+                  type: "uint256",
+                },
+              ],
+              name: "depositFromLP",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              name: "expTimeSupply",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "owner",
+              outputs: [
+                {
+                  internalType: "address",
+                  name: "",
+                  type: "address",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "renounceOwnership",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "token",
+              outputs: [
+                {
+                  internalType: "address",
+                  name: "",
+                  type: "address",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "totalFees",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "newOwner",
+                  type: "address",
+                },
+              ],
+              name: "transferOwnership",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "_to",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "_amount",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "_expTime",
+                  type: "uint256",
+                },
+              ],
+              name: "withdraw",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "withdrawFees",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+          ],
+        },
+        FakeDUSD: {
+          address: "0xEAaDaE282b1131E80621Bba7AA4F754978C74962",
+          abi: [
+            {
+              inputs: [],
+              stateMutability: "nonpayable",
+              type: "constructor",
+            },
+            {
+              anonymous: false,
+              inputs: [
+                {
+                  indexed: true,
+                  internalType: "address",
+                  name: "owner",
+                  type: "address",
+                },
+                {
+                  indexed: true,
+                  internalType: "address",
+                  name: "spender",
+                  type: "address",
+                },
+                {
+                  indexed: false,
+                  internalType: "uint256",
+                  name: "value",
+                  type: "uint256",
+                },
+              ],
+              name: "Approval",
+              type: "event",
+            },
+            {
+              anonymous: false,
+              inputs: [
+                {
+                  indexed: true,
+                  internalType: "address",
+                  name: "previousOwner",
+                  type: "address",
+                },
+                {
+                  indexed: true,
+                  internalType: "address",
+                  name: "newOwner",
+                  type: "address",
+                },
+              ],
+              name: "OwnershipTransferred",
+              type: "event",
+            },
+            {
+              anonymous: false,
+              inputs: [
+                {
+                  indexed: true,
+                  internalType: "address",
+                  name: "from",
+                  type: "address",
+                },
+                {
+                  indexed: true,
+                  internalType: "address",
+                  name: "to",
+                  type: "address",
+                },
+                {
+                  indexed: false,
+                  internalType: "uint256",
+                  name: "value",
+                  type: "uint256",
+                },
+              ],
+              name: "Transfer",
+              type: "event",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "owner",
+                  type: "address",
+                },
+                {
+                  internalType: "address",
+                  name: "spender",
+                  type: "address",
+                },
+              ],
+              name: "allowance",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "spender",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "amount",
+                  type: "uint256",
+                },
+              ],
+              name: "approve",
+              outputs: [
+                {
+                  internalType: "bool",
+                  name: "",
+                  type: "bool",
+                },
+              ],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "account",
+                  type: "address",
+                },
+              ],
+              name: "balanceOf",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "decimals",
+              outputs: [
+                {
+                  internalType: "uint8",
+                  name: "",
+                  type: "uint8",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "spender",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "subtractedValue",
+                  type: "uint256",
+                },
+              ],
+              name: "decreaseAllowance",
+              outputs: [
+                {
+                  internalType: "bool",
+                  name: "",
+                  type: "bool",
+                },
+              ],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "spender",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "addedValue",
+                  type: "uint256",
+                },
+              ],
+              name: "increaseAllowance",
+              outputs: [
+                {
+                  internalType: "bool",
+                  name: "",
+                  type: "bool",
+                },
+              ],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "_to",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "_amount",
+                  type: "uint256",
+                },
+              ],
+              name: "mint",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "name",
+              outputs: [
+                {
+                  internalType: "string",
+                  name: "",
+                  type: "string",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "owner",
+              outputs: [
+                {
+                  internalType: "address",
+                  name: "",
+                  type: "address",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "renounceOwnership",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "symbol",
+              outputs: [
+                {
+                  internalType: "string",
+                  name: "",
+                  type: "string",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "totalSupply",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "to",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "amount",
+                  type: "uint256",
+                },
+              ],
+              name: "transfer",
+              outputs: [
+                {
+                  internalType: "bool",
+                  name: "",
+                  type: "bool",
+                },
+              ],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "from",
+                  type: "address",
+                },
+                {
+                  internalType: "address",
+                  name: "to",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "amount",
+                  type: "uint256",
+                },
+              ],
+              name: "transferFrom",
+              outputs: [
+                {
+                  internalType: "bool",
+                  name: "",
+                  type: "bool",
+                },
+              ],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "newOwner",
+                  type: "address",
+                },
+              ],
+              name: "transferOwnership",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+          ],
+        },
+        ImpliedVolatilityOracle: {
+          address: "0x5B88Af642e17F350D2AA4eCb183340A9B40cD7aC",
+          abi: [
+            {
+              inputs: [
+                {
+                  internalType: "uint8",
+                  name: "_decimals",
+                  type: "uint8",
+                },
+                {
+                  internalType: "string",
+                  name: "_description",
+                  type: "string",
+                },
+                {
+                  internalType: "uint256",
+                  name: "_version",
+                  type: "uint256",
+                },
+                {
+                  internalType: "string",
+                  name: "_underlying",
+                  type: "string",
+                },
+                {
+                  internalType: "uint256",
+                  name: "_period",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "nonpayable",
+              type: "constructor",
+            },
+            {
+              anonymous: false,
+              inputs: [
+                {
+                  indexed: true,
+                  internalType: "address",
+                  name: "previousOwner",
+                  type: "address",
+                },
+                {
+                  indexed: true,
+                  internalType: "address",
+                  name: "newOwner",
+                  type: "address",
+                },
+              ],
+              name: "OwnershipTransferred",
+              type: "event",
+            },
+            {
+              inputs: [],
+              name: "decimals",
+              outputs: [
+                {
+                  internalType: "uint8",
+                  name: "",
+                  type: "uint8",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "description",
+              outputs: [
+                {
+                  internalType: "string",
+                  name: "",
+                  type: "string",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "uint80",
+                  name: "",
+                  type: "uint80",
+                },
+              ],
+              name: "getAnswer",
+              outputs: [
+                {
+                  internalType: "int256",
+                  name: "",
+                  type: "int256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "uint80",
+                  name: "_roundId",
+                  type: "uint80",
+                },
+              ],
+              name: "getRoundData",
+              outputs: [
+                {
+                  internalType: "uint80",
+                  name: "roundId",
+                  type: "uint80",
+                },
+                {
+                  internalType: "int256",
+                  name: "answer",
+                  type: "int256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "startedAt",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "updatedAt",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint80",
+                  name: "answeredInRound",
+                  type: "uint80",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "uint80",
+                  name: "",
+                  type: "uint80",
+                },
+              ],
+              name: "getStartedAt",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "uint80",
+                  name: "",
+                  type: "uint80",
+                },
+              ],
+              name: "getTimestamp",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "latestRoundData",
+              outputs: [
+                {
+                  internalType: "uint80",
+                  name: "roundId",
+                  type: "uint80",
+                },
+                {
+                  internalType: "int256",
+                  name: "answer",
+                  type: "int256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "startedAt",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "updatedAt",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint80",
+                  name: "answeredInRound",
+                  type: "uint80",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "owner",
+              outputs: [
+                {
+                  internalType: "address",
+                  name: "",
+                  type: "address",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "period",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "renounceOwnership",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "newOwner",
+                  type: "address",
+                },
+              ],
+              name: "transferOwnership",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "underlying",
+              outputs: [
+                {
+                  internalType: "string",
+                  name: "",
+                  type: "string",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "int256",
+                  name: "_answer",
+                  type: "int256",
+                },
+              ],
+              name: "updateAnswer",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "version",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+          ],
+        },
+        LiquidityPool: {
+          address: "0x3b714fa316AFF16566E7eFe26D41E4505DCa6ef6",
+          abi: [
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "_managerContract",
+                  type: "address",
+                },
+                {
+                  internalType: "address",
+                  name: "_token",
+                  type: "address",
+                },
+                {
+                  internalType: "address",
+                  name: "_betVault",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "_maxLossPerTimePercent",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "nonpayable",
+              type: "constructor",
+            },
+            {
+              inputs: [],
+              name: "LiquidityPool__AccessForbidden",
+              type: "error",
+            },
+            {
+              inputs: [],
+              name: "LiquidityPool__NotAllowedAmount",
+              type: "error",
+            },
+            {
+              inputs: [],
+              name: "LiquidityPool__NotEnoughFreeSuppy",
+              type: "error",
+            },
+            {
+              inputs: [],
+              name: "LiquidityPool__VaultNotValid",
+              type: "error",
+            },
+            {
+              anonymous: false,
+              inputs: [
+                {
+                  indexed: true,
+                  internalType: "address",
+                  name: "owner",
+                  type: "address",
+                },
+                {
+                  indexed: true,
+                  internalType: "address",
+                  name: "spender",
+                  type: "address",
+                },
+                {
+                  indexed: false,
+                  internalType: "uint256",
+                  name: "value",
+                  type: "uint256",
+                },
+              ],
+              name: "Approval",
+              type: "event",
+            },
+            {
+              anonymous: false,
+              inputs: [
+                {
+                  indexed: true,
+                  internalType: "address",
+                  name: "account",
+                  type: "address",
+                },
+                {
+                  indexed: false,
+                  internalType: "uint256",
+                  name: "amount",
+                  type: "uint256",
+                },
+                {
+                  indexed: false,
+                  internalType: "uint256",
+                  name: "shares",
+                  type: "uint256",
+                },
+                {
+                  indexed: false,
+                  internalType: "uint256",
+                  name: "totalTokens",
+                  type: "uint256",
+                },
+                {
+                  indexed: false,
+                  internalType: "uint256",
+                  name: "totalSupply",
+                  type: "uint256",
+                },
+              ],
+              name: "Deposit",
+              type: "event",
+            },
+            {
+              anonymous: false,
+              inputs: [
+                {
+                  indexed: false,
+                  internalType: "uint256",
+                  name: "lockedTokenSupply",
+                  type: "uint256",
+                },
+                {
+                  indexed: false,
+                  internalType: "uint256",
+                  name: "expTime",
+                  type: "uint256",
+                },
+                {
+                  indexed: false,
+                  internalType: "uint256",
+                  name: "lockedPerExpTime",
+                  type: "uint256",
+                },
+              ],
+              name: "LockedSupplyUpdated",
+              type: "event",
+            },
+            {
+              anonymous: false,
+              inputs: [
+                {
+                  indexed: false,
+                  internalType: "uint256",
+                  name: "newMaxLoss",
+                  type: "uint256",
+                },
+              ],
+              name: "MaxLossPerTimeUpdated",
+              type: "event",
+            },
+            {
+              anonymous: false,
+              inputs: [
+                {
+                  indexed: true,
+                  internalType: "address",
+                  name: "account",
+                  type: "address",
+                },
+                {
+                  indexed: false,
+                  internalType: "uint256",
+                  name: "shares",
+                  type: "uint256",
+                },
+                {
+                  indexed: false,
+                  internalType: "uint256",
+                  name: "amount",
+                  type: "uint256",
+                },
+                {
+                  indexed: false,
+                  internalType: "uint256",
+                  name: "totalTokens",
+                  type: "uint256",
+                },
+                {
+                  indexed: false,
+                  internalType: "uint256",
+                  name: "totalSupply",
+                  type: "uint256",
+                },
+              ],
+              name: "Redeem",
+              type: "event",
+            },
+            {
+              anonymous: false,
+              inputs: [
+                {
+                  indexed: true,
+                  internalType: "address",
+                  name: "from",
+                  type: "address",
+                },
+                {
+                  indexed: true,
+                  internalType: "address",
+                  name: "to",
+                  type: "address",
+                },
+                {
+                  indexed: false,
+                  internalType: "uint256",
+                  name: "value",
+                  type: "uint256",
+                },
+              ],
+              name: "Transfer",
+              type: "event",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "owner",
+                  type: "address",
+                },
+                {
+                  internalType: "address",
+                  name: "spender",
+                  type: "address",
+                },
+              ],
+              name: "allowance",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "spender",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "amount",
+                  type: "uint256",
+                },
+              ],
+              name: "approve",
+              outputs: [
+                {
+                  internalType: "bool",
+                  name: "",
+                  type: "bool",
+                },
+              ],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "account",
+                  type: "address",
+                },
+              ],
+              name: "balanceOf",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "balanceTokens",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "uint256",
+                  name: "_amount",
+                  type: "uint256",
+                },
+              ],
+              name: "calcSharesToMint",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "uint256",
+                  name: "_shares",
+                  type: "uint256",
+                },
+              ],
+              name: "calcTokensToWithdraw",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "decimals",
+              outputs: [
+                {
+                  internalType: "uint8",
+                  name: "",
+                  type: "uint8",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "spender",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "subtractedValue",
+                  type: "uint256",
+                },
+              ],
+              name: "decreaseAllowance",
+              outputs: [
+                {
+                  internalType: "bool",
+                  name: "",
+                  type: "bool",
+                },
+              ],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "_account",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "_amount",
+                  type: "uint256",
+                },
+              ],
+              name: "depositForAccount",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "spender",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "addedValue",
+                  type: "uint256",
+                },
+              ],
+              name: "increaseAllowance",
+              outputs: [
+                {
+                  internalType: "bool",
+                  name: "",
+                  type: "bool",
+                },
+              ],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              name: "lockedPerExpTime",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "lockedTokenSupply",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "managerContract",
+              outputs: [
+                {
+                  internalType: "address",
+                  name: "",
+                  type: "address",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "maxLPLost",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "maxLostPerTimeInPercent",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "name",
+              outputs: [
+                {
+                  internalType: "string",
+                  name: "",
+                  type: "string",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "_account",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "_shares",
+                  type: "uint256",
+                },
+              ],
+              name: "redeemSharesForAccount",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "uint256",
+                  name: "_expTime",
+                  type: "uint256",
+                },
+              ],
+              name: "resetLockedTokens",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "symbol",
+              outputs: [
+                {
+                  internalType: "string",
+                  name: "",
+                  type: "string",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "token",
+              outputs: [
+                {
+                  internalType: "address",
+                  name: "",
+                  type: "address",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "totalSupply",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "totalTokenSupply",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "to",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "amount",
+                  type: "uint256",
+                },
+              ],
+              name: "transfer",
+              outputs: [
+                {
+                  internalType: "bool",
+                  name: "",
+                  type: "bool",
+                },
+              ],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "from",
+                  type: "address",
+                },
+                {
+                  internalType: "address",
+                  name: "to",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "amount",
+                  type: "uint256",
+                },
+              ],
+              name: "transferFrom",
+              outputs: [
+                {
+                  internalType: "bool",
+                  name: "",
+                  type: "bool",
+                },
+              ],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "_vault",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "_amount",
+                  type: "uint256",
+                },
+              ],
+              name: "transferTokensToVault",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "uint256",
+                  name: "_delta",
+                  type: "uint256",
+                },
+                {
+                  internalType: "bool",
+                  name: "_increase",
+                  type: "bool",
+                },
+                {
+                  internalType: "uint256",
+                  name: "_expTime",
+                  type: "uint256",
+                },
+              ],
+              name: "updateLockedTokenSupply",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "uint256",
+                  name: "_newMaxLoss",
+                  type: "uint256",
+                },
+              ],
+              name: "updateMaxLoss",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "_vault",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "_amount",
+                  type: "uint256",
+                },
+                {
+                  internalType: "bool",
+                  name: "_profit",
+                  type: "bool",
+                },
+              ],
+              name: "updateTokenSupply",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "",
+                  type: "address",
+                },
+              ],
+              name: "validVaults",
+              outputs: [
+                {
+                  internalType: "bool",
+                  name: "",
+                  type: "bool",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+          ],
+        },
+        MathLibraryDefibets: {
+          address: "0xBe6a15Eb7c086539a5ba52812b3C9d66DACa80ee",
+          abi: [
+            {
+              inputs: [],
+              name: "MathLibraryDefibets__WrongParameter",
+              type: "error",
+            },
+            {
+              inputs: [],
+              name: "BILLION",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "Z_TABLE_MAX",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "uint256",
+                  name: "lowerPrice",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "upperPrice",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "currPrice",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "impliedVolatility",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "impliedVolatilityTime",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "timeUntilEpxiry",
+                  type: "uint256",
+                },
+              ],
+              name: "calculateProbabilityRange",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+          ],
+        },
+        UseMathLibraryDefibets: {
+          address: "0xe1F09d6E5FDF0576366623F0a4068181A314c1Db",
+          abi: [
+            {
+              inputs: [],
+              stateMutability: "nonpayable",
+              type: "constructor",
+            },
+            {
+              inputs: [],
+              name: "calculateProbabilityRange",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
               type: "function",
             },
           ],

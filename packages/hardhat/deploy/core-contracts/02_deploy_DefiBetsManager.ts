@@ -27,6 +27,7 @@ const deployDefiBetsManagerContract: DeployFunction = async (hre: HardhatRuntime
             libraries: {
                 MathLibraryDefibets: mathLibrary,
             },
+            waitConfirmations: 6,
         });
 
         if (!developmentChains.includes(hre.network.name)) {

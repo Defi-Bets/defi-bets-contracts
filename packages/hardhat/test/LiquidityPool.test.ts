@@ -20,7 +20,7 @@ describe("LiquidityPool unit test", () => {
             maxLossPerTime,
         );
 
-        return { stableToken, lpProvider, manager, liquidityPool, deployer };
+        return { stableToken, lpProvider, manager, liquidityPool, deployer, betVault };
     }
 
     describe("#depositForAccount", () => {
@@ -46,7 +46,9 @@ describe("LiquidityPool unit test", () => {
 
     describe("#redeemSharesForAccount", () => {
         it("should redeem the tokens from lp", async () => {
-            const { manager, lpProvider, stableToken, liquidityPool } = await loadFixture(deployLiquidityPoolFixture);
+            const { manager, lpProvider, stableToken, liquidityPool, betVault } = await loadFixture(
+                deployLiquidityPoolFixture,
+            );
 
             //1. deposit tokens
             const mintAmount = ethers.utils.parseEther("1000");
@@ -59,7 +61,7 @@ describe("LiquidityPool unit test", () => {
 
             //2. increase the value of the lp pool
             await stableToken.mint(liquidityPool.address, depositAmount);
-            await liquidityPool.connect(manager).updateTokenSupply(depositAmount, true);
+            await liquidityPool.connect(manager).updateTokenSupply(betVault.address, depositAmount, true);
 
             //3. redeem tokens
             const _balanceBefore = await stableToken.balanceOf(lpProvider.address);
