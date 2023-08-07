@@ -100,13 +100,11 @@ contract LiquidityPool is ERC20, ILiquidityPool {
 
         uint256 _lockedTokenSupply = lockedTokenSupply;
 
-        lockedTokenSupply = _increase ? _lockedTokenSupply.add(_delta) : _lockedTokenSupply.sub(lockedTokenSupply);
+        lockedTokenSupply = _increase ? _lockedTokenSupply.add(_delta) : _lockedTokenSupply.sub(_delta);
 
         uint256 _lockedPerExpTime = lockedPerExpTime[_expTime];
 
-        lockedPerExpTime[_expTime] = _increase
-            ? _lockedPerExpTime.add(_delta)
-            : _lockedPerExpTime.sub(lockedTokenSupply);
+        lockedPerExpTime[_expTime] = _increase ? _lockedPerExpTime.add(_delta) : _lockedPerExpTime.sub(_delta);
 
         emit LockedSupplyUpdated(lockedTokenSupply, _expTime, lockedPerExpTime[_expTime]);
     }
