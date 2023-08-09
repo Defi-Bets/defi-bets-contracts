@@ -82,7 +82,7 @@ export const networkConfig: INetworkConfig = {
     },
 };
 
-export const developmentChains = ["hardhat", "localhost", "dmcTestnet"];
+export const developmentChains = ["hardhat", "localhost"];
 export const testNetworks = ["polygonMumbai"];
 
 export const deploymentFilesLocation = "./deployments";
