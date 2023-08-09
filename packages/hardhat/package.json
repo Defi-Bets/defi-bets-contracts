@@ -12,14 +12,15 @@
         "generate": "hardhat run scripts/generateAccount.ts",
         "setup": "hardhat run scripts/defi-bets/setupBetContract.ts",
         "coverage": "hardhat coverage --network hardhat",
-        "provide-lp": "hardhat run scripts/provideLiquidity.ts",
+        "provide-lp": "hardhat mint-fDUSD --amount 100000 \"$@\" && hardhat provide-lp --amount 100000 ",
         "lint": "eslint --config ./.eslintrc.json --ignore-path ./.eslintignore ./*.ts ./deploy/**/*.ts ./scripts/**/*.ts ./test/**/*.ts",
         "lint-staged": "eslint --config ./.eslintrc.json --ignore-path ./.eslintignore",
         "test": "REPORT_GAS=true hardhat test --network hardhat",
         "test-staging": "hardhat deploy --export-all ./temp/hardhat_contracts.json --tags token --network localhost \"$@\" && hardhat deploy --export-all ./temp/hardhat_contracts.json --network localhost \"$@\" && hardhat run scripts/generateTsAbis.ts --network localhost \"$@\" && hardhat test --grep \"DefiBets Protocol Staging Test\"  --network localhost",
         "verify": "hardhat etherscan-verify",
-        "protocol-info": "hardhat run scripts/defi-bets/readDefiBetsInfo.ts ",
-        "show-bets": "hardhat run scripts/defi-bets/showAllBets.ts "
+        "protocol-update": "hardhat run scripts/defi-bets/readDefiBetsInfo.ts ",
+        "show-bets": "hardhat run scripts/defi-bets/showAllBets.ts ",
+        "jump": "hardhat jump"
     },
     "devDependencies": {
         "@ethersproject/abi": "^5.7.0",

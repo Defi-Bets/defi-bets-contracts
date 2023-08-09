@@ -6,6 +6,7 @@
 - [Quickstart](#quickstart)
 - [Deploying your Smart Contracts to a Live Network](#deploying-your-smart-contracts-to-a-live-network)
 - [Deploying your NextJS App](#deploying-your-nextjs-app)
+- [Run local protocol for testing](#run-defi-bets-on-local-blockchain-for-frontend-testing)
 - [Smart Contracts Documentation](#smart-contracts-documentation)
 
 ## Requirements
@@ -34,7 +35,7 @@ yarn install
 yarn chain
 ```
 
-This command starts a local Ethereum network using Hardhat. The network runs on your local machine and can be used for testing and development. You can customize the network configuration in `hardhat.config.ts`.
+This command starts a local Ethereum network using Hardhat. The network runs on your local machine and can be used for testing and development. You can customize the network configuration in `hardhat.config.ts`. The input parameters depending on the chain can be adjusted in `helper-hardhat-config.ts`
 
 3. On a second terminal, deploy the test contract:
 
@@ -93,12 +94,40 @@ Run the command below to deploy the smart contract to the target network. Make s
 yarn deploy --network network_name
 ```
 
-4. Verify your smart contract
+4. Setup the Defi-Bets contracts
 
-You can verify your smart contract on Etherscan by running:
+Run the command below for the initial setup of the smart contract to the target network.
 
 ```
-yarn verify --network network_name
+yarn setup --network network_name
+```
+
+## Run Defi Bets on local blockchain for frontend testing
+
+The following commands are required for running a local blockchain and deploying all contracts including initial setup.
+
+```
+yarn chain
+```
+
+Run teh following commands in a second terminal.
+
+```
+yarn deploy
+yarn setup
+yarn provide-lp
+```
+
+For jumping the time on the blockchain to the next expiration date execute the following command.
+
+```
+yarn jump
+```
+
+After each time jump the protocol should be updated. Run the following command.
+
+```
+yarn protocol-update
 ```
 
 ## Smart Contracts Documentation
