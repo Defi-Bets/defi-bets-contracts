@@ -29,7 +29,7 @@ const deployImpliedVolatilityOracle: DeployFunction = async (hre: HardhatRuntime
             args: args,
             log: true,
             autoMine: true,
-            waitConfirmations: 1,
+            waitConfirmations: networkConfig[chainId].confirmations,
         });
 
         const oracleContract = (await hre.ethers.getContract("ImpliedVolatilityOracle")) as ImpliedVolatilityOracle;

@@ -28,6 +28,7 @@ const deployBTCPriceOracle: DeployFunction = async (hre: HardhatRuntimeEnvironme
             args: args,
             log: true,
             autoMine: true,
+            waitConfirmations: networkConfig[chainId].confirmations,
         });
 
         const oracleContract = (await hre.ethers.getContract("BTCPriceOracle")) as BTCPriceOracle;

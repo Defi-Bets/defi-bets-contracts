@@ -5,7 +5,7 @@
         "account": "hardhat run scripts/listAccount.ts",
         "chain": "hardhat node --network hardhat --no-deploy",
         "compile": "hardhat compile",
-        "deploy": "hardhat deploy --export-all ./temp/hardhat_contracts.json --tags token \"$@\" && hardhat deploy --export-all ./temp/hardhat_contracts.json  \"$@\" && hardhat run scripts/generateTsAbis.ts",
+        "deploy": "hardhat deploy --export-all ./temp/hardhat_contracts.json --tags token \"$@\" && hardhat deploy --export-all  ./temp/hardhat_contracts.json --tags oracle \"$@\" && hardhat deploy --export-all  ./temp/hardhat_contracts.json --tags core \"$@\" && hardhat run scripts/generateTsAbis.ts",
         "deploy-oracle": "hardhat deploy --export-all ./temp/hardhat_contracts.json --tags oracle \"$@\" && hardhat run scripts/generateTsAbis.ts",
         "deploy-core": "hardhat deploy --export-all ./temp/hardhat_contracts.json --tags core \"$@\" && hardhat run scripts/generateTsAbis.ts",
         "fork": "MAINNET_FORKING_ENABLED=true hardhat node --network hardhat --no-deploy",

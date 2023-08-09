@@ -9,6 +9,7 @@ import "../interface/core/ILiquidityPool.sol";
 error LiquidityPool__AccessForbidden();
 error LiquidityPool__NotAllowedAmount();
 error LiquidityPool__NotEnoughFreeSuppy();
+error LiquidityPool__VaultNotValid();
 
 contract LiquidityPool is ERC20, ILiquidityPool {
     using SafeMath for uint256;
@@ -26,7 +27,7 @@ contract LiquidityPool is ERC20, ILiquidityPool {
 
     address public token;
     address public managerContract;
-    address public betVault;
+    mapping(address => bool) public validVaults;
 
     mapping(uint256 => uint256) public lockedPerExpTime;
 
@@ -46,7 +47,7 @@ contract LiquidityPool is ERC20, ILiquidityPool {
     ) ERC20("DefiB", "DefiB") {
         managerContract = _managerContract;
         token = _token;
-        betVault = _betVault;
+        validVaults[_betVault] = true;
         maxLostPerTimeInPercent = _maxLossPerTimePercent;
     }
 
@@ -82,13 +83,13 @@ contract LiquidityPool is ERC20, ILiquidityPool {
         emit Redeem(_account, _shares, _tokens, balanceTokens(), totalSupply());
     }
 
-    function updateTokenSupply(uint256 _amount, bool _profit) external {
+    function updateTokenSupply(address _vault, uint256 _amount, bool _profit) external {
         _isManagerContract();
 
         if (_profit) {
             totalTokenSupply = totalTokenSupply.add(_amount);
         } else {
-            IERC20(token).transfer(betVault, _amount);
+            IERC20(token).transfer(_vault, _amount);
 
             totalTokenSupply = totalTokenSupply.sub(_amount);
         }
@@ -99,21 +100,20 @@ contract LiquidityPool is ERC20, ILiquidityPool {
 
         uint256 _lockedTokenSupply = lockedTokenSupply;
 
-        lockedTokenSupply = _increase ? _lockedTokenSupply.add(_delta) : _lockedTokenSupply.sub(lockedTokenSupply);
+        lockedTokenSupply = _increase ? _lockedTokenSupply.add(_delta) : _lockedTokenSupply.sub(_delta);
 
         uint256 _lockedPerExpTime = lockedPerExpTime[_expTime];
 
-        lockedPerExpTime[_expTime] = _increase
-            ? _lockedPerExpTime.add(_delta)
-            : _lockedPerExpTime.sub(lockedTokenSupply);
+        lockedPerExpTime[_expTime] = _increase ? _lockedPerExpTime.add(_delta) : _lockedPerExpTime.sub(_delta);
 
         emit LockedSupplyUpdated(lockedTokenSupply, _expTime, lockedPerExpTime[_expTime]);
     }
 
-    function transferTokensToVault(uint256 _amount) external {
+    function transferTokensToVault(address _vault, uint256 _amount) external {
         _isManagerContract();
+        _isValidVault(_vault);
 
-        IERC20(token).transfer(betVault, _amount);
+        IERC20(token).transfer(_vault, _amount);
         uint256 _tokenSupply = totalTokenSupply;
         totalTokenSupply = _tokenSupply.sub(_amount);
     }
@@ -157,6 +157,12 @@ contract LiquidityPool is ERC20, ILiquidityPool {
     function _isEnoughFreeTokenSupply(uint256 _amount) internal view {
         if (totalTokenSupply.sub(lockedTokenSupply) < _amount) {
             revert LiquidityPool__NotEnoughFreeSuppy();
+        }
+    }
+
+    function _isValidVault(address _vault) internal view {
+        if (validVaults[_vault] == false) {
+            revert LiquidityPool__VaultNotValid();
         }
     }
 

@@ -30,7 +30,7 @@ async function main() {
     console.log("Active Exp Times:");
 
     //calculate maximum exp time
-    const now = Math.ceil(Date.now() / 1000);
+    const now = (await ethers.provider.getBlock("latest")).timestamp;
 
     const maxExpTime = maxBetDuration.add(now);
     console.log(new Date(maxExpTime.toNumber() * 1000));
@@ -95,8 +95,6 @@ async function main() {
             const tokenBalance = await token.balanceOf(lp.address);
             console.log(`balance lp ${ethers.utils.formatEther(tokenBalance)}`);
 
-            const vault = await lp.betVault();
-            console.log(vault);
             const vaultManager = await managerContract.vaults(hash);
             console.log(vaultManager);
 

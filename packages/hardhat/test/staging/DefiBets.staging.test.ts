@@ -79,7 +79,7 @@ if (network.name != "localhost") {
                     dependendTimestamp.add(delta.mul(5)),
                 ];
                 const betSizes = [parseEther("22"), parseEther("100"), parseEther("20"), parseEther("80")];
-                const minPrices = [parseEther("29000"), parseEther("28000"), parseEther("28000"), parseEther("28000")];
+                const minPrices = [parseEther("29000"), parseEther("28000"), parseEther("27900"), parseEther("28000")];
                 const maxPrices = [parseEther("29500"), parseEther("32000"), parseEther("31000"), parseEther("30000")];
 
                 await setBets(users, expDates, betSizes, minPrices, maxPrices);
