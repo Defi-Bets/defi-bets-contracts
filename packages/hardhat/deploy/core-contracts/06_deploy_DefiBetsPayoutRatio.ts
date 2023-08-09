@@ -29,14 +29,12 @@ const deployDefiBetsContract: DeployFunction = async (hre: HardhatRuntimeEnviron
         nextDate.setSeconds(0);
         nextDate.setMilliseconds(0);
 
-        console.log(`${nextDate.toLocaleDateString()} , ${nextDate.toLocaleTimeString()}`);
-
         const PayoutRatioContract = await deploy("DefiBetsPayoutRatio", {
             from: deployer,
             log: true,
             args: [managerContractAddress, moduloDays, targetPayoutRatio, nextDate.getTime() / 1000],
             autoMine: true,
-            waitConfirmations: 6,
+            waitConfirmations: networkConfig[chainId].confirmations,
         });
 
         const lpPoolContract = (await get("LiquidityPool")).address;

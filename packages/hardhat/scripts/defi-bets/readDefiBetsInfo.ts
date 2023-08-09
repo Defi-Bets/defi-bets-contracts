@@ -30,7 +30,7 @@ async function main() {
     console.log("Active Exp Times:");
 
     //calculate maximum exp time
-    const now = Math.ceil(Date.now() / 1000);
+    const now = (await ethers.provider.getBlock("latest")).timestamp;
 
     const maxExpTime = maxBetDuration.add(now);
     console.log(new Date(maxExpTime.toNumber() * 1000));

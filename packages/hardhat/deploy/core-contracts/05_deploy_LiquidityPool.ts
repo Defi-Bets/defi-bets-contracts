@@ -29,7 +29,7 @@ const deployLiquidityPoolContract: DeployFunction = async (hre: HardhatRuntimeEn
                 log: true,
                 args: args,
                 autoMine: true,
-                waitConfirmations: 6,
+                waitConfirmations: networkConfig[chainId].confirmations,
             });
 
             if (!developmentChains.includes(hre.network.name)) {

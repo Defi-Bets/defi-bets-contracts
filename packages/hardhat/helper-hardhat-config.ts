@@ -22,6 +22,7 @@ export const networkConfig: INetworkConfig = {
         targetPayoutRatio: 90,
         moduloDays: 30,
         maxLossPerTime: 50000,
+        confirmations: 1,
     },
     1133: {
         name: "dmcTestnet",
@@ -41,6 +42,7 @@ export const networkConfig: INetworkConfig = {
         targetPayoutRatio: 90,
         moduloDays: 30,
         maxLossPerTime: 50000,
+        confirmations: 2,
     },
     80001: {
         name: "mumbai",
@@ -60,6 +62,7 @@ export const networkConfig: INetworkConfig = {
         targetPayoutRatio: 90,
         moduloDays: 30,
         maxLossPerTime: 50000,
+        confirmations: 6,
     },
     11155111: {
         name: "sepolia",
@@ -79,6 +82,7 @@ export const networkConfig: INetworkConfig = {
         targetPayoutRatio: 90,
         moduloDays: 7,
         maxLossPerTime: 50000,
+        confirmations: 6,
     },
 };
 

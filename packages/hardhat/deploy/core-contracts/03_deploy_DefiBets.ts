@@ -1,7 +1,7 @@
 import { DeployFunction } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import verify from "../../helper-functions";
-import { developmentChains } from "../../helper-hardhat-config";
+import { developmentChains, getNetworkIdFromName, networkConfig } from "../../helper-hardhat-config";
 
 const deployDefiBetsContract: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     const { deployer } = await hre.getNamedAccounts();
@@ -10,16 +10,22 @@ const deployDefiBetsContract: DeployFunction = async (hre: HardhatRuntimeEnviron
     const managerContractAddress = (await get("DefiBetsManager")).address;
     const args = ["BTC", managerContractAddress];
 
-    const bets = await deploy("DefiBets", {
-        from: deployer,
-        log: true,
-        args: args,
-        autoMine: true,
-        waitConfirmations: 6,
-    });
+    const network = hre.network.name;
 
-    if (!developmentChains.includes(hre.network.name)) {
-        await verify(bets.address, args);
+    const chainId = await getNetworkIdFromName(network);
+
+    if (chainId) {
+        const bets = await deploy("DefiBets", {
+            from: deployer,
+            log: true,
+            args: args,
+            autoMine: true,
+            waitConfirmations: networkConfig[chainId].confirmations,
+        });
+
+        if (!developmentChains.includes(hre.network.name)) {
+            await verify(bets.address, args);
+        }
     }
 };
 
