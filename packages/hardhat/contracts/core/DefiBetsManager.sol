@@ -71,11 +71,11 @@ contract DefiBetsManager is Pausable, Ownable, IDefiBetsManager {
      * @dev Provides liquidity to the liquidity pool on behalf of a user.
      * @param _amount The amount of liquidity to be provided.
      */
-    function provideLP(uint256 _amount) external whenNotPaused {
+    function provideLP(uint256 _amount) external {
         ILiquidityPool(liquidityPool).depositForAccount(msg.sender, _amount);
     }
 
-    function redeemLPTokens(uint256 _amount) external whenNotPaused {
+    function redeemLPTokens(uint256 _amount) external {
         ILiquidityPool(liquidityPool).redeemSharesForAccount(msg.sender, _amount);
     }
 
@@ -153,6 +153,8 @@ contract DefiBetsManager is Pausable, Ownable, IDefiBetsManager {
 
         if (_profit == true) {
             IDefiBetsVault(_vault).withdraw(liquidityPool, _delta, _expTime);
+
+            ILiquidityPool(liquidityPool).increaseTokenSupply(_delta);
         } else {
             ILiquidityPool(liquidityPool).transferTokensToVault(_vault, _delta);
 

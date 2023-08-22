@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
 import "../interface/core/ILiquidityPool.sol";
 
 error LiquidityPool__AccessForbidden();
@@ -11,7 +12,7 @@ error LiquidityPool__NotAllowedAmount();
 error LiquidityPool__NotEnoughFreeSuppy();
 error LiquidityPool__VaultNotValid();
 
-contract LiquidityPool is ERC20, ILiquidityPool {
+contract LiquidityPool is ERC20, ILiquidityPool, Pausable {
     using SafeMath for uint256;
 
     uint256 private constant MULTIPLIER = 1000000;
@@ -35,6 +36,7 @@ contract LiquidityPool is ERC20, ILiquidityPool {
     event Deposit(address indexed account, uint256 amount, uint256 shares, uint256 totalTokens, uint256 totalSupply);
     event Redeem(address indexed account, uint256 shares, uint256 amount, uint256 totalTokens, uint256 totalSupply);
     event LockedSupplyUpdated(uint256 lockedTokenSupply, uint256 expTime, uint256 lockedPerExpTime);
+    event TokenSupplyUpdated(uint256 amount);
     event MaxLossPerTimeUpdated(uint256 newMaxLoss);
 
     /* ====== Modifier ====== */
@@ -44,7 +46,7 @@ contract LiquidityPool is ERC20, ILiquidityPool {
         address _token,
         address _betVault,
         uint256 _maxLossPerTimePercent
-    ) ERC20("DefiB", "DefiB") {
+    ) ERC20("DefiBets-LP-Token", "DBLP") {
         managerContract = _managerContract;
         token = _token;
         validVaults[_betVault] = true;
@@ -83,16 +85,12 @@ contract LiquidityPool is ERC20, ILiquidityPool {
         emit Redeem(_account, _shares, _tokens, balanceTokens(), totalSupply());
     }
 
-    function updateTokenSupply(address _vault, uint256 _amount, bool _profit) external {
+    function increaseTokenSupply(uint256 _amount) external {
         _isManagerContract();
 
-        if (_profit) {
-            totalTokenSupply = totalTokenSupply.add(_amount);
-        } else {
-            IERC20(token).transfer(_vault, _amount);
+        totalTokenSupply = totalTokenSupply.add(_amount);
 
-            totalTokenSupply = totalTokenSupply.sub(_amount);
-        }
+        emit TokenSupplyUpdated(totalTokenSupply);
     }
 
     function updateLockedTokenSupply(uint256 _delta, bool _increase, uint256 _expTime) external {
@@ -116,6 +114,8 @@ contract LiquidityPool is ERC20, ILiquidityPool {
         IERC20(token).transfer(_vault, _amount);
         uint256 _tokenSupply = totalTokenSupply;
         totalTokenSupply = _tokenSupply.sub(_amount);
+
+        emit TokenSupplyUpdated(totalTokenSupply);
     }
 
     function resetLockedTokens(uint256 _expTime) external {
