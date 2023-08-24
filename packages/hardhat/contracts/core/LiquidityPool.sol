@@ -9,8 +9,9 @@ import "../interface/core/ILiquidityPool.sol";
 
 error LiquidityPool__AccessForbidden();
 error LiquidityPool__NotAllowedAmount();
-error LiquidityPool__NotEnoughFreeSuppy();
+error LiquidityPool__NotEnoughFreeSupply();
 error LiquidityPool__VaultNotValid();
+error LiquidityPool__HasNoTokenSupply();
 
 contract LiquidityPool is ERC20, ILiquidityPool, Pausable {
     using SafeMath for uint256;
@@ -19,12 +20,12 @@ contract LiquidityPool is ERC20, ILiquidityPool, Pausable {
 
     /* ====== State Variables ====== */
 
-    uint256 public totalTokenSupply;
     uint256 public lockedTokenSupply;
 
     uint256 public maxLostPerTimeInPercent; // in ppm (parts per million). 50.000 ppm = 5% = 0,050000
 
-    // uint256 public maxLPLostPerTime;
+    uint256 public redeemFee;
+    uint256 public redeemTime;
 
     address public token;
     address public managerContract;
@@ -64,17 +65,15 @@ contract LiquidityPool is ERC20, ILiquidityPool, Pausable {
 
         _mint(_account, _shares);
 
-        totalTokenSupply = totalTokenSupply.add(_amount);
-
         emit Deposit(_account, _amount, _shares, balanceTokens(), totalSupply());
     }
 
     function redeemSharesForAccount(address _account, uint256 _shares) external {
         _isManagerContract();
-
+        _hasTokenSupply();
         _isValidAmount(_account, _shares);
 
-        uint256 _tokens = calcTokensToWithdraw(_shares);
+        uint256 _tokens = calcTokensToWithdraw(_shares, true);
 
         _isEnoughFreeTokenSupply(_tokens);
 
@@ -83,14 +82,6 @@ contract LiquidityPool is ERC20, ILiquidityPool, Pausable {
         IERC20(token).transfer(_account, _tokens);
 
         emit Redeem(_account, _shares, _tokens, balanceTokens(), totalSupply());
-    }
-
-    function increaseTokenSupply(uint256 _amount) external {
-        _isManagerContract();
-
-        totalTokenSupply = totalTokenSupply.add(_amount);
-
-        emit TokenSupplyUpdated(totalTokenSupply);
     }
 
     function updateLockedTokenSupply(uint256 _delta, bool _increase, uint256 _expTime) external {
@@ -112,10 +103,6 @@ contract LiquidityPool is ERC20, ILiquidityPool, Pausable {
         _isValidVault(_vault);
 
         IERC20(token).transfer(_vault, _amount);
-        uint256 _tokenSupply = totalTokenSupply;
-        totalTokenSupply = _tokenSupply.sub(_amount);
-
-        emit TokenSupplyUpdated(totalTokenSupply);
     }
 
     function resetLockedTokens(uint256 _expTime) external {
@@ -155,8 +142,14 @@ contract LiquidityPool is ERC20, ILiquidityPool, Pausable {
     }
 
     function _isEnoughFreeTokenSupply(uint256 _amount) internal view {
-        if (totalTokenSupply.sub(lockedTokenSupply) < _amount) {
-            revert LiquidityPool__NotEnoughFreeSuppy();
+        if (balanceTokens().sub(lockedTokenSupply) < _amount) {
+            revert LiquidityPool__NotEnoughFreeSupply();
+        }
+    }
+
+    function _hasTokenSupply() internal view {
+        if (totalSupply() == 0) {
+            revert LiquidityPool__HasNoTokenSupply();
         }
     }
 
@@ -183,10 +176,10 @@ contract LiquidityPool is ERC20, ILiquidityPool, Pausable {
             return _amount;
         }
 
-        return _amount.mul(totalTokenSupply).div(balanceTokens());
+        return _amount.mul(totalSupply()).div(balanceTokens());
     }
 
-    function calcTokensToWithdraw(uint256 _shares) public view returns (uint256) {
+    function calcTokensToWithdraw(uint256 _shares, bool _withFee) public view returns (uint256) {
         /*
         a = amount
         B = balance of token before withdraw
@@ -197,8 +190,13 @@ contract LiquidityPool is ERC20, ILiquidityPool, Pausable {
 
         a = sB / T
         */
+        uint256 withdrawAmount = _shares.mul(balanceTokens()).div(totalSupply());
 
-        return _shares.mul(totalTokenSupply).div(totalSupply());
+        if (_withFee && redeemFee > 0) {
+            return withdrawAmount.mul(uint256(1).sub(MULTIPLIER.div(redeemFee)));
+        }
+
+        return withdrawAmount;
     }
 
     function balanceTokens() public view returns (uint256) {

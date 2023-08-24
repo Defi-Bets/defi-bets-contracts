@@ -43,6 +43,7 @@ export const networkConfig: INetworkConfig = {
         moduloDays: 30,
         maxLossPerTime: 50000,
         confirmations: 2,
+        stableToken: "0xFF0000000000000000000000000000000000000B",
     },
     80001: {
         name: "mumbai",
