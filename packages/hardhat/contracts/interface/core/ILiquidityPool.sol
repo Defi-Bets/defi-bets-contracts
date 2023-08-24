@@ -21,4 +21,6 @@ interface ILiquidityPool is IERC20 {
     function resetLockedTokens(uint256 _expTime) external;
 
     function updateMaxLoss(uint256 _newMaxLoss) external;
+
+    function increaseTokenSupply(uint256 _amount) external;
 }
