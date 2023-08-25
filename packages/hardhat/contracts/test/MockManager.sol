@@ -58,7 +58,6 @@ contract MockManager is IDefiBetsManager {
 
     function setBetParameter(
         address defiBets,
-        uint256 _maxLossPerExpTime,
         uint256 _minBetDuration,
         uint256 _maxBetDuration,
         uint256 _slot,
@@ -67,7 +66,6 @@ contract MockManager is IDefiBetsManager {
         uint256 _dependentTimeStamp
     ) external {
         IDefiBets(defiBets).setBetParamater(
-            _maxLossPerExpTime,
             _minBetDuration,
             _maxBetDuration,
             _slot,

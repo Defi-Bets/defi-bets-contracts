@@ -250,7 +250,6 @@ contract DefiBetsManager is Pausable, Ownable, IDefiBetsManager {
     }
 
     function setDefiBetsParameter(
-        uint256 _maxLossPerExpTime,
         uint256 _minBetDuration,
         uint256 _maxBetDuration,
         uint256 _slot,
@@ -264,7 +263,6 @@ contract DefiBetsManager is Pausable, Ownable, IDefiBetsManager {
         address _defiBetsAddress = defiBetsContracts[_hash];
 
         IDefiBets(_defiBetsAddress).setBetParamater(
-            _maxLossPerExpTime,
             _maxBetDuration,
             _minBetDuration,
             _slot,
