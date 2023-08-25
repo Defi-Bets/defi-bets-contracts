@@ -47,6 +47,8 @@ contract DefiBetsPayoutRatio is IDefiBetsPayoutRatio, Ownable {
         uint256 currProfitsPeriodLP,
         uint256 currProfitsPeriodPlayer
     );
+    event UpdatePeriod(uint256 period);
+    event UpdateDelta(uint256 delta);
 
     constructor(address _managerContract, uint256 _period, uint256 _targetPayoutRatio, uint256 _startTimeStamp) {
         managerContract = _managerContract;
@@ -65,6 +67,18 @@ contract DefiBetsPayoutRatio is IDefiBetsPayoutRatio, Ownable {
 
     function setAdjustmentFactor(uint256 _factor) external onlyOwner {
         adjustmentFactor = _factor;
+    }
+
+    function setPeriod(uint256 _period) external onlyOwner {
+        period = _period;
+
+        emit UpdatePeriod(period);
+    }
+
+    function setDelta(uint256 _delta) external onlyOwner {
+        delta = _delta;
+
+        emit UpdateDelta(delta);
     }
 
     function updateLPProfit(uint256 _amount, uint256 _expTime) external {

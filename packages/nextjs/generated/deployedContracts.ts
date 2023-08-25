@@ -1160,11 +1160,6 @@ const contracts = {
               inputs: [
                 {
                   internalType: "uint256",
-                  name: "_maxLossPerExpTime",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
                   name: "_minBetDuration",
                   type: "uint256",
                 },
@@ -2385,11 +2380,6 @@ const contracts = {
             },
             {
               inputs: [
-                {
-                  internalType: "uint256",
-                  name: "_maxLossPerExpTime",
-                  type: "uint256",
-                },
                 {
                   internalType: "uint256",
                   name: "_minBetDuration",
@@ -3846,6 +3836,32 @@ const contracts = {
                 {
                   indexed: false,
                   internalType: "uint256",
+                  name: "delta",
+                  type: "uint256",
+                },
+              ],
+              name: "UpdateDelta",
+              type: "event",
+            },
+            {
+              anonymous: false,
+              inputs: [
+                {
+                  indexed: false,
+                  internalType: "uint256",
+                  name: "period",
+                  type: "uint256",
+                },
+              ],
+              name: "UpdatePeriod",
+              type: "event",
+            },
+            {
+              anonymous: false,
+              inputs: [
+                {
+                  indexed: false,
+                  internalType: "uint256",
                   name: "currProfit",
                   type: "uint256",
                 },
@@ -4023,6 +4039,32 @@ const contracts = {
                 },
               ],
               name: "setAdjustmentFactor",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "uint256",
+                  name: "_delta",
+                  type: "uint256",
+                },
+              ],
+              name: "setDelta",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "uint256",
+                  name: "_period",
+                  type: "uint256",
+                },
+              ],
+              name: "setPeriod",
               outputs: [],
               stateMutability: "nonpayable",
               type: "function",

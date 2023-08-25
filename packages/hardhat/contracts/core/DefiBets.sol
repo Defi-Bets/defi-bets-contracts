@@ -234,21 +234,14 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
 
         _isNotIntialized();
 
-        setBetParamater(
-            _maxLossPerExpTime,
-            _minBetDuration,
-            _maxBetDuration,
-            _slot,
-            _maxWinMultiplier,
-            60 * 60 * 24,
-            _dependentTimeStamp
-        );
+        setBetParamater(_minBetDuration, _maxBetDuration, _slot, _maxWinMultiplier, 60 * 60 * 24, _dependentTimeStamp);
+
+        _initializeMaxWinningsPerExpTime(_maxLossPerExpTime);
 
         initialized = true;
     }
 
     function setBetParamater(
-        uint256 _maxLossPerExpTime,
         uint256 _minBetDuration,
         uint256 _maxBetDuration,
         uint256 _slot,
@@ -267,8 +260,6 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
         maxWinMultiplier = _maxWinMultiplier;
         timeDelta = _timeDelta;
         dependentTimeStamp = _dependentTimeStamp;
-
-        _initializeMaxWinningsPerExpTime(_maxLossPerExpTime);
 
         emit BetParameterUpdated(minBetDuration, maxBetDuration, slot);
     }
