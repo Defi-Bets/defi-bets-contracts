@@ -25,7 +25,7 @@ describe("RedeemTracker unit test", () => {
 
             const _time = (await ethers.provider.getBlock("latest")).timestamp + redeemTime;
             const tokenIDs = await redeemTracker.tokenIds();
-            await redeemTracker.connect(liquidityPool).mintTokenForAccount(redeemer.address, tokenToRedeem, _time);
+            await redeemTracker.connect(liquidityPool).startRedeemPeriod(redeemer.address, tokenToRedeem, _time);
 
             expect(await redeemTracker.balanceOf(redeemer.address)).to.be.equal(1);
             expect(await redeemTracker.ownerOf(tokenIDs.add(1))).to.be.equal(redeemer.address);
@@ -40,12 +40,12 @@ describe("RedeemTracker unit test", () => {
 
             const _time = (await ethers.provider.getBlock("latest")).timestamp + redeemTime;
             await token.mint(redeemTracker.address, tokenToRedeem);
-            await redeemTracker.connect(liquidityPool).mintTokenForAccount(redeemer.address, tokenToRedeem, _time);
+            await redeemTracker.connect(liquidityPool).startRedeemPeriod(redeemer.address, tokenToRedeem, _time);
             const tokenID = await redeemTracker.tokenIds();
 
             await time.increaseTo(_time + 1);
 
-            await expect(redeemTracker.connect(redeemer).redeem(tokenID))
+            await expect(redeemTracker.connect(redeemer).finishRedeemPeriod(tokenID))
                 .to.be.emit(redeemTracker, "RedeemFinished")
                 .withArgs(redeemer.address, tokenID, tokenToRedeem);
 
@@ -57,10 +57,10 @@ describe("RedeemTracker unit test", () => {
 
             const _time = (await ethers.provider.getBlock("latest")).timestamp + redeemTime;
             await token.mint(redeemTracker.address, tokenToRedeem);
-            await redeemTracker.connect(liquidityPool).mintTokenForAccount(redeemer.address, tokenToRedeem, _time);
+            await redeemTracker.connect(liquidityPool).startRedeemPeriod(redeemer.address, tokenToRedeem, _time);
             const tokenID = await redeemTracker.tokenIds();
 
-            await expect(redeemTracker.connect(redeemer).redeem(tokenID)).to.be.revertedWith(
+            await expect(redeemTracker.connect(redeemer).finishRedeemPeriod(tokenID)).to.be.revertedWith(
                 "RedeemTracker__TimeNotPassed",
             );
         });
@@ -72,12 +72,12 @@ describe("RedeemTracker unit test", () => {
 
             const _time = (await ethers.provider.getBlock("latest")).timestamp + redeemTime;
             await token.mint(redeemTracker.address, tokenToRedeem);
-            await redeemTracker.connect(liquidityPool).mintTokenForAccount(redeemer.address, tokenToRedeem, _time);
+            await redeemTracker.connect(liquidityPool).startRedeemPeriod(redeemer.address, tokenToRedeem, _time);
             const tokenID = await redeemTracker.tokenIds();
 
             await time.increaseTo(_time + 1);
 
-            await expect(redeemTracker.connect(badActor).redeem(tokenID)).to.be.revertedWith(
+            await expect(redeemTracker.connect(badActor).finishRedeemPeriod(tokenID)).to.be.revertedWith(
                 "RedeemTracker__NotTheOwner",
             );
         });

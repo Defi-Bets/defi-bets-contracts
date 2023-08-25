@@ -23,12 +23,14 @@ export const networkConfig: INetworkConfig = {
         moduloDays: 30,
         maxLossPerTime: 50000,
         confirmations: 1,
+        redeemPeriod: 6 * 24 * 60 * 60,
+        redeemFee: 60000, //6 %
     },
     1133: {
         name: "dmcTestnet",
         minDuration: 43200,
         maxDuration: 604800,
-        fee: 20000,
+        fee: 0,
         payoutRatio: 90,
         priceFeed: "0x",
         volatilityFeed: "0x",
@@ -44,6 +46,8 @@ export const networkConfig: INetworkConfig = {
         maxLossPerTime: 50000,
         confirmations: 2,
         stableToken: "0xFF0000000000000000000000000000000000000B",
+        redeemPeriod: 6 * 24 * 60 * 60,
+        redeemFee: 60000, //6 %
     },
     80001: {
         name: "mumbai",

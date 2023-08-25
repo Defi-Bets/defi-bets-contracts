@@ -8,8 +8,6 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "../interface/core/IDefiBets.sol";
 import "../interface/core/IDefiBetsManager.sol";
 
-import "hardhat/console.sol";
-
 error DefiBets__Forbidden();
 error DefiBets__NoValidExpTime();
 error DefiBets__NoValidPrice();
@@ -430,10 +428,9 @@ contract DefiBets is ERC721, Ownable, IDefiBets {
         uint256 _allowedLossPercent
     ) internal view returns (bool) {
         (uint256 _totalSupply, uint256 _lockedSupply) = IDefiBetsManager(defiBetsManager).getLPTokenSupplies();
-        console.log("totalSupply %i", _totalSupply);
+
         uint256 _allowedLoss = _totalSupply.mul(_allowedLossPercent).div(MULTIPLIER);
-        console.log("allowed loss %i", _allowedLoss);
-        console.log("max lp loss %i", _maxLoss);
+
         if (_maxLoss > _allowedLoss) {
             return false;
         }

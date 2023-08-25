@@ -65,7 +65,7 @@ describe("LiquidityPool unit test", () => {
             const _balanceBefore = await stableToken.balanceOf(lpProvider.address);
             const _shares = await liquidityPool.balanceOf(lpProvider.address);
 
-            await liquidityPool.connect(manager).redeemSharesForAccount(lpProvider.address, _shares);
+            await liquidityPool.connect(manager).redeemSharesForAccount(lpProvider.address, _shares, true);
 
             expect(await stableToken.balanceOf(lpProvider.address)).to.be.equal(
                 _balanceBefore.add(depositAmount.mul(2)),
@@ -90,7 +90,7 @@ describe("LiquidityPool unit test", () => {
 
             //3. Try to redeem the total deposits
             await expect(
-                liquidityPool.connect(manager).redeemSharesForAccount(lpProvider.address, depositAmount),
+                liquidityPool.connect(manager).redeemSharesForAccount(lpProvider.address, depositAmount, true),
             ).to.be.revertedWithCustomError(liquidityPool, "LiquidityPool__NotEnoughFreeSupply");
         });
     });

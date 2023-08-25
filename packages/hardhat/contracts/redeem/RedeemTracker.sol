@@ -4,8 +4,9 @@ pragma solidity >=0.8.0 <0.9.0;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "../interface/redeem/IRedeemTracker.sol";
 
-contract RedeemTracker is ERC721 {
+contract RedeemTracker is ERC721, IRedeemTracker {
     error RedeemTracker__NotAllowed();
     error RedeemTracker__TimeNotPassed();
     error RedeemTracker__NotTheOwner();
@@ -28,12 +29,12 @@ contract RedeemTracker is ERC721 {
     event RedeemFinished(address indexed account, uint256 tokenID, uint256 amount);
     event RedeemStarted(address indexed account, uint256 tokenID, uint256 redeemTime, uint256 amount);
 
-    constructor(address _token, address _LiquidityPool) ERC721("LiquidityPoolBond", "LPB") {
+    constructor(address _token, address _LiquidityPool) ERC721("RedeemBond", "RB") {
         liquditiyPool = _LiquidityPool;
         token = _token;
     }
 
-    function mintTokenForAccount(address _redeemer, uint256 _amount, uint256 _redeemTime) external {
+    function startRedeemPeriod(address _redeemer, uint256 _amount, uint256 _redeemTime) external {
         _isLiquidityPool();
 
         tokenIds.increment();
@@ -46,7 +47,7 @@ contract RedeemTracker is ERC721 {
         emit RedeemStarted(_redeemer, newTokenId, _redeemTime, _amount);
     }
 
-    function redeem(uint256 _tokenID) external {
+    function finishRedeemPeriod(uint256 _tokenID) external {
         _isOwnerOfToken(_tokenID);
         _hasTimePassed(_tokenID);
 

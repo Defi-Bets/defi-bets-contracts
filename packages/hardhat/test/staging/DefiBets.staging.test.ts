@@ -175,7 +175,7 @@ if (network.name != "localhost") {
                 const expTimeSupply = await vaultContract.expTimeSupply(expDates[0]);
 
                 const lp = (await ethers.getContractAt("LiquidityPool", lpAddress, deployer)) as LiquidityPool;
-                const totalLPSupply = await lp.totalTokenSupply();
+                const totalLPSupply = await lp.balanceTokens();
 
                 expect(amountLP.sub(totalLPSupply)).to.be.equal(lpLoss);
 

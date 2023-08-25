@@ -5,15 +5,18 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "../interface/core/ILiquidityPool.sol";
+import "../interface/redeem/IRedeemTracker.sol";
 
 error LiquidityPool__AccessForbidden();
 error LiquidityPool__NotAllowedAmount();
 error LiquidityPool__NotEnoughFreeSupply();
 error LiquidityPool__VaultNotValid();
 error LiquidityPool__HasNoTokenSupply();
+error LiquidityPool__NoRedeemTrackerSet();
 
-contract LiquidityPool is ERC20, ILiquidityPool, Pausable {
+contract LiquidityPool is ERC20, ILiquidityPool, Pausable, Ownable {
     using SafeMath for uint256;
 
     uint256 private constant MULTIPLIER = 1000000;
@@ -25,10 +28,12 @@ contract LiquidityPool is ERC20, ILiquidityPool, Pausable {
     uint256 public maxLostPerTimeInPercent; // in ppm (parts per million). 50.000 ppm = 5% = 0,050000
 
     uint256 public redeemFee;
-    uint256 public redeemTime;
+    uint256 public redeemPeriod;
 
     address public token;
     address public managerContract;
+    address public redeemTracker;
+
     mapping(address => bool) public validVaults;
 
     mapping(uint256 => uint256) public lockedPerExpTime;
@@ -39,6 +44,8 @@ contract LiquidityPool is ERC20, ILiquidityPool, Pausable {
     event LockedSupplyUpdated(uint256 lockedTokenSupply, uint256 expTime, uint256 lockedPerExpTime);
     event TokenSupplyUpdated(uint256 amount);
     event MaxLossPerTimeUpdated(uint256 newMaxLoss);
+    event RedeemConditionsSetup(uint256 redeemFee, uint256 redeemPeriod);
+    event SetRedeemTracker(address redeemTracker);
 
     /* ====== Modifier ====== */
 
@@ -68,20 +75,28 @@ contract LiquidityPool is ERC20, ILiquidityPool, Pausable {
         emit Deposit(_account, _amount, _shares, balanceTokens(), totalSupply());
     }
 
-    function redeemSharesForAccount(address _account, uint256 _shares) external {
+    function redeemSharesForAccount(address _account, uint256 _shares, bool _withFee) external {
         _isManagerContract();
         _hasTokenSupply();
         _isValidAmount(_account, _shares);
 
-        uint256 _tokens = calcTokensToWithdraw(_shares, true);
+        uint256 _tokens = calcTokensToWithdraw(_shares, _withFee);
 
         _isEnoughFreeTokenSupply(_tokens);
 
         _burn(_account, _shares);
 
-        IERC20(token).transfer(_account, _tokens);
-
         emit Redeem(_account, _shares, _tokens, balanceTokens(), totalSupply());
+
+        bool _success;
+        if (_withFee) {
+            _success = IERC20(token).transfer(_account, _tokens);
+        } else {
+            _isRedeemTrackerSet();
+            IRedeemTracker(redeemTracker).startRedeemPeriod(_account, _tokens, redeemPeriod);
+            _success = IERC20(token).transfer(_account, _tokens);
+        }
+        require(_success);
     }
 
     function updateLockedTokenSupply(uint256 _delta, bool _increase, uint256 _expTime) external {
@@ -118,12 +133,23 @@ contract LiquidityPool is ERC20, ILiquidityPool, Pausable {
         emit LockedSupplyUpdated(lockedTokenSupply, _expTime, lockedPerExpTime[_expTime]);
     }
 
-    function updateMaxLoss(uint256 _newMaxLoss) external {
-        _isManagerContract();
-
+    function updateMaxLoss(uint256 _newMaxLoss) external onlyOwner {
         maxLostPerTimeInPercent = _newMaxLoss;
 
         emit MaxLossPerTimeUpdated(_newMaxLoss);
+    }
+
+    function setupRedeemConditions(uint256 _redeemFee, uint256 _redeemPeriod) external onlyOwner {
+        redeemFee = _redeemFee;
+        redeemPeriod = _redeemPeriod;
+
+        emit RedeemConditionsSetup(redeemFee, redeemPeriod);
+    }
+
+    function setRedeemTracker(address _redeemTracker) external onlyOwner {
+        redeemTracker = _redeemTracker;
+
+        emit SetRedeemTracker(redeemTracker);
     }
 
     /* ====== Internal Functions ====== */
@@ -156,6 +182,12 @@ contract LiquidityPool is ERC20, ILiquidityPool, Pausable {
     function _isValidVault(address _vault) internal view {
         if (validVaults[_vault] == false) {
             revert LiquidityPool__VaultNotValid();
+        }
+    }
+
+    function _isRedeemTrackerSet() internal view {
+        if (redeemTracker == address(0)) {
+            revert LiquidityPool__NoRedeemTrackerSet();
         }
     }
 

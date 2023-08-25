@@ -75,8 +75,8 @@ contract DefiBetsManager is Pausable, Ownable, IDefiBetsManager {
         ILiquidityPool(liquidityPool).depositForAccount(msg.sender, _amount);
     }
 
-    function redeemLPTokens(uint256 _amount) external {
-        ILiquidityPool(liquidityPool).redeemSharesForAccount(msg.sender, _amount);
+    function redeemLPTokens(uint256 _amount, bool _withfees) external {
+        ILiquidityPool(liquidityPool).redeemSharesForAccount(msg.sender, _amount, _withfees);
     }
 
     /**
