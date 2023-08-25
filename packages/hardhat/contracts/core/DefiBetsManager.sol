@@ -75,8 +75,8 @@ contract DefiBetsManager is Pausable, Ownable, IDefiBetsManager {
         ILiquidityPool(liquidityPool).depositForAccount(msg.sender, _amount);
     }
 
-    function redeemLPTokens(uint256 _amount) external {
-        ILiquidityPool(liquidityPool).redeemSharesForAccount(msg.sender, _amount);
+    function redeemLPTokens(uint256 _amount, bool _withfees) external {
+        ILiquidityPool(liquidityPool).redeemSharesForAccount(msg.sender, _amount, _withfees);
     }
 
     /**
@@ -153,8 +153,6 @@ contract DefiBetsManager is Pausable, Ownable, IDefiBetsManager {
 
         if (_profit == true) {
             IDefiBetsVault(_vault).withdraw(liquidityPool, _delta, _expTime);
-
-            ILiquidityPool(liquidityPool).increaseTokenSupply(_delta);
         } else {
             ILiquidityPool(liquidityPool).transferTokensToVault(_vault, _delta);
 
@@ -439,7 +437,7 @@ contract DefiBetsManager is Pausable, Ownable, IDefiBetsManager {
     }
 
     function getLPTokenSupplies() external view returns (uint256, uint256) {
-        uint256 _totalSupply = ILiquidityPool(liquidityPool).totalTokenSupply();
+        uint256 _totalSupply = ILiquidityPool(liquidityPool).balanceTokens();
         uint256 _lockedSupply = ILiquidityPool(liquidityPool).lockedTokenSupply();
 
         return (_totalSupply, _lockedSupply);

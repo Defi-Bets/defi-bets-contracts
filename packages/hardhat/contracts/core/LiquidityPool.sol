@@ -5,29 +5,35 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "../interface/core/ILiquidityPool.sol";
+import "../interface/redeem/IRedeemTracker.sol";
 
 error LiquidityPool__AccessForbidden();
 error LiquidityPool__NotAllowedAmount();
-error LiquidityPool__NotEnoughFreeSuppy();
+error LiquidityPool__NotEnoughFreeSupply();
 error LiquidityPool__VaultNotValid();
+error LiquidityPool__HasNoTokenSupply();
+error LiquidityPool__NoRedeemTrackerSet();
 
-contract LiquidityPool is ERC20, ILiquidityPool, Pausable {
+contract LiquidityPool is ERC20, ILiquidityPool, Pausable, Ownable {
     using SafeMath for uint256;
 
     uint256 private constant MULTIPLIER = 1000000;
 
     /* ====== State Variables ====== */
 
-    uint256 public totalTokenSupply;
     uint256 public lockedTokenSupply;
 
     uint256 public maxLostPerTimeInPercent; // in ppm (parts per million). 50.000 ppm = 5% = 0,050000
 
-    // uint256 public maxLPLostPerTime;
+    uint256 public redeemFee;
+    uint256 public redeemPeriod;
 
     address public token;
     address public managerContract;
+    address public redeemTracker;
+
     mapping(address => bool) public validVaults;
 
     mapping(uint256 => uint256) public lockedPerExpTime;
@@ -38,6 +44,8 @@ contract LiquidityPool is ERC20, ILiquidityPool, Pausable {
     event LockedSupplyUpdated(uint256 lockedTokenSupply, uint256 expTime, uint256 lockedPerExpTime);
     event TokenSupplyUpdated(uint256 amount);
     event MaxLossPerTimeUpdated(uint256 newMaxLoss);
+    event RedeemConditionsSetup(uint256 redeemFee, uint256 redeemPeriod);
+    event SetRedeemTracker(address redeemTracker);
 
     /* ====== Modifier ====== */
 
@@ -64,33 +72,31 @@ contract LiquidityPool is ERC20, ILiquidityPool, Pausable {
 
         _mint(_account, _shares);
 
-        totalTokenSupply = totalTokenSupply.add(_amount);
-
         emit Deposit(_account, _amount, _shares, balanceTokens(), totalSupply());
     }
 
-    function redeemSharesForAccount(address _account, uint256 _shares) external {
+    function redeemSharesForAccount(address _account, uint256 _shares, bool _withFee) external {
         _isManagerContract();
-
+        _hasTokenSupply();
         _isValidAmount(_account, _shares);
 
-        uint256 _tokens = calcTokensToWithdraw(_shares);
+        uint256 _tokens = calcTokensToWithdraw(_shares, _withFee);
 
         _isEnoughFreeTokenSupply(_tokens);
 
         _burn(_account, _shares);
 
-        IERC20(token).transfer(_account, _tokens);
-
         emit Redeem(_account, _shares, _tokens, balanceTokens(), totalSupply());
-    }
 
-    function increaseTokenSupply(uint256 _amount) external {
-        _isManagerContract();
-
-        totalTokenSupply = totalTokenSupply.add(_amount);
-
-        emit TokenSupplyUpdated(totalTokenSupply);
+        bool _success;
+        if (_withFee) {
+            _success = IERC20(token).transfer(_account, _tokens);
+        } else {
+            _isRedeemTrackerSet();
+            IRedeemTracker(redeemTracker).startRedeemPeriod(_account, _tokens, redeemPeriod);
+            _success = IERC20(token).transfer(_account, _tokens);
+        }
+        require(_success);
     }
 
     function updateLockedTokenSupply(uint256 _delta, bool _increase, uint256 _expTime) external {
@@ -112,10 +118,6 @@ contract LiquidityPool is ERC20, ILiquidityPool, Pausable {
         _isValidVault(_vault);
 
         IERC20(token).transfer(_vault, _amount);
-        uint256 _tokenSupply = totalTokenSupply;
-        totalTokenSupply = _tokenSupply.sub(_amount);
-
-        emit TokenSupplyUpdated(totalTokenSupply);
     }
 
     function resetLockedTokens(uint256 _expTime) external {
@@ -131,12 +133,23 @@ contract LiquidityPool is ERC20, ILiquidityPool, Pausable {
         emit LockedSupplyUpdated(lockedTokenSupply, _expTime, lockedPerExpTime[_expTime]);
     }
 
-    function updateMaxLoss(uint256 _newMaxLoss) external {
-        _isManagerContract();
-
+    function updateMaxLoss(uint256 _newMaxLoss) external onlyOwner {
         maxLostPerTimeInPercent = _newMaxLoss;
 
         emit MaxLossPerTimeUpdated(_newMaxLoss);
+    }
+
+    function setupRedeemConditions(uint256 _redeemFee, uint256 _redeemPeriod) external onlyOwner {
+        redeemFee = _redeemFee;
+        redeemPeriod = _redeemPeriod;
+
+        emit RedeemConditionsSetup(redeemFee, redeemPeriod);
+    }
+
+    function setRedeemTracker(address _redeemTracker) external onlyOwner {
+        redeemTracker = _redeemTracker;
+
+        emit SetRedeemTracker(redeemTracker);
     }
 
     /* ====== Internal Functions ====== */
@@ -155,14 +168,26 @@ contract LiquidityPool is ERC20, ILiquidityPool, Pausable {
     }
 
     function _isEnoughFreeTokenSupply(uint256 _amount) internal view {
-        if (totalTokenSupply.sub(lockedTokenSupply) < _amount) {
-            revert LiquidityPool__NotEnoughFreeSuppy();
+        if (balanceTokens().sub(lockedTokenSupply) < _amount) {
+            revert LiquidityPool__NotEnoughFreeSupply();
+        }
+    }
+
+    function _hasTokenSupply() internal view {
+        if (totalSupply() == 0) {
+            revert LiquidityPool__HasNoTokenSupply();
         }
     }
 
     function _isValidVault(address _vault) internal view {
         if (validVaults[_vault] == false) {
             revert LiquidityPool__VaultNotValid();
+        }
+    }
+
+    function _isRedeemTrackerSet() internal view {
+        if (redeemTracker == address(0)) {
+            revert LiquidityPool__NoRedeemTrackerSet();
         }
     }
 
@@ -183,10 +208,10 @@ contract LiquidityPool is ERC20, ILiquidityPool, Pausable {
             return _amount;
         }
 
-        return _amount.mul(totalTokenSupply).div(balanceTokens());
+        return _amount.mul(totalSupply()).div(balanceTokens());
     }
 
-    function calcTokensToWithdraw(uint256 _shares) public view returns (uint256) {
+    function calcTokensToWithdraw(uint256 _shares, bool _withFee) public view returns (uint256) {
         /*
         a = amount
         B = balance of token before withdraw
@@ -197,8 +222,13 @@ contract LiquidityPool is ERC20, ILiquidityPool, Pausable {
 
         a = sB / T
         */
+        uint256 withdrawAmount = _shares.mul(balanceTokens()).div(totalSupply());
 
-        return _shares.mul(totalTokenSupply).div(totalSupply());
+        if (_withFee && redeemFee > 0) {
+            return withdrawAmount.mul(uint256(1).sub(MULTIPLIER.div(redeemFee)));
+        }
+
+        return withdrawAmount;
     }
 
     function balanceTokens() public view returns (uint256) {

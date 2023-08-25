@@ -165,7 +165,7 @@ describe("DefiBetsManager unit test", () => {
                 deployDefiBetsManagerFixture,
             );
 
-            const totalSupply = await liquidityPool.totalTokenSupply();
+            const totalSupply = await liquidityPool.balanceTokens();
 
             const value = ethers.utils.parseEther("100");
 
@@ -175,7 +175,7 @@ describe("DefiBetsManager unit test", () => {
             await managerContract.connect(lpStaker).provideLP(value);
 
             expect(await liquidityPool.balanceOf(lpStaker.address)).to.be.equal(value.add(totalSupply));
-            expect(await liquidityPool.totalTokenSupply()).to.be.equal(value.add(totalSupply));
+            expect(await liquidityPool.balanceTokens()).to.be.equal(value.add(totalSupply));
         });
     });
 

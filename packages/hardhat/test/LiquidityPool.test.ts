@@ -4,6 +4,7 @@ import { ethers } from "hardhat";
 import { LiquidityPool__factory, MockDUSD__factory } from "../typechain-types";
 
 const maxLossPerTime = 50000;
+const depositAmount = ethers.utils.parseEther("145");
 
 describe("LiquidityPool unit test", () => {
     async function deployLiquidityPoolFixture() {
@@ -39,7 +40,7 @@ describe("LiquidityPool unit test", () => {
             //3. Provide Liquidity and deposit stable tokens
             await liquidityPool.connect(manager).depositForAccount(lpProvider.address, depositAmount);
 
-            expect(await liquidityPool.totalTokenSupply()).to.be.equal(depositAmount);
+            expect(await liquidityPool.balanceTokens()).to.be.equal(depositAmount);
             expect(await liquidityPool.balanceOf(lpProvider.address)).to.be.equal(depositAmount);
         });
     });
@@ -59,12 +60,12 @@ describe("LiquidityPool unit test", () => {
 
             //2. increase the value of the lp pool
             await stableToken.mint(liquidityPool.address, depositAmount);
-            await liquidityPool.connect(manager).increaseTokenSupply(depositAmount);
 
             //3. redeem tokens
             const _balanceBefore = await stableToken.balanceOf(lpProvider.address);
             const _shares = await liquidityPool.balanceOf(lpProvider.address);
-            await liquidityPool.connect(manager).redeemSharesForAccount(lpProvider.address, _shares);
+
+            await liquidityPool.connect(manager).redeemSharesForAccount(lpProvider.address, _shares, true);
 
             expect(await stableToken.balanceOf(lpProvider.address)).to.be.equal(
                 _balanceBefore.add(depositAmount.mul(2)),
@@ -89,8 +90,21 @@ describe("LiquidityPool unit test", () => {
 
             //3. Try to redeem the total deposits
             await expect(
-                liquidityPool.connect(manager).redeemSharesForAccount(lpProvider.address, depositAmount),
-            ).to.be.revertedWithCustomError(liquidityPool, "LiquidityPool__NotEnoughFreeSuppy");
+                liquidityPool.connect(manager).redeemSharesForAccount(lpProvider.address, depositAmount, true),
+            ).to.be.revertedWithCustomError(liquidityPool, "LiquidityPool__NotEnoughFreeSupply");
+        });
+    });
+
+    describe("#calcSharesToMint", () => {
+        it("should calc the right amount of shares to mint when no tokens deposited before", async () => {
+            const { liquidityPool, stableToken, manager } = await loadFixture(deployLiquidityPoolFixture);
+
+            await stableToken.mint(manager.address, depositAmount);
+
+            await stableToken.connect(manager).approve(liquidityPool.address, depositAmount);
+            await liquidityPool.connect(manager).depositForAccount(manager.address, depositAmount);
+
+            expect(await liquidityPool.balanceOf(manager.address)).to.be.equal(depositAmount);
         });
     });
 });
